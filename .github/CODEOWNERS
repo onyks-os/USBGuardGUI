@@ -1,0 +1,23 @@
+# Every file requires review from the project lead by default.
+# See MAINTAINERS.md for the role definitions.
+*                       @onyks-os
+
+# Security-critical paths — always require an explicit lead sign-off.
+/.github/workflows/     @onyks-os
+/SECURITY.md            @onyks-os
+/docs/security-assessment.md @onyks-os
+
+# Source paths carrying security-critical logic.
+#
+# src/rules/     Every byte it parses comes from outside the program, and its
+#                output becomes rule syntax. Injection and panics both live here.
+# src/dbus/      The trust boundary with the daemon: proxies, the request path,
+#                rule-identity handling, and denial attribution.
+# Cargo.toml     Adding a dependency, changing a feature set, or relaxing a lint
+#                is a change to the attack surface.
+/src/rules/             @onyks-os
+/src/dbus/              @onyks-os
+/Cargo.toml             @onyks-os
+/Cargo.lock             @onyks-os
+/clippy.toml            @onyks-os
+/packaging/             @onyks-os

@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+title: "USBGuard GUI"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - alias: "onyks"
+    name: "onyks"
+repository-code: "https://github.com/onyks-os/USBGuardGUI"
+url: "https://onyks-os.github.io/usbguard-gui/"
+abstract: "Unprivileged GTK4 desktop client for managing USB device authorization policy through the USBGuard daemon."
+keywords:
+  - "USBGuardGUI"
+license: MIT
+version: "0.1.0"
+date-released: "2026-09-14"

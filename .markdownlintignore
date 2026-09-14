@@ -1,0 +1,7 @@
+node_modules/
+.venv/
+venv/
+target/
+site/
+# Personal working notes, not part of the repository (see .gitignore).
+ignore/

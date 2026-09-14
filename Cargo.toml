@@ -1,0 +1,60 @@
+[package]
+name = "usbguard-gui"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Unprivileged GTK4 desktop client for managing USB device authorization policy through the USBGuard daemon."
+authors = ["onyks"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/onyks-os/USBGuardGUI"
+homepage = "https://onyks-os.github.io/usbguard-gui/"
+documentation = "https://onyks-os.github.io/usbguard-gui/"
+keywords = ["usbguard", "usb", "security", "gtk4", "linux"]
+categories = ["gui"]
+exclude = ["docs/", ".github/", "tests/fixtures/"]
+
+[dependencies]
+# Deliberately empty. The *choice* of every runtime crate is already decided and
+# justified in DEPENDENCIES.md §1.1; each one is added with `cargo add` at the
+# start of the ROADMAP phase that first needs it, so that the committed
+# Cargo.lock only ever pins versions the project actually builds against.
+#
+# Planned, in the order the roadmap reaches them:
+#   Phase 1  thiserror
+#   Phase 2  zbus, tokio, futures-util, tracing, tracing-subscriber
+#   Phase 4  gtk4, libadwaita, async-channel
+#   Later    notify-rust, ksni, gettext-rs
+
+[dev-dependencies]
+proptest = "1"
+
+[profile.release]
+# Fail loudly rather than wrap silently: an integer overflow in release mode is
+# a correctness bug, not a performance optimization.
+overflow-checks = true
+lto = true
+codegen-units = 1
+strip = "symbols"
+
+# ---------------------------------------------------------------------------
+# Lints — enforced by `cargo clippy -- -D warnings` in CI.
+# ---------------------------------------------------------------------------
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+unreachable_pub = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# Panicking paths are banned in library code: a library that panics takes the
+# caller's process down with it.
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+todo = "warn"
+# Project names, acronyms, and file names appear constantly in doc comments and
+# are not code; pedantic's doc_markdown would flag every one of them.
+doc_markdown = "allow"
