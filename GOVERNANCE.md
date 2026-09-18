@@ -33,7 +33,7 @@ architectural matters, in an ADR.
 
 - **GitHub Issues** — bug reports, feature requests, and design discussions (primary channel).
 - **GitHub Security Advisories** — private vulnerability reports.
-- **Email** — `129986281+onyks-os@users.noreply.github.com` for anything that cannot be public.
+- **Email** — `github.tgwp7@aleeas.com` for anything that cannot be public.
 
 All project decisions are made in public channels so that they remain auditable. Private discussion
 is limited to security disclosures and code-of-conduct matters.

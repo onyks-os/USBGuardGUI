@@ -48,7 +48,7 @@ the case for a solo-maintained project.
 | Package Registry           | `onyks` | Owner of the published package                           |
 | GitHub Actions Secrets     | `onyks` | Manages CI/CD credentials                                |
 | Release Signing            | `onyks` | Signs release artifacts (Sigstore keyless / GPG)         |
-| Security Reporting Inbox   | `onyks` | `129986281+onyks-os@users.noreply.github.com` — see [SECURITY.md](SECURITY.md)        |
+| Security Reporting Inbox   | `onyks` | `github.tgwp7@aleeas.com` — see [SECURITY.md](SECURITY.md)        |
 
 ---
 

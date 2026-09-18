@@ -19,7 +19,7 @@ First off, thank you for considering contributing to USBGuardGUI!
 ## Code of Conduct
 
 By participating in this project you agree to abide by the
-[Code of Conduct](CODE_OF_CONDUCT.md). Report unacceptable behavior to `129986281+onyks-os@users.noreply.github.com`.
+[Code of Conduct](CODE_OF_CONDUCT.md). Report unacceptable behavior to `github.tgwp7@aleeas.com`.
 
 ## How to Report Bugs
 

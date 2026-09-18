@@ -8,7 +8,8 @@
 /// The crate version, taken from `Cargo.toml` at compile time.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-// TODO(template): expose the public API, and mirror it in `docs/interfaces.md`.
+/// Domain types shared across the application.
+pub mod model;
 
 #[cfg(test)]
 mod tests {
