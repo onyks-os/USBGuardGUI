@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Settings of USBGuard GUI (docs/interfaces.md §2).
+  Nothing here is security policy: no key has any effect on the USBGuard
+  daemon, the ruleset, or what the user is authorized to do.
+-->
+<schemalist gettext-domain="usbguard-gui">
+  <enum id="io.github.onyks_os.UsbguardGui.Persistence">
+    <value nick="runtime-only" value="0"/>
+    <value nick="permanent" value="1"/>
+  </enum>
+
+  <schema id="io.github.onyks_os.UsbguardGui" path="/io/github/onyks_os/UsbguardGui/">
+    <key name="start-in-background" type="b">
+      <default>false</default>
+      <summary>Start without presenting the window</summary>
+    </key>
+    <key name="run-in-background" type="b">
+      <default>false</default>
+      <summary>Keep running after the window is closed</summary>
+      <description>So that newly inserted devices are still announced. With a tray, the icon reopens the window; without one, launching the application again does.</description>
+    </key>
+    <key name="notify-inserted" type="b">
+      <default>true</default>
+      <summary>Notify when an unauthorized device is inserted</summary>
+    </key>
+    <key name="default-persistence" enum="io.github.onyks_os.UsbguardGui.Persistence">
+      <default>'runtime-only'</default>
+      <summary>Preselected persistence for device actions</summary>
+      <description>Runtime-only by default: for a security tool, the less destructive choice is the one whose effect disappears on restart.</description>
+    </key>
+    <key name="show-blocked-only" type="b">
+      <default>false</default>
+      <summary>Device list filter: show only unauthorized devices</summary>
+    </key>
+    <key name="tray-notice-shown" type="b">
+      <default>false</default>
+      <summary>Whether the one-time notice about tray availability was shown</summary>
+    </key>
+    <key name="window-width" type="i">
+      <default>960</default>
+      <summary>Window width</summary>
+    </key>
+    <key name="window-height" type="i">
+      <default>600</default>
+      <summary>Window height</summary>
+    </key>
+    <key name="window-maximized" type="b">
+      <default>false</default>
+      <summary>Window maximized</summary>
+    </key>
+  </schema>
+</schemalist>

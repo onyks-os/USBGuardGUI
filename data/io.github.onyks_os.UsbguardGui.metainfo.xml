@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2026 onyks-os -->
+<component type="desktop-application">
+  <id>io.github.onyks_os.UsbguardGui</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+
+  <name>USBGuard</name>
+  <summary>See and control which USB devices may connect</summary>
+  <developer id="io.github.onyks_os">
+    <name>onyks-os</name>
+  </developer>
+
+  <description>
+    <p>
+      A desktop interface for USBGuard, the Linux daemon that decides which USB devices are
+      allowed to talk to your computer. See every connected device and whether it is authorized,
+      read the policy rules in the order the daemon evaluates them, and find out precisely why
+      access fails when it does.
+    </p>
+    <p>
+      The application runs without any privileges of its own. Every change is made by the
+      USBGuard daemon, after the system's own authorization checks have approved it.
+    </p>
+    <ul>
+      <li>Live device list, resilient to hubs with dozens of devices</li>
+      <li>The policy ruleset in evaluation order</li>
+      <li>Diagnostics that name the exact cause of an access problem and its remedy</li>
+      <li>Reads and writes nothing under /etc, /var, or /sys</li>
+    </ul>
+    <p>
+      Requires the USBGuard daemon and its D-Bus bridge (usbguard-dbus) on the host.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.onyks_os.UsbguardGui.desktop</launchable>
+  <provides>
+    <binary>usbguard-gui</binary>
+  </provides>
+
+  <url type="homepage">https://github.com/onyks-os/USBGuardGUI</url>
+  <url type="bugtracker">https://github.com/onyks-os/USBGuardGUI/issues</url>
+  <url type="vcs-browser">https://github.com/onyks-os/USBGuardGUI</url>
+
+  <categories>
+    <category>System</category>
+    <category>Security</category>
+  </categories>
+  <keywords>
+    <keyword>usb</keyword>
+    <keyword>usbguard</keyword>
+    <keyword>device</keyword>
+    <keyword>security</keyword>
+  </keywords>
+
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="0.1.0" date="2026-09-23" type="stable">
+      <description>
+        <p>First release.</p>
+        <ul>
+          <li>Live device list; allow, block, or reject a device for this session or permanently</li>
+          <li>Policy view in evaluation order, with a guided rule editor and safe rule removal</li>
+          <li>Notifications for newly inserted devices that are not authorized</li>
+          <li>Diagnostics that name the exact cause of an access problem, and usbguard-gui --diagnose</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>
