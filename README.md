@@ -91,9 +91,10 @@ Key architectural advantages:
 
 * **Rust 1.85+** (2024 edition) — to build.
 * **USBGuard daemon 1.1.0 or later** — earlier versions have a different `appendRule` arity.
-* **The USBGuard D-Bus bridge** (`usbguard-dbus`), a separate package on every reference
-  distribution. Without it the program cannot function at all; its absence is a distinct diagnostic
-  state with a per-distribution install command.
+* **The USBGuard D-Bus bridge** (`usbguard-dbus`). Debian, Ubuntu, and Arch ship it inside the
+  `usbguard` package; Fedora ships it separately as `usbguard-dbus`. Without it the program cannot
+  function at all; its absence is a distinct diagnostic state with a per-distribution install
+  command.
 * **GTK 4.14+** and **libadwaita 1.5+**.
 * A Wayland or X11 session, and a running Polkit session agent.
 * **No root.** The program is an unprivileged client and must not be run as one.
@@ -112,15 +113,33 @@ cd USBGuardGUI
 make setup
 ```
 
-Build-time system dependencies, on Fedora:
+Build-time system dependencies:
 
 ```bash
+# Fedora / RHEL
 sudo dnf install gtk4-devel libadwaita-devel glib2-devel pkgconf-pkg-config gcc
+# Debian / Ubuntu (Ubuntu 24.04 or later, for GTK 4.14 and libadwaita 1.5)
+sudo apt install libgtk-4-dev libadwaita-1-dev pkg-config build-essential
+# Arch
+sudo pacman -S gtk4 libadwaita pkgconf base-devel
 ```
 
-**Planned**: a Flatpak on Flathub, and native `.deb` / `.rpm` packages built with `cargo-deb` and
-`cargo-generate-rpm`. Both will declare a hard dependency on `usbguard` *and* on the bridge package,
-and neither will modify any system configuration on install.
+Then `cargo run` opens the window, and `cargo run -- --diagnose` runs the access checks. To build
+without GTK at all — the headless commands only — use `cargo build --no-default-features`.
+
+**Packages from source** (no release is published yet):
+
+```bash
+make package-deb     # Debian / Ubuntu → dist/*.deb   (needs: cargo install cargo-deb)
+make package-rpm     # Fedora / RHEL   → dist/*.rpm   (needs: cargo install cargo-generate-rpm)
+cd packaging/arch && makepkg -si   # Arch
+```
+
+Build the `.deb` on Debian or Ubuntu itself: a binary built on a newer distribution needs a newer
+glibc than theirs. The `.rpm` depends on `usbguard-dbus`, which Fedora packages separately; the
+`.deb` and the Arch package depend on `usbguard`, which includes the bridge there. No package
+modifies system configuration on install. A Flatpak manifest is in `packaging/`; Flathub
+submission is planned.
 
 For instructions on verifying the integrity and authenticity of release assets, see the
 [Release Verification Guide](docs/verification.md).
@@ -228,12 +247,16 @@ bus, never against a live system daemon.
 ├── scripts/                # Installation, verification, and maintenance scripts
 ├── tests/                  # Test suites
 ├── data/                   # Desktop file, AppStream metainfo, GSettings schema, icons, UI templates
-├── packaging/              # Flatpak manifest and the example Polkit rule
+├── packaging/              # The example Polkit rule (shipped inert); package manifests later
+├── fuzz/                   # cargo-fuzz targets for the rule parser
 └── src/                    # Main source package
     ├── model/              # Domain types — depends on nothing else in the program
     ├── rules/              # Rule-language lexer, parser, and renderer
     ├── dbus/               # Proxies, client, event worker, supervisor, diagnostics
-    └── ui/                 # Window shell and views
+    ├── device_store.rs     # The device table as pure data: snapshots, batches, ordering
+    ├── remedy.rs           # Per-distribution remedies for each access state
+    ├── cli.rs              # Headless commands: --diagnose, --list-devices, --list-rules
+    └── ui/                 # Window shell and views (Cargo feature `gui`)
 ```
 
 The dependency direction is strictly one way: `model` depends on nothing; `rules` depends on

@@ -14,13 +14,17 @@ descriptors and are therefore attacker-chosen.
 
 **Primary fuzz targets** (`fuzz/`):
 
-- `rules::parser::parse_rule` — the rule-language parser. The single highest-value target: arbitrary
-  bytes in, a typed structure out. Goal: zero panics, hangs, or unbounded allocations over 10⁶
-  inputs.
-- `rules::lexer::tokenize` — fuzzed separately so that a lexer crash is not masked by the parser
-  rejecting the input earlier.
-- `rules::render::render_rule` — fed structures produced by the parser, to prove the round-trip
-  property `parse(render(parse(x))) == parse(x)` rather than just the absence of crashes.
+- `parse_rule` (`fuzz/fuzz_targets/parse_rule.rs`) — every parser entry point, plus the device-row
+  builder. The single highest-value target: arbitrary bytes in, a typed structure out. Goal: zero
+  panics, hangs, or unbounded allocations over 10⁶ inputs. The lexer is covered here: every entry
+  point tokenizes the whole input before parsing any of it, so a lexer crash cannot be masked by an
+  earlier parse error.
+- `round_trip` (`fuzz/fuzz_targets/round_trip.rs`) — the round-trip property
+  `parse(render(parse(x))) == parse(x)`, rather than just the absence of crashes.
+
+Run locally with `make fuzz-parser` (nightly toolchain and `cargo install cargo-fuzz`). The starting
+corpus is generated at run time from `tests/fixtures/rules/`, which is synthetic; nothing the fuzzer
+produces is committed.
 
 **Property-tested surfaces** (`proptest`, in-tree tests):
 

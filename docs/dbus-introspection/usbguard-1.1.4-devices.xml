@@ -1,0 +1,93 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+                      "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<!-- GDBus 2.88.3 -->
+<node>
+  <interface name="org.freedesktop.DBus.Properties">
+    <method name="Get">
+      <arg type="s" name="interface_name" direction="in"/>
+      <arg type="s" name="property_name" direction="in"/>
+      <arg type="v" name="value" direction="out"/>
+    </method>
+    <method name="GetAll">
+      <arg type="s" name="interface_name" direction="in"/>
+      <arg type="a{sv}" name="properties" direction="out"/>
+    </method>
+    <method name="Set">
+      <arg type="s" name="interface_name" direction="in"/>
+      <arg type="s" name="property_name" direction="in"/>
+      <arg type="v" name="value" direction="in"/>
+    </method>
+    <signal name="PropertiesChanged">
+      <arg type="s" name="interface_name"/>
+      <arg type="a{sv}" name="changed_properties"/>
+      <arg type="as" name="invalidated_properties"/>
+    </signal>
+  </interface>
+  <interface name="org.freedesktop.DBus.Introspectable">
+    <method name="Introspect">
+      <arg type="s" name="xml_data" direction="out"/>
+    </method>
+  </interface>
+  <interface name="org.freedesktop.DBus.Peer">
+    <method name="Ping"/>
+    <method name="GetMachineId">
+      <arg type="s" name="machine_uuid" direction="out"/>
+    </method>
+  </interface>
+  <interface name="org.usbguard.Devices1">
+    <method name="listDevices">
+      <arg type="s" name="query" direction="in">
+      </arg>
+      <arg type="a(us)" name="devices" direction="out">
+      </arg>
+    </method>
+    <method name="applyDevicePolicy">
+      <arg type="u" name="id" direction="in">
+      </arg>
+      <arg type="u" name="target" direction="in">
+      </arg>
+      <arg type="b" name="permanent" direction="in">
+      </arg>
+      <arg type="u" name="rule_id" direction="out">
+      </arg>
+    </method>
+    <signal name="DevicePresenceChanged">
+      <arg type="u" name="id">
+      </arg>
+      <arg type="u" name="event">
+      </arg>
+      <arg type="u" name="target">
+      </arg>
+      <arg type="s" name="device_rule">
+      </arg>
+      <arg type="a{ss}" name="attributes">
+      </arg>
+    </signal>
+    <signal name="DevicePolicyChanged">
+      <arg type="u" name="id">
+      </arg>
+      <arg type="u" name="target_old">
+      </arg>
+      <arg type="u" name="target_new">
+      </arg>
+      <arg type="s" name="device_rule">
+      </arg>
+      <arg type="u" name="rule_id">
+      </arg>
+      <arg type="a{ss}" name="attributes">
+      </arg>
+    </signal>
+    <signal name="DevicePolicyApplied">
+      <arg type="u" name="id">
+      </arg>
+      <arg type="u" name="target_new">
+      </arg>
+      <arg type="s" name="device_rule">
+      </arg>
+      <arg type="u" name="rule_id">
+      </arg>
+      <arg type="a{ss}" name="attributes">
+      </arg>
+    </signal>
+  </interface>
+</node>

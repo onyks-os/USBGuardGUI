@@ -25,7 +25,9 @@ Usage: usbguard-gui [OPTIONS]
 | :----- | :--- | :------ | :---------- |
 | `--background` | flag | off | Start without presenting the window. Overrides the `start-in-background` setting. |
 | `--diagnose` | flag | — | Run the access probe sequence, print the result, and exit without opening a window. |
-| `--version`, `-V` | flag | — | Print the version, plus the USBGuard version detected on the bus, and exit. |
+| `--version`, `-V` | flag | — | Print the version, plus the USBGuard D-Bus API level detected on the bus, and exit. |
+| `--list-devices` | flag | — | Print the devices the daemon knows, sorted by port, and exit. |
+| `--list-rules` | flag | — | Print the ruleset in evaluation order, and exit. |
 | `--help`, `-h` | flag | — | Show usage and exit. |
 
 A second launch does not start a second process: `adw::Application` raises the running window

@@ -12,10 +12,10 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 
 ## 1. Dependency Directory
 
-> **No crate has been added to `Cargo.toml` yet.** The tables below record the *choice* of
-> dependency and the reason for it, which is the part that is decided. Exact versions are resolved
-> with `cargo add` when each crate is first needed, and are then pinned by the committed
-> `Cargo.lock` — transcribing them here would go stale silently. The **License** column states the
+> Every runtime crate except `notify-rust`, `ksni`, and `gettext-rs` has been added. The tables
+> record the *choice* of dependency and the reason for it; exact versions are pinned by the
+> committed `Cargo.lock` — major versions are noted where they matter (`gtk4` 0.10 and
+> `libadwaita` 0.8 must move together). The **License** column states the
 > license the crate is expected to carry; it is confirmed against the crate's own metadata by
 > `cargo deny check licenses` in CI at the moment the crate is added, and corrected here if it
 > differs.
@@ -24,24 +24,24 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 
 | Package | Version constraint | License | Purpose | Security justification |
 | :------ | :----------------- | :------ | :------ | :--------------------- |
-| `gtk4` | Resolved at add time; feature-gated to GTK 4.14 | MIT | GTK 4 bindings — every widget in the interface. | The canonical Rust binding, maintained by the GNOME Rust team. A hand-rolled FFI layer to GTK would be a far larger unsafe surface than the binding it replaced. |
-| `libadwaita` | Resolved at add time; ≥ 1.5 | MIT | Adaptive layout, `AdwToastOverlay`, `AdwAlertDialog`, `AdwApplication`. | Same maintainers as `gtk4`; avoids reimplementing the platform's dialog and toast semantics, which is where inconsistent confirmation UX would otherwise creep in. |
-| `zbus` | Resolved at add time | MIT | D-Bus client, and the `#[proxy]` macro that generates the typed proxies. | Pure Rust, no `libdbus` FFI. The proxy macro keeps raw D-Bus signatures in exactly one file, which is what makes the boundary auditable. |
-| `tokio` | Resolved at add time; features `rt-multi-thread`, `time`, `macros` | MIT | The I/O runtime that owns every D-Bus interaction. | Only the features listed are enabled; `net`, `fs`, and `process` are deliberately absent, so the dependency cannot open a socket or touch the filesystem on the program's behalf. |
-| `async-channel` | Resolved at add time | Apache-2.0 OR MIT | The executor-agnostic bridge between the Tokio runtime and the GLib main loop. | Executor-agnostic by design, which is the whole requirement: a Tokio-specific channel would couple the two loops the architecture keeps apart. |
-| `futures-util` | Resolved at add time | MIT OR Apache-2.0 | Stream combinators for the event worker's coalescing window. | Ecosystem-standard, minimal transitive tree. |
-| `notify-rust` | Resolved at add time | MIT OR Apache-2.0 | Desktop notifications over the session bus. | Wraps a session-bus protocol that is fiddly to get right (capabilities negotiation, action callbacks). Optional at runtime: see §1.4. |
-| `ksni` | Resolved at add time | Apache-2.0 | `StatusNotifierItem` tray icon. | The only maintained Rust implementation of the SNI protocol. Optional at runtime: see §1.4. |
-| `tracing` | Resolved at add time | MIT | Structured logging and the spans that measure the latency targets. | Span-based rather than line-based, which is what makes the identifier-redaction policy enforceable per target instead of per call site. |
-| `tracing-subscriber` | Resolved at add time | MIT | `EnvFilter`, driven by `USBGUARD_GUI_LOG`. | Same. |
-| `thiserror` | Resolved at add time | MIT OR Apache-2.0 | Derives the error taxonomy that crosses layers. | Compile-time only in effect; adds no runtime behaviour to get wrong. |
+| `gtk4` | 0.10, feature `v4_14`; optional, behind the Cargo feature `gui` | MIT | GTK 4 bindings — every widget in the interface. | The canonical Rust binding, maintained by the GNOME Rust team. A hand-rolled FFI layer to GTK would be a far larger unsafe surface than the binding it replaced. |
+| `libadwaita` | 0.8, feature `v1_5`; optional, behind `gui` | MIT | Adaptive layout, `AdwToastOverlay`, `AdwAlertDialog`, `AdwApplication`. | Same maintainers as `gtk4`; avoids reimplementing the platform's dialog and toast semantics, which is where inconsistent confirmation UX would otherwise creep in. |
+| `zbus` | 5, default features off, feature `tokio` | MIT | D-Bus client, and the `#[proxy]` macro that generates the typed proxies. | Pure Rust, no `libdbus` FFI. The proxy macro keeps raw D-Bus signatures in exactly one file, which is what makes the boundary auditable. |
+| `tokio` | 1.53, features `rt-multi-thread`, `time`, `macros`, `sync` | MIT | The I/O runtime that owns every D-Bus interaction. | This crate enables only the features listed. `zbus`'s `tokio` backend additionally enables `net`, `fs`, and `process` (verified with `cargo tree -e features -i tokio`): it needs `net` for the bus socket, and the others for address discovery and authentication. The earlier claim that the dependency *cannot* open a socket or touch the filesystem was therefore wrong; the guarantee comes from the program's own code, verified by the `strace` target of `docs/architecture.md` §13.2, not from feature flags. |
+| `async-channel` | 2 | Apache-2.0 OR MIT | The executor-agnostic bridge between the Tokio runtime and the GLib main loop. | Executor-agnostic by design, which is the whole requirement: a Tokio-specific channel would couple the two loops the architecture keeps apart. |
+| `futures-util` | 0.3 | MIT OR Apache-2.0 | Stream combinators for the event worker's coalescing window. | Ecosystem-standard, minimal transitive tree. |
+| ~~`notify-rust`~~ | not used | — | Replaced by GIO's `GNotification`, already part of the GTK stack. | GIO speaks both the session-bus protocol and the Flatpak notification portal, and routes button presses to application actions. One dependency fewer; capabilities are still queried (`GetCapabilities`) before buttons are offered. |
+| `ksni` | 0.3, feature `tokio`; optional, behind `gui` | Unlicense | `StatusNotifierItem` tray icon. | The only maintained Rust implementation of the SNI protocol. Since 0.3 it is built on `zbus`: it shares the program's D-Bus stack and Tokio runtime instead of adding a second one (the cost the architecture anticipated in §9.6). Optional at runtime: see §1.4. |
+| `tracing` | 0.1 | MIT | Structured logging and the spans that measure the latency targets. | Span-based rather than line-based, which is what makes the identifier-redaction policy enforceable per target instead of per call site. |
+| `tracing-subscriber` | 0.3, feature `env-filter` | MIT | `EnvFilter`, driven by `USBGUARD_GUI_LOG`. | Same. |
+| `thiserror` | 2 | MIT OR Apache-2.0 | Derives the error taxonomy that crosses layers. | Compile-time only in effect; adds no runtime behaviour to get wrong. |
 | `gettext-rs` | Resolved at add time | MIT | Translation catalogue lookup. | The platform's own i18n mechanism, so translations integrate with the distribution's tooling rather than a bespoke format. |
 
 ### 1.2 Development Dependencies
 
 | Package | Version constraint | License | Purpose |
 | :------ | :----------------- | :------ | :------ |
-| `proptest` | Resolved at add time | MIT OR Apache-2.0 | Property-based round-trip tests for the rule parser and renderer. |
+| `proptest` | 1 | MIT OR Apache-2.0 | Property-based round-trip tests for the rule parser and renderer. |
 | `cargo-fuzz` / `libfuzzer-sys` | Toolchain, not a manifest entry | MIT OR Apache-2.0 | Fuzzing the parser; target of zero panics over 10⁶ inputs. |
 | `cargo-llvm-cov` | Toolchain | MIT OR Apache-2.0 | Coverage measurement against the >90% parser target. |
 | `cargo-audit` | Toolchain | MIT OR Apache-2.0 | `make audit` — RustSec advisory scanning. |
@@ -54,7 +54,7 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 | Package | Minimum version | Provided by | Purpose |
 | :------ | :-------------- | :---------- | :------ |
 | `usbguard` (daemon) | 1.1.0 | Distribution | The daemon this program is a client of. Earlier versions have a different `appendRule` arity. **Hard dependency** in native packages. |
-| `usbguard-dbus` (bridge) | Matching the daemon | Distribution — a *separate* package everywhere | The D-Bus bridge exposing `org.usbguard1`. Without it the program cannot function at all. **Hard dependency** in native packages; its absence is a first-class diagnostic state. |
+| `usbguard-dbus` (bridge) | Matching the daemon | Distribution — inside `usbguard` on Debian, Ubuntu, and Arch; a separate `usbguard-dbus` package on Fedora | The D-Bus bridge exposing `org.usbguard1`. Without it the program cannot function at all. **Hard dependency** of the `.rpm`; its absence is a first-class diagnostic state. |
 | GTK | 4.14 | Distribution | Runtime and build-time (`gtk4-devel`). |
 | libadwaita | 1.5 | Distribution | Runtime and build-time (`libadwaita-devel`). |
 | GLib | Matching GTK | Distribution | Main loop, GSettings, GResource (`glib2-devel`). |
@@ -62,7 +62,9 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 | A C toolchain | any | Distribution | Required by the `-sys` crates underlying the GTK bindings. |
 | D-Bus (system bus) | any | Distribution | The only transport to the daemon. |
 
-On Fedora: `gtk4-devel libadwaita-devel glib2-devel pkgconf-pkg-config gcc`.
+- Fedora / RHEL: `gtk4-devel libadwaita-devel glib2-devel pkgconf-pkg-config gcc`
+- Debian / Ubuntu (24.04+): `libgtk-4-dev libadwaita-1-dev pkg-config build-essential`
+- Arch: `gtk4 libadwaita pkgconf base-devel`
 
 ### 1.4 Optional & Dynamic Dependencies
 
