@@ -1,0 +1,55 @@
+# Flatpak manifest (docs/architecture.md §14.1).
+#
+# Build:
+#   python3 flatpak-cargo-generator.py Cargo.lock -o packaging/cargo-sources.json
+#   flatpak-builder --user --install --force-clean build-flatpak packaging/io.github.onyks_os.UsbguardGui.yaml
+# (flatpak-cargo-generator.py is from github.com/flatpak/flatpak-builder-tools)
+#
+# The USBGuard daemon and its bridge must be installed on the HOST: a sandbox
+# cannot provide them. No --filesystem permission of any kind is requested.
+app-id: io.github.onyks_os.UsbguardGui
+runtime: org.gnome.Platform
+runtime-version: '48'
+sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+command: usbguard-gui
+
+build-options:
+  append-path: /usr/lib/sdk/rust-stable/bin
+  env:
+    CARGO_HOME: /run/build/usbguard-gui/cargo
+
+finish-args:
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  - --device=dri
+  # The USBGuard bridge: the only system-bus service the program uses.
+  - --system-talk-name=org.usbguard1
+  # --diagnose asks systemd whether usbguard.service is active (read-only).
+  - --system-talk-name=org.freedesktop.systemd1
+  # Notifications and the tray are not implemented yet; their permissions
+  # (§14.1) are added together with the features.
+
+modules:
+  - name: usbguard-gui
+    buildsystem: simple
+    build-options:
+      env:
+        CARGO_NET_OFFLINE: 'true'
+    build-commands:
+      - cargo --offline fetch --manifest-path Cargo.toml
+      - cargo --offline build --release
+      - install -Dm755 target/release/usbguard-gui /app/bin/usbguard-gui
+      - install -Dm644 data/io.github.onyks_os.UsbguardGui.desktop /app/share/applications/io.github.onyks_os.UsbguardGui.desktop
+      - install -Dm644 data/io.github.onyks_os.UsbguardGui.metainfo.xml /app/share/metainfo/io.github.onyks_os.UsbguardGui.metainfo.xml
+      - install -Dm644 data/io.github.onyks_os.UsbguardGui.gschema.xml /app/share/glib-2.0/schemas/io.github.onyks_os.UsbguardGui.gschema.xml
+      - glib-compile-schemas /app/share/glib-2.0/schemas
+      - install -Dm644 data/icons/hicolor/scalable/apps/io.github.onyks_os.UsbguardGui.svg /app/share/icons/hicolor/scalable/apps/io.github.onyks_os.UsbguardGui.svg
+      - install -Dm644 data/icons/hicolor/symbolic/apps/io.github.onyks_os.UsbguardGui-symbolic.svg /app/share/icons/hicolor/symbolic/apps/io.github.onyks_os.UsbguardGui-symbolic.svg
+      - install -Dm644 packaging/70-usbguard-gui.rules.example /app/share/doc/usbguard-gui/70-usbguard-gui.rules.example
+    sources:
+      - type: dir
+        path: ..
+      - cargo-sources.json
