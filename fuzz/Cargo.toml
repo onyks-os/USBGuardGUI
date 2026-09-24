@@ -9,7 +9,8 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
-usbguard-gui = { path = ".." }
+# The parser needs no GTK: without it the fuzz build runs on bare CI runners.
+usbguard-gui = { path = "..", default-features = false }
 
 # Not a member of the main workspace: it needs a nightly toolchain and
 # sanitizer flags that the main build must not inherit.

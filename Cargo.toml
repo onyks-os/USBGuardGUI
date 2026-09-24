@@ -8,7 +8,6 @@ authors = ["onyks"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/onyks-os/USBGuardGUI"
-homepage = "https://onyks-os.github.io/usbguard-gui/"
 documentation = "https://onyks-os.github.io/usbguard-gui/"
 keywords = ["usbguard", "usb", "security", "gtk4", "linux"]
 categories = ["gui"]
