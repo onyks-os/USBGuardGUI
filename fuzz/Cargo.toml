@@ -1,0 +1,31 @@
+[package]
+name = "usbguard-gui-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+# The parser needs no GTK: without it the fuzz build runs on bare CI runners.
+usbguard-gui = { path = "..", default-features = false }
+
+# Not a member of the main workspace: it needs a nightly toolchain and
+# sanitizer flags that the main build must not inherit.
+[workspace]
+
+[[bin]]
+name = "parse_rule"
+path = "fuzz_targets/parse_rule.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "round_trip"
+path = "fuzz_targets/round_trip.rs"
+test = false
+doc = false
+bench = false

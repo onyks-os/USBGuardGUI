@@ -8,26 +8,92 @@ authors = ["onyks"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/onyks-os/USBGuardGUI"
-homepage = "https://onyks-os.github.io/usbguard-gui/"
 documentation = "https://onyks-os.github.io/usbguard-gui/"
 keywords = ["usbguard", "usb", "security", "gtk4", "linux"]
 categories = ["gui"]
 exclude = ["docs/", ".github/", "tests/fixtures/"]
 
-[dependencies]
-# Deliberately empty. The *choice* of every runtime crate is already decided and
-# justified in DEPENDENCIES.md §1.1; each one is added with `cargo add` at the
-# start of the ROADMAP phase that first needs it, so that the committed
-# Cargo.lock only ever pins versions the project actually builds against.
+# ---------------------------------------------------------------------------
+# Native packages (docs/architecture.md §14.2). `make package-deb` and
+# `make package-rpm`; Arch has packaging/arch/PKGBUILD.
 #
-# Planned, in the order the roadmap reaches them:
-#   Phase 1  thiserror
-#   Phase 2  zbus, tokio, futures-util, tracing, tracing-subscriber
-#   Phase 4  gtk4, libadwaita, async-channel
-#   Later    notify-rust, ksni, gettext-rs
+# None of them runs a post-install script: the distributions' own triggers
+# compile the GSettings schema and refresh the icon cache. The Polkit rule is
+# shipped as an inert example under /usr/share/doc (§3.6), never installed.
+# ---------------------------------------------------------------------------
+[package.metadata.deb]
+maintainer = "onyks <github.tgwp7@aleeas.com>"
+section = "admin"
+priority = "optional"
+# Debian and Ubuntu ship the D-Bus bridge inside the usbguard package.
+depends = "$auto, libgtk-4-1 (>= 4.14), libadwaita-1-0 (>= 1.5), usbguard (>= 1.1.0)"
+recommends = "polkitd | policykit-1"
+extended-description = """A desktop interface for USBGuard: see which USB devices are connected and authorized, allow or block them, and read and edit the policy rules. Runs without privileges; every change is made by the USBGuard daemon after the system's own authorization checks."""
+assets = [
+    ["target/release/usbguard-gui", "usr/bin/", "755"],
+    ["data/io.github.onyks_os.UsbguardGui.desktop", "usr/share/applications/", "644"],
+    ["data/io.github.onyks_os.UsbguardGui.metainfo.xml", "usr/share/metainfo/", "644"],
+    ["data/io.github.onyks_os.UsbguardGui.gschema.xml", "usr/share/glib-2.0/schemas/", "644"],
+    ["data/icons/hicolor/scalable/apps/io.github.onyks_os.UsbguardGui.svg", "usr/share/icons/hicolor/scalable/apps/", "644"],
+    ["data/icons/hicolor/symbolic/apps/io.github.onyks_os.UsbguardGui-symbolic.svg", "usr/share/icons/hicolor/symbolic/apps/", "644"],
+    ["packaging/70-usbguard-gui.rules.example", "usr/share/doc/usbguard-gui/", "644"],
+    ["README.md", "usr/share/doc/usbguard-gui/", "644"],
+]
+
+[package.metadata.generate-rpm]
+summary = "Desktop interface for USBGuard"
+assets = [
+    { source = "target/release/usbguard-gui", dest = "/usr/bin/usbguard-gui", mode = "755" },
+    { source = "data/io.github.onyks_os.UsbguardGui.desktop", dest = "/usr/share/applications/io.github.onyks_os.UsbguardGui.desktop", mode = "644" },
+    { source = "data/io.github.onyks_os.UsbguardGui.metainfo.xml", dest = "/usr/share/metainfo/io.github.onyks_os.UsbguardGui.metainfo.xml", mode = "644" },
+    { source = "data/io.github.onyks_os.UsbguardGui.gschema.xml", dest = "/usr/share/glib-2.0/schemas/io.github.onyks_os.UsbguardGui.gschema.xml", mode = "644" },
+    { source = "data/icons/hicolor/scalable/apps/io.github.onyks_os.UsbguardGui.svg", dest = "/usr/share/icons/hicolor/scalable/apps/io.github.onyks_os.UsbguardGui.svg", mode = "644" },
+    { source = "data/icons/hicolor/symbolic/apps/io.github.onyks_os.UsbguardGui-symbolic.svg", dest = "/usr/share/icons/hicolor/symbolic/apps/io.github.onyks_os.UsbguardGui-symbolic.svg", mode = "644" },
+    { source = "packaging/70-usbguard-gui.rules.example", dest = "/usr/share/doc/usbguard-gui/70-usbguard-gui.rules.example", mode = "644", doc = true },
+    { source = "README.md", dest = "/usr/share/doc/usbguard-gui/README.md", mode = "644", doc = true },
+]
+
+# Fedora ships the bridge as its own package.
+[package.metadata.generate-rpm.requires]
+usbguard = ">= 1.1.0"
+usbguard-dbus = "*"
+gtk4 = ">= 4.14"
+libadwaita = ">= 1.5"
+
+[package.metadata.generate-rpm.recommends]
+polkit = "*"
+
+[dependencies]
+adw = { version = "0.8", package = "libadwaita", features = ["v1_5"], optional = true }
+# Each crate's choice is justified in DEPENDENCIES.md §1.1. Crates are added
+# with `cargo add` at the start of the ROADMAP phase that first needs them, so
+# the committed Cargo.lock only pins versions the project builds against.
+#
+# Still to come: gettext-rs (ROADMAP "Later"). notify-rust is not needed:
+# GIO notifications cover both the session bus and the Flatpak portal.
+async-channel = "2.5.0"
+futures-util = "0.3.34"
+gtk = { version = "0.10", package = "gtk4", features = ["v4_14"], optional = true }
+ksni = { version = "0.3", default-features = false, features = ["tokio"], optional = true }
+thiserror = "2"
+tokio = { version = "1.53.1", features = ["rt-multi-thread", "time", "macros", "sync"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+# The default async-io executor is disabled: everything runs on the one Tokio
+# runtime of docs/architecture.md §5.2.
+zbus = { version = "5.13.2", default-features = false, features = ["tokio"] }
+
+[features]
+# The GTK interface. Without it the binary still builds and offers the
+# headless commands (--diagnose, --list-devices, …), which is what CI jobs
+# without GTK development packages build.
+default = ["gui"]
+gui = ["dep:gtk", "dep:adw", "dep:ksni"]
 
 [dev-dependencies]
 proptest = "1"
+tokio = { version = "1.53.1", features = ["net", "rt-multi-thread", "macros", "time"] }
+zbus = { version = "5.13.2", default-features = false, features = ["tokio", "p2p"] }
 
 [profile.release]
 # Fail loudly rather than wrap silently: an integer overflow in release mode is

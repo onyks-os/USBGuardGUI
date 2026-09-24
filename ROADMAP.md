@@ -21,12 +21,28 @@ Rust; treat elapsed time as an output of the work, not an input to it.
 
 Delivered:
 
-- Complete technical architecture specification — the upstream D-Bus contract, the three-checkpoint
-  access model, the process and concurrency design, the domain model, the rule-language grammar,
-  the resilience test matrix, and the packaging plan.
-- Project scaffold, CI pipeline, and governance documents.
+- Complete technical architecture specification, and the project scaffold, CI, and governance.
+- **Phase 0**: introspection, Polkit actions, bus policy, error shapes, signal and target
+  mappings, and the IPC identity test, all on usbguard 1.1.4; packaging of Debian, Ubuntu, and
+  Arch checked in containers (`docs/architecture.md` §13.4).
+- **Phase 1**: the rule-language parser and renderer, with property tests and two cargo-fuzz
+  targets (10⁶ inputs each, no findings).
+- **Phase 2**: typed D-Bus client, mock bridge for tests, `--list-devices` / `--list-rules`.
+- **Phase 3**: the probe sequence, denial attribution, per-distribution remedies, `--diagnose`.
+- **Phase 4 / v0.1.0**: runtime bootstrap, channel bridge, coalescing worker, supervisor with
+  reconnection, the window, GSettings, desktop file, AppStream metainfo, and icon. T1, T3, T4, T5,
+  T6, and T15 pass against the mock. Memory: PSS within target; RSS within target only with the
+  software renderer (`docs/architecture.md` §13.2).
+- **v0.2.0**, code complete: device actions with the runtime/permanent choice, the policy view
+  with safe removal and the disambiguation dialog, the new-rule dialog (guided and text modes),
+  cancellable operations with the 20 s / 180 s notices, runtime parameters, preferences.
+- **Later, done**: notifications with a quick action (§9.5), background mode and the tray icon
+  (§9.6), start at login. Still to do: localization (§9.7) and Flathub submission.
+- **Packaging**: `.deb` (built on Ubuntu 24.04, installs on Debian and Ubuntu), `.rpm` (installs
+  on Fedora, pulling in `usbguard-dbus`), an Arch `PKGBUILD`, and a Flatpak manifest.
 
-Not yet delivered: **any of the program**. There is no binary, no release, and nothing to install.
+No release exists yet. Before tagging: the open Phase 0 items below, a manual pass over the
+v0.2 actions on a real system, and screenshots for the AppStream metadata.
 
 ---
 
@@ -155,9 +171,8 @@ explicit at every step.
 
 ## Later
 
-Not committed, and in no particular order: notifications with quick actions (§9.5), the
-`StatusNotifierItem` tray and background mode (§9.6), localization (§9.7), the Flatpak manifest and
-Flathub submission (§14.1), and native `.deb` / `.rpm` packaging (§14.2).
+Not committed, and in no particular order: localization (§9.7) and Flathub submission (§14.1).
+Notifications, the tray, background mode, the Flatpak manifest, and native packages are done.
 
 One upstream contribution is worth more than any of them: proposing
 `removeRuleIfMatches(id, expected_text)` to USBGuard would eliminate the rule-removal race at its

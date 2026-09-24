@@ -1,0 +1,39 @@
+// Example Polkit rule for USBGuard GUI — SHIPPED INERT, NEVER INSTALLED.
+//
+// Installing this file grants every member of the administrator group control
+// over USB authorization policy. That is a change to the system's security
+// posture, and it is the administrator's decision to make (see
+// docs/architecture.md §3.6 in the USBGuardGUI repository). To apply it:
+//
+//   sudo install -m 0644 /usr/share/doc/usbguard-gui/70-usbguard-gui.rules.example \
+//        /etc/polkit-1/rules.d/70-usbguard-gui.rules
+//
+// Effect: reading devices, rules, and parameters needs no password; changing
+// them asks for the user's OWN password, remembered for a few minutes. Only for
+// a local, active session — a remote SSH session or a switched-away seat keeps
+// the default (administrator password).
+//
+// Adjust "wheel" to the distribution's administrator group:
+// wheel on Fedora/Arch, sudo on Debian/Ubuntu.
+polkit.addRule(function(action, subject) {
+    if (!subject.local || !subject.active || !subject.isInGroup("wheel")) {
+        return;
+    }
+    var readOnly = [
+        "org.usbguard.Devices1.listDevices",
+        "org.usbguard.Policy1.listRules",
+        "org.usbguard1.getParameter"
+    ];
+    var mutating = [
+        "org.usbguard.Devices1.applyDevicePolicy",
+        "org.usbguard.Policy1.appendRule",
+        "org.usbguard.Policy1.removeRule",
+        "org.usbguard1.setParameter"
+    ];
+    if (readOnly.indexOf(action.id) >= 0) {
+        return polkit.Result.YES;
+    }
+    if (mutating.indexOf(action.id) >= 0) {
+        return polkit.Result.AUTH_SELF_KEEP;
+    }
+});

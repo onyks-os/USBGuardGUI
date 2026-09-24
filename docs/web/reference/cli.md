@@ -4,9 +4,6 @@ Exhaustive, non-narrative reference for every command and option. This page mirr
 [`docs/interfaces.md`](https://github.com/onyks-os/USBGuardGUI/blob/main/docs/interfaces.md);
 both must be updated together.
 
-!!! warning "Specified, not implemented"
-    Nothing on this page can be run yet.
-
 ---
 
 ## Commands
@@ -25,7 +22,9 @@ Usage: usbguard-gui [OPTIONS]
 | :----- | :--- | :------ | :---------- |
 | `--background` | flag | off | Start without presenting the window. Overrides the `start-in-background` setting. |
 | `--diagnose` | flag | — | Run the access probe sequence, print the result, and exit without opening a window. |
-| `--version`, `-V` | flag | — | Print the version, plus the USBGuard version detected on the bus, and exit. |
+| `--version`, `-V` | flag | — | Print the version, plus the USBGuard D-Bus API level detected on the bus, and exit. |
+| `--list-devices` | flag | — | Print the devices the daemon knows, sorted by port, and exit. |
+| `--list-rules` | flag | — | Print the ruleset in evaluation order, and exit. |
 | `--help`, `-h` | flag | — | Show usage and exit. |
 
 A second launch does not start a second process: `adw::Application` raises the running window
@@ -74,7 +73,7 @@ usbguard-gui --diagnose || echo "not usable yet, exit code $?"
 
 | Variable | Default | Description |
 | :------- | :------ | :---------- |
-| `USBGUARD_GUI_LOG` | `warn` | `tracing` `EnvFilter` directive. Levels above `debug` record device names, serial numbers, and hashes; default-level output never does. |
+| `USBGUARD_GUI_LOG` | `warn` | `tracing` `EnvFilter` directive. The `debug` and `trace` levels record device names, serial numbers, and hashes; `info` and above never do. |
 
 ---
 

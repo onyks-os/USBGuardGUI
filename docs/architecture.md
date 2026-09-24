@@ -10,7 +10,8 @@ Statements marked **[P0]** are assumptions about the upstream D-Bus contract
 that must be confirmed by introspection against the target USBGuard build
 before any code depends on them (procedure in §13.3). Where introspection
 disagrees with this document, introspection wins and this document is
-corrected.
+corrected. Phase 0 has been run once, against usbguard 1.1.4; the results,
+and the markers still open, are in §13.4.
 
 ---
 
@@ -105,7 +106,7 @@ rejects a hyphen in this position. The underscore is the standard substitution.
         │
         │  system D-Bus, name org.usbguard1
         ▼
-  usbguard-dbus  (bridge, runs as root — SEPARATE PACKAGE)
+  usbguard-dbus  (bridge, runs as root — a separate package on Fedora)
         │
         │  USBGuard IPC (unix socket)
         ▼
@@ -116,8 +117,10 @@ rejects a hyphen in this position. The underscore is the standard substitution.
   kernel USB authorization
 ```
 
-The bridge is packaged separately from the daemon on every reference
-distribution. On Fedora the split is:
+**Correction from Phase 0 (§13.4):** only Fedora packages the bridge
+separately. Debian, Ubuntu, and Arch ship it inside the `usbguard` package,
+and Debian and Ubuntu enable both services on installation. On Fedora the
+split is:
 
 | Package | Provides |
 |---|---|
@@ -163,12 +166,18 @@ activatable through `org.usbguard1.service`, which matters for probe 2b.
 
 | Member | Signature | Semantics |
 |---|---|---|
-| `listRules` | `(s) → a(us)` | `query` in rule-language syntax; returns `(rule_id, rule_text)` **in evaluation order** |
+| `listRules` | `(s) → a(us)` | `label` — a **label filter, not a query**: `""` returns every rule, `"match"` only rules labelled `match`; returns `(rule_id, rule_text)` **in evaluation order** |
 | `appendRule` | `(sub) → u` | `rule`, `parent_id`, **`temporary`**; returns the new rule id |
 | `removeRule` | `(u) → ()` | Remove by rule id |
 
-**[P0]** Every signature above is confirmed against the target build before
-use. The named formal parameter of `listRules` has been renamed upstream over
+`Devices1` additionally emits **`DevicePolicyApplied`** `(uusua{ss})` — `id`,
+`target_new`, `device_rule`, `rule_id`, `attributes` — whenever a policy
+decision is applied to a device, whether or not the target changed. It is
+absent from the upstream documentation and was found by introspection; the
+event worker treats it like `DevicePolicyChanged` (§5.4).
+
+**[P0 — confirmed on 1.1.4]** Every signature above matches
+`docs/dbus-introspection/usbguard-1.1.4-*.xml`. The named formal parameter of `listRules` has been renamed upstream over
 time; the client binds **by position**, never by name, and the published online
 documentation is known to lag the source.
 
@@ -460,10 +469,13 @@ folding it into "permission denied".
 The bridge checks a Polkit action per method call, against the calling
 process's Polkit subject. The actions are declared in
 `/usr/share/polkit-1/actions/org.usbguard1.policy`, shipped by the bridge
-package, and default to `auth_admin`.
+package. **Observed on usbguard 1.1.4 (Fedora packaging):** the three read
+actions default to `yes` for an active local session, and the four mutating
+actions to `auth_admin`. Other distributions may ship different defaults;
+the program assumes nothing and reacts to what each call returns.
 
-**[P0]** The exact action identifiers are read from the installed policy file
-at Phase 0 rather than assumed. The expected set is:
+**[P0 — confirmed on 1.1.4]** The action identifiers, read from the installed
+policy file:
 
 | Action | Used for |
 |---|---|
@@ -475,7 +487,8 @@ at Phase 0 rather than assumed. The expected set is:
 | `org.usbguard1.getParameter` | reading runtime parameters, and the probe |
 | `org.usbguard1.setParameter` | changing runtime parameters |
 
-**Read operations are gated too.** With the shipped defaults, merely filling the
+**Read operations may be gated too.** Where a distribution ships `auth_admin`
+for the read actions (1.1.4 upstream-as-packaged ships `yes`), merely filling the
 device table at startup raises an administrator password prompt. This has a
 direct architectural consequence: initial synchronization cannot be silent and
 automatic, or the user is asked for a password immediately on launch with no
@@ -544,11 +557,10 @@ checkpoint for every D-Bus client, and per-user IPC grants are what the
 `usbguard` **CLI** needs, since the CLI connects to the socket directly as the
 invoking user.
 
-**[P0]** This is reasoning from the process topology, and it is confirmed by
-test P0-5 (§13.3) before the interface tells any user what to do about it:
-configure Polkit but *not* the IPC ACL, and observe whether calls succeed. Until
-that test passes, the diagnostic panel presents the IPC ACL remedy as a
-secondary possibility rather than as the primary instruction.
+**[P0 — confirmed, §13.4]** Test P0-5 configured Polkit but *not* the IPC
+ACL, and the call succeeded: the IPC ACL sees the bridge's root identity. An
+IPC ACL denial is therefore only possible where an administrator has narrowed
+even root's privileges, and the diagnostic panel presents it as such.
 
 Where a per-user grant genuinely is required — a hardened deployment that has
 narrowed even root's privileges through `IPCAccessControlFiles`, or a user who
@@ -601,8 +613,14 @@ Capabilities are established by observation, not by prediction:
 - The `list_*` capabilities are set on the first successful call, cleared on a
   denial.
 - The `modify_*` capabilities start **optimistically true** and are cleared on
-  the first denial, which is then reported. They are never probed, because the
-  only probe for a write is a write (§4.2, probe 5).
+  the first *structural* denial — bus policy or IPC ACL — which is then
+  reported. They are never probed, because the only probe for a write is a
+  write (§4.2, probe 5).
+- A **Polkit** refusal does not clear them. Polkit answers `Not authorized.`
+  both when policy forbids the action and when the user dismisses the password
+  prompt, and the two are indistinguishable from here; disabling every control
+  because a prompt was cancelled would be wrong. The refusal is reported, and
+  the next attempt asks again.
 
 A denial that clears a capability also records the checkpoint that produced it,
 so the panel offers the correct remedy rather than a list of all three.
@@ -1200,7 +1218,7 @@ async fn remove_rule(
     policy: &UsbGuardPolicyProxy<'_>,
     handle: &RuleHandle,
 ) -> Result<RemoveOutcome, AppError> {
-    let current = policy.list_rules("match").await?;
+    let current = policy.list_rules("").await?; // "" = no label filter (§2.2)
     let matches: Vec<RuleHandle> = current
         .iter()
         .enumerate()
@@ -1487,6 +1505,16 @@ silently drops is worse than one that never claimed to have them.
 Under Flatpak, `org.freedesktop.portal.Notification` is preferred when
 available, falling back to the session bus.
 
+**As implemented:** notifications are GIO `GNotification`s rather than
+`notify-rust` — GIO already selects the portal or the session bus, and routes a
+button to an application action (`app.allow-device(u32)`), which works with
+the window hidden. The quick action is **"Allow for this session"** only; a
+permanent change needs the window. Because device ids are recycled (§2.4.1), the
+action re-checks before acting that the device holding that id is still the one
+announced (same descriptor hash, or the same rule text), and otherwise opens
+the window instead. When the window is in front, a toast replaces the
+notification.
+
 Notifications are rate-limited and coalesced on the same window as §5.4: a hub
 insertion produces one summary notification, not thirty.
 
@@ -1500,6 +1528,12 @@ Detection is therefore explicit — query the session bus for an owner of
 none, which is GNOME without an AppIndicator extension, the program enters
 background mode without an icon, keeps notifications working, and states this
 once in its preferences. It does not log an error per attempt.
+
+**As implemented:** the tray exists while `run-in-background` is on; closing
+the window then hides it and keeps the program running. Where no watcher
+exists, the first close says so once, in a notification, and names the way
+back (launching the program again). `ksni` 0.3 is built on zbus, so the
+duplication described next no longer applies.
 
 `ksni` brings a second D-Bus stack alongside zbus. The duplication is acceptable
 but is a real cost in build time and binary size, and if it grows, implementing
@@ -1632,6 +1666,16 @@ usbguard-gui/
     └── dbus-introspection/     # §13.3 output, versioned
 ```
 
+As implemented, the tree differs in a few places, all additive: `model/access.rs`
+(`AccessState`, `Capabilities` — they cross the channel, so they live in
+`model`), `model/parameter.rs`, `dbus/errors.rs` (§4.3's classifier),
+`dbus/coalesce.rs` (§5.4's merge rules as pure logic), `device_store.rs` (the
+device table, testable without GTK), `remedy.rs`, and `cli.rs`. `data/`,
+`po/`, `build.rs`, and the Flatpak manifest do not exist yet; the widgets are
+built in code rather than from GtkBuilder templates. The `ui` module is behind
+the Cargo feature `gui` (on by default), so the headless commands build without
+GTK.
+
 The dependency direction is strictly one way: `model` depends on nothing in the
 program; `rules` depends on `model`; `dbus` depends on `model` and `rules`;
 `ui` depends on all three. `model` and `rules` are testable without a bus and
@@ -1726,6 +1770,15 @@ hardware.
 | Parser robustness | zero panics over 10⁶ fuzz inputs | `cargo-fuzz` |
 | Parser coverage | > 90% of lines | `cargo-llvm-cov` |
 
+**Measured (2026-09-23, release build, 7 devices, idle after 90 s, GNOME 50 on
+Wayland with GTK's default GPU renderer):** PSS 65.8 MB — within target; RSS
+147 MB — above the 110 MB figure. The difference is the GPU renderer: its
+driver mappings are shared, clean pages (`Shared_Clean` 110 MB), and the
+program's own private dirty memory is 32 MB. With `GSK_RENDERER=cairo` the
+same window measures RSS 62 MB, PSS 22 MB. The program does not force a
+renderer — that is the session's choice — so the RSS target is restated as
+applying to the software renderer, and PSS stays the number held to.
+
 The memory figure is PSS-based on purpose. GTK4 and libadwaita share a
 substantial fraction of their pages with every other GTK application in the
 session, so RSS overstates what this program actually costs a running desktop,
@@ -1785,6 +1838,32 @@ ACL is written before this test has an answer.
 **P0-6 — Rule corpus.** Collect the real `rules.conf` shipped or generated on
 each reference distribution, plus the output of `usbguard generate-policy`, as
 the parser's test corpus and fuzzing seed (§7.2).
+
+### 13.4 Phase 0 Results (usbguard 1.1.4)
+
+Run on 2026-09-23 against usbguard 1.1.4 with its D-Bus bridge, on the
+maintainer's Fedora 44 system. The interface is the same upstream code on every
+distribution; packaging defaults (Polkit, bus policy, package split) are what
+differ, and those still need checking on Debian/Ubuntu and Arch. No device data
+from that system is committed: the parser corpus under
+`tests/fixtures/rules/` is synthetic and keeps only the structural quirks
+observed.
+
+| Item | Result |
+|---|---|
+| P0-1 signatures | Confirmed, including `appendRule(sub)` with `temporary`. Two corrections: `listRules` takes a **label filter** (`""` = all rules; §2.2), and `Devices1` emits an undocumented **`DevicePolicyApplied`** signal. XML in `docs/dbus-introspection/`. |
+| Polkit action ids | Confirmed (§3.2). Defaults: reads `yes`, writes `auth_admin`. |
+| Bus policy (checkpoint A) | `<allow send_destination="org.usbguard1"/>` in the default context: transparent, as expected. |
+| Error shapes | A Polkit refusal is `org.freedesktop.DBus.Error.AccessDenied` with the text `Not authorized.`; a daemon-side failure is `org.freedesktop.DBus.Error.Failed` with `IPC method: usbguard.IPC.<method>: <reason>` (e.g. `RuleParserError` for a bad query); an unknown parameter is `Failed` with `getParameter: <name>: unknown parameter`. §4.3's classifier is calibrated on these. |
+| Version information | The bridge exposes **no version**. `--version` reports the API level inferred from introspection (`appendRule` has `temporary` ⇒ ≥ 1.1.0) instead of a version number. |
+| Polkit agent (probe 3) | Polkit offers an unprivileged process no query for registered agents. Probe 3 is a heuristic over `/proc/*/comm` against known agents and shells that embed one; it only chooses which explanation a denial gets. |
+| P0-2 target mapping | **Confirmed**: `allow-device` gives `target_new=0`, `block-device` 1, `reject-device` 2, each matching the word `usbguard list-devices` prints (§2.3). |
+| P0-3 event mapping | **Confirmed**: insertion `event=1`, removal `event=3`; a rejected device also produces a removal (`event=3`). |
+| P0-4 `DevicePresent` absence | **Confirmed**: a client connecting while devices are present receives no `event=0` signal (§2.4.4). |
+| Presence vs. decision | Observed on insertion: `DevicePresenceChanged` carried `target=1` (block) and the `DevicePolicyApplied` that followed carried `target_new=0` (allow). The presence target is provisional, exactly as §2.4.5 warns, and the worker's merge rule (§5.4 rule 2) is what shows the device as allowed. |
+| Interactive authorization | The bridge reads the message flags and passes Polkit the D-Bus `ALLOW_INTERACTIVE_AUTHORIZATION` flag. Without it, a mutating call is refused at once with `Not authorized.` and no password prompt. zbus does not set it by default: the four mutating proxy methods declare `allow_interactive_auth`; the reads do not, so no prompt can precede the window (§4.2). Found by the first manual test of the window. |
+| P0-5 identity at checkpoint C | **Confirmed.** With a temporary Polkit rule admitting only the user `nobody` — who appears nowhere in the daemon's IPC access control — `listDevices` over D-Bus as `nobody` succeeded. Checkpoint C is satisfied by the bridge's own root identity; per-user IPC grants are a CLI concern only (§3.3). A first run was invalid: under a restrictive umask the rule file was 0640 and `polkitd` could not read it. |
+| Other distributions | Checked in containers on 2026-09-23 by installing the distribution package: **Debian stable** (usbguard 1.1.3), **Ubuntu 24.04** (1.1.2), **Arch** (1.1.4). All three ship the bridge, its D-Bus service file, bus policy, Polkit actions, and `usbguard-dbus.service` inside the `usbguard` package — only Fedora splits it out. Polkit defaults and bus policy are identical to Fedora's. Debian and Ubuntu enable `usbguard.service` and `usbguard-dbus.service` on install; Arch enables nothing, as usual. Runtime behaviour on those systems (signals, errors) is not yet observed, but it is the same upstream bridge code. |
 
 ---
 
@@ -1856,6 +1935,14 @@ modules:
 ```
 
 No `--filesystem` permission of any kind is requested, consistently with §1.1.
+
+**As implemented** (`packaging/io.github.onyks_os.UsbguardGui.yaml`): the tray
+and notification permissions above are left out until those features exist,
+and `--system-talk-name=org.freedesktop.systemd1` is added, because
+`--diagnose` asks systemd whether `usbguard.service` is active. Two behaviours
+change inside the sandbox: the distribution is read from the host's
+`/run/host/os-release`, and probe 3 reports the Polkit agent as *unknown*,
+since `/proc` there shows only the sandbox's own processes.
 Preferences live in the sandbox's own data directory.
 
 The application ID must correspond to a domain or account the publisher
@@ -1868,13 +1955,16 @@ Flathub's verification process checks.
 file, the AppStream metainfo, icons, the GSettings schema, translations, and the
 Polkit rule **as an example under `/usr/share/doc/`, not active** (§3.6).
 
-Dependencies: a hard dependency on `usbguard`, and — this is the part it is easy
-to get wrong — a hard dependency on the **bridge** package (`usbguard-dbus`),
-because without it the program cannot function at all (§2.1). `polkit` is a
-recommendation.
+Dependencies: a hard dependency on `usbguard` ≥ 1.1.0 everywhere, and on the
+**bridge** package `usbguard-dbus` in the `.rpm` — the one place it is separate
+(§2.1, §13.4). Without the bridge the program cannot function at all. `polkit`
+is a recommendation.
 
-The post-install script modifies no system configuration. Its only action is the
-GSettings schema recompilation that packaging conventions require.
+There is **no** post-install script. The GSettings schema is compiled by the
+distributions' own triggers — dpkg triggers on Debian/Ubuntu, RPM file triggers
+on Fedora, pacman hooks on Arch — whenever a file lands in
+`/usr/share/glib-2.0/schemas/`. Nothing the package installs modifies system
+configuration.
 
 ---
 
@@ -1905,7 +1995,8 @@ GSettings schema recompilation that packaging conventions require.
    root and is the highest-value contribution to make to USBGuard from this
    project.
 
-6. **The bridge is optional packaging on every reference distribution.** A large
+6. **The bridge is optional packaging on Fedora**, and on Arch its service is
+   not enabled by default (§13.4). A large
    share of first-run failures will be `BridgeNotInstalled`, and the quality of
    that one message and its per-distribution install command determines whether
    most users ever see the program work.

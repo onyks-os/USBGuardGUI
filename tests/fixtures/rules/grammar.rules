@@ -1,0 +1,45 @@
+# Hand-written rules covering every construct of docs/architecture.md §2.6.
+# Each line must round-trip byte for byte through the parser and renderer.
+allow
+block
+reject
+match
+allow id *:*
+allow id 1234:*
+block id 1d6b:0002 serial "0000:00:01.0" name "xHCI Host Controller"
+allow via-port "1-2.1" with-connect-type "hotplug"
+allow via-port one-of { "1-1" "1-2" "usb3" }
+allow hash "abc=" parent-hash "def="
+allow with-interface 03:*:*
+allow with-interface 03:01:*
+allow with-interface { 03:01:01 03:01:02 }
+allow with-interface all-of { 08:06:50 }
+allow with-interface one-of { 03:00:01 03:01:01 }
+reject with-interface none-of { 08:*:* }
+allow with-interface equals { 09:00:00 }
+allow with-interface equals-ordered { 0e:01:00 0e:02:00 }
+allow with-interface match-all { 03:*:* 09:00:00 }
+allow with-interface { }
+allow name "Example Disk      "
+allow name "quote \" and backslash \\ inside"
+allow name "bytes \xff\xfe that are not UTF-8"
+allow name "Clé USB — ünïcödé"
+allow serial "" label "empty serial"
+allow label "work laptop" id 1111:0002
+allow id 1111:0002 if localtime(08:00-18:00)
+allow if localtime(08:00:00-18:00:59)
+block if !rule-applied
+allow if rule-applied(00:30:00)
+allow if rule-evaluated(30)
+allow if random
+allow if random(0.5)
+allow if true
+reject if false
+allow if all-of { localtime(08:00-18:00) !rule-applied(10) }
+allow if one-of { true false }
+allow if none-of { random(0.1) }
+allow if { true }
+allow if allowed-matches(id 1234:5678)
+allow if allowed-matches(name "has ) paren")
+allow id 1234:5678 # a trailing comment
+block #comment with no space

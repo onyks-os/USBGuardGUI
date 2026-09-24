@@ -8,8 +8,15 @@
 /// The crate version, taken from `Cargo.toml` at compile time.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-/// Domain types shared across the application.
+pub mod cli;
+pub mod dbus;
+pub mod device_store;
 pub mod model;
+pub mod remedy;
+pub mod rules;
+pub mod runtime;
+#[cfg(feature = "gui")]
+pub mod ui;
 
 #[cfg(test)]
 mod tests {

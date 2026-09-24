@@ -26,6 +26,11 @@ jobs:
         with:
           persist-credentials: false
 
+      # GTK 4.14 and libadwaita 1.5 are the floor of docs/architecture.md §1.4;
+      # Ubuntu 24.04 ships exactly those.
+      - name: Install GTK development packages
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
+
       - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # master — this action selects the toolchain from the branch name, so a
         # pinned SHA must name the toolchain explicitly via `toolchain:`.
         with:
@@ -54,6 +59,11 @@ jobs:
         with:
           persist-credentials: false
 
+      # GTK 4.14 and libadwaita 1.5 are the floor of docs/architecture.md §1.4;
+      # Ubuntu 24.04 ships exactly those.
+      - name: Install GTK development packages
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
+
       - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # master
         with:
           toolchain: ${{ matrix.toolchain }}
@@ -61,6 +71,11 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 
       - run: cargo test --all-features
+
+      # The headless commands must keep building without GTK (Cargo feature
+      # `gui` off), which is also what the fuzz crate links against.
+      - name: Headless build
+        run: cargo build --no-default-features
 
   audit:
     name: Dependency audit
@@ -81,6 +96,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # GTK 4.14 and libadwaita 1.5 are the floor of docs/architecture.md §1.4;
+      # Ubuntu 24.04 ships exactly those.
+      - name: Install GTK development packages
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
+
       - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # master
         with:
           toolchain: stable

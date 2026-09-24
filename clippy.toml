@@ -1,0 +1,16 @@
+# Clippy configuration. `cargo clippy -- -D warnings` in CI makes every entry
+# here a hard rule rather than a suggestion.
+
+# docs/architecture.md §5.2: GTK owns the main thread, so there is no Tokio
+# runtime in its thread-local context and a bare `tokio::spawn` would panic.
+disallowed-methods = [
+    { path = "tokio::spawn", reason = "use runtime::runtime().spawn() — GTK owns the main thread" },
+    { path = "tokio::task::spawn", reason = "use runtime::runtime().spawn() — GTK owns the main thread" },
+]
+
+# The no-panic rules (Cargo.toml [lints], and the stricter set on src/rules/)
+# protect production paths. Tests are expected to panic on failure.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-indexing-slicing-in-tests = true
