@@ -1,116 +1,114 @@
 # Tutorial: Quickstart
 
-!!! warning "This tutorial does not work yet"
-    USBGuardGUI has not been implemented. The steps below describe what the first release will do,
-    and exist so the design can be reviewed against a concrete user experience. Step 1 is the only
-    one you can run today, and only in the sense that the repository will clone and the scaffold
-    will build.
+This tutorial takes you from nothing installed to allowing your first USB device from the window.
+Follow it in order.
 
-This tutorial takes you from nothing installed to a working USBGuardGUI setup. It is a learning
-exercise: follow it in order, and do not substitute your own values until the end.
-
-**You will need:** a Linux desktop session, the USBGuard daemon installed, Rust 1.85 or newer, and
-about 10 minutes.
+**You will need:** a Linux desktop session, administrator rights (for `sudo` and the password
+prompts), a USB stick you can plug and unplug freely, and about 15 minutes.
 
 ---
 
 ## 1. Install
 
-From source, which is the only route until a release exists:
+No release has been published yet, so build from source.
+
+=== "Fedora / RHEL"
+
+    ```bash
+    sudo dnf install usbguard usbguard-dbus gtk4-devel libadwaita-devel gcc
+    ```
+
+=== "Debian / Ubuntu"
+
+    ```bash
+    sudo apt install usbguard libgtk-4-dev libadwaita-1-dev build-essential
+    ```
+
+=== "Arch"
+
+    ```bash
+    sudo pacman -S usbguard gtk4 libadwaita base-devel
+    ```
+
+Then, with a [Rust toolchain](https://rustup.rs/) (1.85 or newer):
 
 ```bash
 git clone https://github.com/onyks-os/USBGuardGUI.git
 cd USBGuardGUI
-make setup
-make build
+cargo build --release
 ```
 
-On Fedora, `make setup` expects these system packages:
+The program is `target/release/usbguard-gui`. To install it as a package instead, run
+`make package-deb` or `make package-rpm` and install the file from `dist/`.
+
+## 2. Start USBGuard safely
+
+!!! danger "An empty policy blocks your keyboard"
+    USBGuard started without a policy blocks **every** USB device, including your keyboard and
+    mouse. Always generate a policy that allows what is connected right now first.
+
+Debian and Ubuntu already did this, and started the services, when the package was installed. On
+Fedora and Arch:
 
 ```bash
-sudo dnf install gtk4-devel libadwaita-devel glib2-devel pkgconf-pkg-config gcc
+sudo sh -c 'umask 077; usbguard generate-policy > /etc/usbguard/rules.conf'
+sudo systemctl enable --now usbguard.service usbguard-dbus.service
 ```
 
-Verify the installation:
+The `umask 077` matters: the daemon refuses a rule file that other users can read.
+
+## 3. Check that you can reach the daemon
 
 ```bash
-usbguard-gui --version
+target/release/usbguard-gui --diagnose
 ```
 
-You should see the version number printed, followed by the USBGuard version detected on the system
-bus. If the second half is missing, the daemon or its bridge is not reachable — which is exactly
-what step 2 is for.
-
-## 2. Find out whether you are allowed to talk to the daemon
-
-```bash
-usbguard-gui --diagnose
-```
-
-**What just happened:** the program ran its probe sequence against the system D-Bus bus and reported
-one of nine states. This is the step most desktop tools skip, and it is why they are so often
-unusable: an unprivileged process asking a root daemon to change USB authorization passes through
-**three independent checkpoints**, each enforced by a different component, and each closed by
-default in a stock configuration.
-
-- **The D-Bus bus policy** decides which uids may send a message to `org.usbguard1` at all.
-- **Polkit** checks an action per method call, against your session.
-- **The daemon's own IPC access-control list** checks the process connected to its socket.
-
-A failure at any one of them looks the same from the outside — "permission denied" — but the remedy
-is different in each case. `--diagnose` tells you which one refused, and what to do about it. The
-most common answer on a fresh system is neither of those three: it is that `usbguard-dbus` is not
-installed, because no distribution installs it by default.
-
-Follow whatever remedy it prints before continuing.
-
-## 3. Open the window
-
-```bash
-usbguard-gui
-```
-
-You should see your USB devices with their current authorization state, updating live as you plug
-and unplug things.
-
-Expected output on the terminal:
+**What just happened:** the program checked, in order, that there is a system bus, that USBGuard's
+D-Bus bridge is installed and running, and that you are allowed to read from the daemon. The last
+line should be:
 
 ```text
-(nothing)
+Result: connected
 ```
 
-That is the intended result. The program logs at `warn` by default and has nothing to warn about.
-If you want to see what it is doing:
+If it is anything else, the lines below it name the cause and the command that fixes it. See
+[Read a diagnostic result](../how-to/diagnose.md) for what each state means.
+
+## 4. Open the window
 
 ```bash
-USBGUARD_GUI_LOG=debug usbguard-gui
+target/release/usbguard-gui
 ```
 
-!!! danger "Do not paste a debug log into a public bug report"
-    The `debug` level records device names, serial numbers, and hashes — an inventory of the
-    hardware you own. Default-level logs deliberately contain none of that, which is why they are
-    the ones to attach to an issue.
+You should see your USB devices, each with its state — *Allowed* or *Blocked* — shown by an icon
+**and** a word, never by colour alone.
 
-## 4. Clean Up
+## 5. Allow a device for this session
 
-Nothing to undo. The program created no system state: it wrote no file outside your own
-configuration, installed no Polkit rule, and changed nothing about your USB policy unless you
-explicitly asked it to.
+1. Plug in the USB stick. With the policy generated in step 2 it is new to USBGuard, so it appears
+   as **Blocked**, and a toast (or a notification, if the window is not in front) says so.
+2. In its row, click **Allow**, then **This session only**.
+3. Your system asks for the administrator password. Enter it.
+4. The row changes to **Allowed** — only now, when USBGuard reports the change, never before.
 
-To remove the settings it stored for itself:
+**What just happened:** the program asked the daemon to authorize that device, and *this session
+only* means the daemon keeps the decision in memory. When USBGuard restarts, the stick is blocked
+again. Choosing **Permanently** instead writes a rule to the policy.
+
+While the password prompt is open, the row shows a spinner and a **Cancel** button. Cancelling stops
+the program from waiting; if the daemon had already acted, the list shows what it actually did.
+
+## 6. Clean up
+
+Unplug the stick. Nothing else to undo: the session-only decision disappears on its own when
+USBGuard restarts, and the program created no system state — it installed no Polkit rule and wrote
+no file outside your own settings.
+
+To reset the settings the program stored for itself:
 
 ```bash
 gsettings reset-recursively io.github.onyks_os.UsbguardGui
 ```
-
-To remove the build:
-
-```bash
-make clean
-```
-
-If you *did* change your USB policy through the window and want it back the way it was, that is the
-daemon's state, not this program's — use `usbguard` to inspect and revert it.
 
 ---
 
@@ -118,4 +116,4 @@ daemon's state, not this program's — use `usbguard` to inspect and revert it.
 
 - [How-To Guides](../how-to/index.md) — solve a specific problem.
 - [Explanation: Architecture](../explanation/architecture.md) — understand the design.
-- [Reference](../reference/cli.md) — the exhaustive option list.
+- [Reference](../reference/cli.md) — every option and exit code.

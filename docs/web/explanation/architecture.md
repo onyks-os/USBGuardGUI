@@ -29,7 +29,7 @@ depends on all three. Nothing ever points back up.
 That constraint is not tidiness for its own sake. `model` and `rules` together hold the rule-language
 grammar and every domain type, and because neither can reach a D-Bus connection or a widget, both
 are testable in a process with no bus and no display. That is what makes the majority of the test
-suite runnable in ordinary CI, which in turn is what makes fuzzing the parser on every push
+suite runnable in ordinary CI, which in turn is what makes fuzzing the parser on every pull request
 affordable.
 
 The two arrows between `ui` and `dbus` do not share memory. They are a channel, and what crosses it
@@ -40,12 +40,11 @@ is immutable values.
 Five constraints shaped everything else. Each one rules something out.
 
 **The program holds no privilege, ever.** No setuid bit, no file capabilities, no helper daemon, and
-no read or write of any path under `/etc`, `/var`, or `/sys`. Every privileged effect is produced by
+no read or write by the program's own code of any path under `/etc`, `/var`, or `/sys` (the system
+libraries it uses, such as GTK, still read their own configuration). Every privileged effect is produced by
 the USBGuard daemon on its own authority. This rules out the obvious conveniences: the program
 cannot edit `usbguard-daemon.conf`, cannot install a Polkit rule, and cannot fix a misconfigured IPC
 access-control file. It diagnoses each of those and prints the command an administrator would run.
-The restriction is checkable rather than merely claimed — `strace` filtered on those three prefixes
-must report zero accesses.
 
 **Two event loops, no shared state.** GTK's main loop is single-threaded and owns every widget;
 async D-Bus work needs a real executor. Rather than pretend one can host the other, the program runs
@@ -96,6 +95,14 @@ security tool the less destructive default is the one whose effect disappears on
 request goes to the daemon and passes three checkpoints outside this program's control. Nothing in
 the view changes until the daemon says so.
 
+**What was verified, not assumed.** Before any code depended on it, the D-Bus contract was checked
+against a running USBGuard 1.1.4, and three documented assumptions turned out wrong: `listRules`
+takes a label filter rather than a query; the bridge emits an undocumented `DevicePolicyApplied`
+signal; and only Fedora packages the bridge separately. The first manual test also found that the
+bridge asks for a password only when a call carries D-Bus's `ALLOW_INTERACTIVE_AUTHORIZATION` flag.
+The full record is in
+[§13.4 of the architecture document](https://github.com/onyks-os/USBGuardGUI/blob/main/docs/architecture.md).
+
 **Removing a rule.** This is the subtle one. USBGuard rule IDs are positional: they shift whenever
 the ruleset changes, so an ID captured a second ago may now name a different rule. The program
 therefore holds rules by their canonical text, re-reads the ruleset immediately before removing, and
@@ -108,8 +115,8 @@ make to USBGuard.
 **When the bridge goes away.** The supervisor detects the disconnection, reports it within two
 seconds, and reconnects with backoff. On reconnection it invalidates the caches and re-reads rather
 than trusting what it held, because the world may have moved while it was not looking. An operation
-that was in flight is reported *inconclusive* — not failed, not succeeded — and the state is
-re-read, because a retry would act on an assumption the program has just been told is unreliable.
+that was in flight fails with the connection's error and is never retried automatically, because a
+retry would act on an assumption the program has just been told is unreliable.
 
 ## 4. Trust Boundaries
 
@@ -141,5 +148,6 @@ it is not a promise that any given call will succeed.
 **Sideways — the session bus is not a trust boundary at all.** Any process running as the user can
 impersonate the notification server or the `StatusNotifierWatcher`. That is true of every desktop
 application, and defending it is out of reach here. What is in reach is bounding the consequence:
-no notification reply is trusted to identify a device on its own — tokens are re-resolved against
-live state — and every privileged effect still passes Polkit regardless of what asked for it.
+no notification reply is trusted to identify a device on its own — before acting, the program checks
+that the device holding that number is still the one announced — and every privileged effect still
+passes Polkit regardless of what asked for it.

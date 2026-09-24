@@ -1,8 +1,8 @@
-site_name: USBGuardGUI - USBGuard GUI
+site_name: USBGuard GUI
 site_url: https://onyks-os.github.io/usbguard-gui/
 # Quoted: the default description is "TODO: describe <project>", and an unquoted
 # YAML value containing ": " is a syntax error, not a string.
-site_description: "Unprivileged GTK4 desktop client for managing USB device authorization policy through the USBGuard daemon."
+site_description: "A desktop interface for USBGuard: see which USB devices are connected, allow or block them, and edit the policy — without root."
 site_author: onyks-os
 site_dir: ../onyks-os.github.io/usbguard-gui
 docs_dir: docs/web
@@ -13,6 +13,8 @@ copyright: Copyright &copy; 2026 onyks-os — MIT
 theme:
   name: material
   language: en
+  logo: assets/icon.svg
+  favicon: assets/icon.svg
   font:
     text: Inter
     code: JetBrains Mono
@@ -83,6 +85,13 @@ nav:
       - Quickstart: tutorials/quickstart.md
   - How-To Guides:
       - Overview: how-to/index.md
+      - Install the D-Bus bridge: how-to/install-bridge.md
+      - Read a diagnostic result: how-to/diagnose.md
+      - Allow or block a device: how-to/device-actions.md
+      - Add and remove rules: how-to/rules.md
+      - Change policy with your own password: how-to/polkit-rule.md
+      - Background mode and notifications: how-to/background.md
+      - Report a bug: how-to/bug-report.md
   - Explanation:
       - Architecture: explanation/architecture.md
   - Reference:

@@ -4,9 +4,6 @@ Exhaustive, non-narrative reference for every command and option. This page mirr
 [`docs/interfaces.md`](https://github.com/onyks-os/USBGuardGUI/blob/main/docs/interfaces.md);
 both must be updated together.
 
-!!! warning "Specified, not implemented"
-    Nothing on this page can be run yet.
-
 ---
 
 ## Commands
@@ -76,7 +73,7 @@ usbguard-gui --diagnose || echo "not usable yet, exit code $?"
 
 | Variable | Default | Description |
 | :------- | :------ | :---------- |
-| `USBGUARD_GUI_LOG` | `warn` | `tracing` `EnvFilter` directive. Levels above `debug` record device names, serial numbers, and hashes; default-level output never does. |
+| `USBGUARD_GUI_LOG` | `warn` | `tracing` `EnvFilter` directive. The `debug` and `trace` levels record device names, serial numbers, and hashes; `info` and above never do. |
 
 ---
 

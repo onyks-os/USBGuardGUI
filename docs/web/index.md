@@ -1,24 +1,24 @@
-# USBGuard GUI (USBGuardGUI)
+# USBGuard GUI
 
-Unprivileged GTK4 desktop client for managing USB device authorization policy through the USBGuard daemon.
+A desktop interface for [USBGuard](https://usbguard.github.io/): see which USB devices are
+connected, **allow or block them**, and edit the policy — without root.
 
 [Quickstart Guide](tutorials/quickstart.md){ .md-button .md-button--primary }
-[Architecture](explanation/architecture.md){ .md-button }
+[How-To Guides](how-to/index.md){ .md-button }
 [GitHub Repository](https://github.com/onyks-os/USBGuardGUI){ .md-button }
 
 ---
 
-!!! warning "Not yet implemented"
-    USBGuardGUI is specified but not written. There is no release, no binary, and nothing to
-    install. This site documents the design so that it can be reviewed before it is built — read it
-    as a plan, not as a manual. Progress is tracked in
-    [ROADMAP.md](https://github.com/onyks-os/USBGuardGUI/blob/main/ROADMAP.md).
+!!! note "USBGuardGUI is a front end"
+    The protection comes from the **USBGuard daemon**, which decides what the kernel lets through.
+    This program asks it — with your authorization — to change its mind. Without USBGuard installed
+    and running there is nothing for it to protect you with.
 
-!!! info "It needs a package your distribution does not install by default"
-    USBGuard's D-Bus bridge (`usbguard-dbus`) ships as a **separate package** on Fedora, Debian,
-    Ubuntu, and Arch alike. Without it this program cannot reach the daemon at all. That is expected
-    to be the single most common first-run outcome, which is why it is a named diagnostic state with
-    a per-distribution install command rather than a generic error.
+!!! info "It needs USBGuard's D-Bus bridge"
+    The program reaches USBGuard only through its D-Bus bridge, `usbguard-dbus`. Debian, Ubuntu,
+    and Arch ship it inside the `usbguard` package; **Fedora and RHEL ship it separately** as
+    `usbguard-dbus`. If it is missing, `usbguard-gui --diagnose` says so and prints the install
+    command for your distribution.
 
 ---
 
@@ -26,37 +26,49 @@ Unprivileged GTK4 desktop client for managing USB device authorization policy th
 
 <div class="grid cards" markdown>
 
-- **Unprivileged by construction**
+- **No privileges of its own**
 
     ---
 
-    No setuid bit, no helper daemon, and no read or write of any file under `/etc`, `/var`, or
-    `/sys`. Every privileged effect is produced by the USBGuard daemon on its own authority, after
-    the system's own authorization layers have approved the request.
+    No setuid bit, no helper daemon, no privileged code path. Every change is made by the USBGuard
+    daemon on its own authority, after Polkit has asked you for a password.
 
-- **Failure is diagnosed, not reported**
-
-    ---
-
-    A probe sequence distinguishes nine distinct reasons the daemon can be unreachable — missing
-    package, stopped service, denied by bus policy, denied by Polkit, denied by the IPC ACL, no
-    Polkit agent — and names the specific remedy for each. Available headless as `--diagnose`.
-
-- **Rule identity that survives concurrency**
+- **Failures are diagnosed, not reported**
 
     ---
 
-    USBGuard rule IDs are positional and shift whenever the ruleset changes. Rules are held by
-    canonical text and re-read immediately before use, so a rule deleted from another terminal
-    reports an error instead of causing a different rule to be removed.
+    Eight distinct failure states — bridge missing, bridge stopped, refused by the bus policy, by
+    Polkit, by USBGuard's own access control, no Polkit agent, and more — each with its specific
+    remedy. Available headless as `usbguard-gui --diagnose`.
 
-- **Live device view that absorbs bursts**
+- **Safe by default**
 
     ---
 
-    Device state updates from daemon signals rather than polling. Insertion bursts are coalesced
-    within a bounded latency window, so a 40-port hub plugged in at once does not freeze the
-    interface or lose an event.
+    Every device action asks: *this session only*, or *permanently*? The preselection is the one
+    whose effect disappears when USBGuard restarts. Rejecting a device asks for confirmation.
+
+- **Rules removed by identity, not by number**
+
+    ---
+
+    USBGuard rule numbers shift whenever the ruleset changes. Rules are held by their text and
+    re-resolved just before removal, so a rule deleted from another terminal is reported as gone
+    instead of a different rule being removed.
+
+- **Announces new devices**
+
+    ---
+
+    A notification when a device that is not authorized is plugged in, with an *Allow for this
+    session* button — also while the window is closed, if you choose.
+
+- **Hostile device names are just text**
+
+    ---
+
+    Device names come from the device itself. The rule parser treats them as untrusted bytes, is
+    fuzzed, and escapes them on the way back, so a crafted name cannot become rule syntax.
 
 </div>
 
@@ -77,8 +89,9 @@ This site follows the [Diátaxis](https://diataxis.fr/) framework:
 
 ## Project Status
 
-**Pre-implementation.** No version has been released; the working version number is `0.1.0`. See
-the [changelog](release-notes/changelog.md) and the
+The program is implemented and tested, and **no version has been released yet**; the first will be
+`0.1.0`. Until then, build it [from source](tutorials/quickstart.md#1-install). See the
+[changelog](release-notes/changelog.md) and the
 [roadmap](https://github.com/onyks-os/USBGuardGUI/blob/main/ROADMAP.md).
 
 Security policy and vulnerability reporting:
