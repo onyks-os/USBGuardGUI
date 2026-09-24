@@ -66,3 +66,7 @@ jobs:
             dist/*
           generate_release_notes: true
           fail_on_unmatched_files: true
+          # A tag with a suffix (v0.1.0-rc.1) is a pre-release: GitHub never
+          # marks it "latest", so the README's download links stay on the last
+          # real release.
+          prerelease: ${{ contains(github.ref_name, '-') }}
