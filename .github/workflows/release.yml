@@ -23,8 +23,9 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Install GTK development packages
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
+      # gettext: msgfmt compiles the translations the packages install.
+      - name: Install GTK development packages and gettext
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext
 
       - name: Set up the Rust toolchain
         uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
@@ -55,9 +56,10 @@ jobs:
       - name: Sign artifacts with Sigstore
         uses: sigstore/gh-action-sigstore-python@790bc6befb9d733738f18d8f895854b453640ec9 # v3.5.0
         with:
-          inputs: |
-            dist/*
-            !dist/*.sigstore
+          # Every line is expanded as a glob and must match at least one file:
+          # a "!pattern" is not an exclusion but a literal path, and fails the
+          # step. No .sigstore bundle exists yet at this point anyway.
+          inputs: dist/*
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
