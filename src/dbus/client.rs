@@ -41,7 +41,7 @@ impl Client {
     ///
     /// [`AppError::Unreachable`] when there is no system bus.
     pub async fn connect_system() -> Result<Self, AppError> {
-        let connection = Connection::system().await.map_err(|e| app_error(&e))?;
+        let connection = super::bus::connect().await.map_err(|e| app_error(&e))?;
         Self::new(&connection).await
     }
 

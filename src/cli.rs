@@ -106,7 +106,7 @@ pub fn run(command: Command) -> ExitCode {
         }
         Command::Version => {
             let api = runtime().block_on(async {
-                let conn = zbus::Connection::system().await.ok()?;
+                let conn = crate::dbus::bus::connect().await.ok()?;
                 diagnostics::api_level(&conn).await
             });
             println!("usbguard-gui {}", crate::VERSION);

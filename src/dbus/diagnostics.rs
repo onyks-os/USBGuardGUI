@@ -71,7 +71,7 @@ impl ProbeReport {
 /// Runs the probe sequence against the system bus.
 pub async fn probe() -> ProbeReport {
     // Probe 1.
-    let Ok(connection) = Connection::system().await else {
+    let Ok(connection) = super::bus::connect().await else {
         return ProbeReport::new(AccessState::BusUnavailable);
     };
     probe_on(&connection).await
