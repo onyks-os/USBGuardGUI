@@ -38,6 +38,8 @@ assets = [
     ["data/icons/hicolor/symbolic/apps/io.github.onyks_os.UsbguardGui-symbolic.svg", "usr/share/icons/hicolor/symbolic/apps/", "644"],
     ["packaging/70-usbguard-gui.rules.example", "usr/share/doc/usbguard-gui/", "644"],
     ["README.md", "usr/share/doc/usbguard-gui/", "644"],
+    # Translations, compiled by `make i18n`. One line per language in po/LINGUAS.
+    ["target/locale/it/LC_MESSAGES/usbguard-gui.mo", "usr/share/locale/it/LC_MESSAGES/", "644"],
 ]
 
 [package.metadata.generate-rpm]
@@ -51,6 +53,8 @@ assets = [
     { source = "data/icons/hicolor/symbolic/apps/io.github.onyks_os.UsbguardGui-symbolic.svg", dest = "/usr/share/icons/hicolor/symbolic/apps/io.github.onyks_os.UsbguardGui-symbolic.svg", mode = "644" },
     { source = "packaging/70-usbguard-gui.rules.example", dest = "/usr/share/doc/usbguard-gui/70-usbguard-gui.rules.example", mode = "644", doc = true },
     { source = "README.md", dest = "/usr/share/doc/usbguard-gui/README.md", mode = "644", doc = true },
+    # Translations, compiled by `make i18n`. One line per language in po/LINGUAS.
+    { source = "target/locale/it/LC_MESSAGES/usbguard-gui.mo", dest = "/usr/share/locale/it/LC_MESSAGES/usbguard-gui.mo", mode = "644" },
 ]
 
 # Fedora ships the bridge as its own package.
@@ -69,10 +73,11 @@ adw = { version = "0.8", package = "libadwaita", features = ["v1_5"], optional =
 # with `cargo add` at the start of the ROADMAP phase that first needs them, so
 # the committed Cargo.lock only pins versions the project builds against.
 #
-# Still to come: gettext-rs (ROADMAP "Later"). notify-rust is not needed:
+# notify-rust is not needed:
 # GIO notifications cover both the session bus and the Flatpak portal.
 async-channel = "2.5.0"
 futures-util = "0.3.34"
+gettextrs = { version = "0.8.0", package = "gettext-rs", default-features = false, features = ["gettext-system"], optional = true }
 gtk = { version = "0.10", package = "gtk4", features = ["v4_14"], optional = true }
 ksni = { version = "0.3", default-features = false, features = ["tokio"], optional = true }
 thiserror = "2"
@@ -88,7 +93,7 @@ zbus = { version = "5.13.2", default-features = false, features = ["tokio"] }
 # headless commands (--diagnose, --list-devices, …), which is what CI jobs
 # without GTK development packages build.
 default = ["gui"]
-gui = ["dep:gtk", "dep:adw", "dep:ksni"]
+gui = ["dep:gtk", "dep:adw", "dep:ksni", "dep:gettextrs"]
 
 [dev-dependencies]
 proptest = "1"

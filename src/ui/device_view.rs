@@ -14,7 +14,10 @@ use std::rc::Rc;
 use adw::prelude::*;
 use gtk::{gio, glib};
 
+use gettextrs::gettext;
+
 use super::config::Config;
+use super::i18n::fill;
 use crate::device_store::matches_filter;
 use crate::model::{Device, DeviceId, DevicePolicy, PendingKind, Persistence, Target};
 
@@ -35,20 +38,24 @@ pub(super) type DeviceHandler = Rc<dyn Fn(DeviceAction)>;
 pub(super) type ModifyBlock = Rc<RefCell<Option<String>>>;
 
 /// Icon and text for a state: never colour alone (§9.7).
-const fn state_presentation(target: Target) -> (&'static str, &'static str) {
+fn state_presentation(target: Target) -> (&'static str, String) {
     match target {
-        Target::Allow => ("emblem-ok-symbolic", "Allowed"),
-        Target::Block => ("action-unavailable-symbolic", "Blocked"),
-        Target::Reject => ("process-stop-symbolic", "Rejected"),
-        Target::Other(_) => ("dialog-question-symbolic", "Unknown"),
+        // Translators: the authorization state of a USB device.
+        Target::Allow => ("emblem-ok-symbolic", gettext("Allowed")),
+        // Translators: the authorization state of a USB device.
+        Target::Block => ("action-unavailable-symbolic", gettext("Blocked")),
+        // Translators: the authorization state of a USB device.
+        Target::Reject => ("process-stop-symbolic", gettext("Rejected")),
+        // Translators: the authorization state of a USB device.
+        Target::Other(_) => ("dialog-question-symbolic", gettext("Unknown")),
     }
 }
 
-const fn pending_text(kind: PendingKind) -> &'static str {
+fn pending_text(kind: PendingKind) -> String {
     match kind {
-        PendingKind::Started => "Working…",
-        PendingKind::WaitingForAuthentication => "Waiting for authentication",
-        PendingKind::PossiblyNoAgent => "Still waiting — is a Polkit agent running?",
+        PendingKind::Started => gettext("Working…"),
+        PendingKind::WaitingForAuthentication => gettext("Waiting for authentication"),
+        PendingKind::PossiblyNoAgent => gettext("Still waiting — is a Polkit agent running?"),
     }
 }
 
@@ -77,8 +84,8 @@ impl DeviceView {
 
         let query: Rc<RefCell<String>> = Rc::default();
         let blocked_only = gtk::ToggleButton::builder()
-            .label("Blocked only")
-            .tooltip_text("Show only devices that are not authorized")
+            .label(gettext("Blocked only"))
+            .tooltip_text(gettext("Show only devices that are not authorized"))
             .build();
         if let Some(settings) = config.settings() {
             settings
@@ -101,7 +108,7 @@ impl DeviceView {
         let filtered = gtk::FilterListModel::new(Some(store.clone()), Some(filter.clone()));
 
         let search = gtk::SearchEntry::builder()
-            .placeholder_text("Filter by name, ID, or serial")
+            .placeholder_text(gettext("Filter by name, ID, or serial"))
             .hexpand(true)
             .build();
         search.connect_search_changed({
@@ -124,7 +131,7 @@ impl DeviceView {
         columns.add_css_class("data-table");
         columns.append_column(&state_column());
         for (title, expand, text) in text_columns() {
-            columns.append_column(&text_column(title, expand, text));
+            columns.append_column(&text_column(&title, expand, text));
         }
         columns.append_column(&actions_column(config.clone(), handler, block));
 
@@ -152,15 +159,15 @@ impl DeviceView {
         content.add_named(
             &adw::StatusPage::builder()
                 .icon_name("content-loading-symbolic")
-                .title("Connecting to USBGuard…")
+                .title(gettext("Connecting to USBGuard…"))
                 .build(),
             Some("loading"),
         );
         content.add_named(
             &adw::StatusPage::builder()
                 .icon_name("drive-removable-media-symbolic")
-                .title("No USB devices")
-                .description("USBGuard reports no connected devices.")
+                .title(gettext("No USB devices"))
+                .description(gettext("USBGuard reports no connected devices."))
                 .build(),
             Some("empty"),
         );
@@ -210,30 +217,41 @@ type TextOf = fn(&Device) -> String;
 /// Name, ID, serial, port. The daemon's device id is in the tooltip only:
 /// next to `vendor:product` it would read as a second identifier of the same
 /// kind, which it is not (§2.4.1).
-fn text_columns() -> [(&'static str, bool, TextOf); 4] {
+fn text_columns() -> [(String, bool, TextOf); 4] {
     [
-        ("Name", true, |d| {
+        (gettext("Name"), true, |d| {
             if d.parse_error.is_some() {
-                format!("(unreadable) {}", d.rule_text)
+                fill(&gettext("(unreadable) {rule}"), &[("rule", &d.rule_text)])
             } else {
                 dash(d.attrs.name.as_deref())
             }
         }),
-        ("ID", false, |d| {
+        (gettext("ID"), false, |d| {
             d.attrs
                 .usb_id
                 .map_or_else(|| "—".to_owned(), |id| id.to_string())
         }),
-        ("Serial", false, |d| dash(d.attrs.serial.as_deref())),
-        ("Port", false, |d| dash(d.attrs.via_port.as_deref())),
+        (gettext("Serial"), false, |d| {
+            dash(d.attrs.serial.as_deref())
+        }),
+        (gettext("Port"), false, |d| {
+            dash(d.attrs.via_port.as_deref())
+        }),
     ]
 }
 
 fn tooltip(device: &Device) -> String {
-    let mut text = format!("Daemon device id: {}\n{}", device.id, device.rule_text);
+    let mut text = fill(
+        &gettext("Daemon device id: {id}"),
+        &[("id", &device.id.to_string())],
+    );
+    text.push('\n');
+    text.push_str(&device.rule_text);
     if let Some(err) = device.parse_error {
-        text.push_str("\n\nCould not be parsed: ");
-        text.push_str(&err.to_string());
+        text.push_str("\n\n");
+        text.push_str(&gettext("Could not be parsed:"));
+        text.push(' ');
+        text.push_str(&super::i18n::parse_error(err.kind));
     }
     text
 }
@@ -302,10 +320,10 @@ fn state_column() -> gtk::ColumnViewColumn {
             image.set_icon_name(Some(icon));
         }
         if let Some(label) = cell.last_child().and_downcast::<gtk::Label>() {
-            label.set_text(text);
+            label.set_text(&text);
         }
     });
-    gtk::ColumnViewColumn::new(Some("State"), Some(factory))
+    gtk::ColumnViewColumn::new(Some(&gettext("State")), Some(factory))
 }
 
 fn actions_column(
@@ -334,11 +352,11 @@ fn actions_column(
                 .ellipsize(gtk::pango::EllipsizeMode::End)
                 .build();
             let cancel = gtk::Button::builder()
-                .label("Cancel")
-                .tooltip_text(
+                .label(gettext("Cancel"))
+                .tooltip_text(gettext(
                     "Stop waiting. The daemon may already have acted; the list will show \
                      what it actually did.",
-                )
+                ))
                 .build();
             cancel.connect_clicked({
                 let (item, handler) = (item.downgrade(), handler.clone());
@@ -377,7 +395,7 @@ fn actions_column(
                 .and_then(|spinner| spinner.next_sibling())
                 .and_downcast::<gtk::Label>();
             if let Some(label) = label {
-                label.set_text(pending_text(kind));
+                label.set_text(&pending_text(kind));
             }
             stack.set_visible_child_name("pending");
         } else {
@@ -390,7 +408,7 @@ fn actions_column(
         }
     });
 
-    gtk::ColumnViewColumn::new(Some("Actions"), Some(factory))
+    gtk::ColumnViewColumn::new(Some(&gettext("Actions")), Some(factory))
 }
 
 /// One of Allow / Block / Reject, with its persistence popover.
@@ -401,14 +419,14 @@ fn action_button(
     handler: &DeviceHandler,
 ) -> gtk::MenuButton {
     let (label, verb) = match policy {
-        DevicePolicy::Allow => ("Allow", "Allow this device"),
-        DevicePolicy::Block => ("Block", "Block this device"),
-        DevicePolicy::Reject => ("Reject", "Reject this device"),
+        DevicePolicy::Allow => (gettext("Allow"), gettext("Allow this device")),
+        DevicePolicy::Block => (gettext("Block"), gettext("Block this device")),
+        DevicePolicy::Reject => (gettext("Reject"), gettext("Reject this device")),
     };
-    let session = gtk::Button::with_label("This session only");
-    session.set_tooltip_text(Some("Undone when USBGuard restarts"));
-    let permanent = gtk::Button::with_label("Permanently");
-    permanent.set_tooltip_text(Some("Written to the policy; survives a restart"));
+    let session = gtk::Button::with_label(&gettext("This session only"));
+    session.set_tooltip_text(Some(&gettext("Undone when USBGuard restarts")));
+    let permanent = gtk::Button::with_label(&gettext("Permanently"));
+    permanent.set_tooltip_text(Some(&gettext("Written to the policy; survives a restart")));
 
     let content = gtk::Box::builder()
         .orientation(gtk::Orientation::Vertical)
@@ -416,7 +434,7 @@ fn action_button(
         .build();
     content.append(
         &gtk::Label::builder()
-            .label(verb)
+            .label(&verb)
             .css_classes(["heading"])
             .build(),
     );
@@ -454,7 +472,7 @@ fn action_button(
     }
 
     gtk::MenuButton::builder()
-        .label(label)
+        .label(&label)
         .popover(&popover)
         .always_show_arrow(false)
         .build()

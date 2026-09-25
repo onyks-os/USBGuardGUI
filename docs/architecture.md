@@ -1549,6 +1549,10 @@ but is a real cost in build time and binary size, and if it grows, implementing
 - All user-visible strings pass through `gettext`, with translator comments on
   anything ambiguous out of context. Rule-language keywords are **not**
   translated: they are syntax.
+- **As implemented** (`src/ui/i18n.rs`, `po/`, `docs/translating.md`): the
+  command-line output stays in English, because it is pasted into bug reports.
+  `model` and `rules` return structured errors and the interface words them, so
+  no translation dependency reaches below `ui`.
 
 ---
 

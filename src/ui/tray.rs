@@ -14,7 +14,10 @@ use ksni::menu::StandardItem;
 use ksni::{Handle, MenuItem, ToolTip, Tray, TrayMethods};
 
 use super::APP_ID;
+use super::APP_NAME;
+use super::i18n::fill;
 use crate::runtime::runtime;
+use gettextrs::gettext;
 
 /// What the tray asks the GTK side to do.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -37,7 +40,7 @@ impl Tray for UsbguardTray {
     }
 
     fn title(&self) -> String {
-        "USBGuard".to_owned()
+        APP_NAME.to_owned()
     }
 
     fn icon_name(&self) -> String {
@@ -46,10 +49,13 @@ impl Tray for UsbguardTray {
 
     fn tool_tip(&self) -> ToolTip {
         ToolTip {
-            title: "USBGuard".to_owned(),
-            description: format!(
-                "{} USB devices, {} not authorized",
-                self.total, self.blocked
+            title: APP_NAME.to_owned(),
+            description: fill(
+                &gettext("{total} USB devices, {blocked} not authorized"),
+                &[
+                    ("total", &self.total.to_string()),
+                    ("blocked", &self.blocked.to_string()),
+                ],
             ),
             ..ToolTip::default()
         }
@@ -62,7 +68,7 @@ impl Tray for UsbguardTray {
     fn menu(&self) -> Vec<MenuItem<Self>> {
         vec![
             StandardItem {
-                label: "Show USBGuard".to_owned(),
+                label: fill(&gettext("Show {app}"), &[("app", APP_NAME)]),
                 activate: Box::new(|t: &mut Self| {
                     let _ = t.commands.try_send(TrayCommand::Show);
                 }),
@@ -71,7 +77,7 @@ impl Tray for UsbguardTray {
             .into(),
             MenuItem::Separator,
             StandardItem {
-                label: "Quit".to_owned(),
+                label: gettext("Quit"),
                 icon_name: "application-exit".to_owned(),
                 activate: Box::new(|t: &mut Self| {
                     let _ = t.commands.try_send(TrayCommand::Quit);

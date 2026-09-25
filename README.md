@@ -279,6 +279,8 @@ Contributions are welcome. The areas where help matters most:
    systems other than the ones already checked.
 2. **GTK 4 / libadwaita** — accessibility, keyboard navigation, and adaptive layouts.
 3. **Packaging** — Flathub submission, and distribution packages.
+4. **Translations** — the interface is in English and Italian; [docs/translating.md](docs/translating.md)
+   explains how to add a language, no Rust needed.
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md). Every commit needs a DCO `Signed-off-by` line.
 

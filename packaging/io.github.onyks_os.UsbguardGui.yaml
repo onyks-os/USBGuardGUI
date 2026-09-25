@@ -38,10 +38,13 @@ modules:
     build-options:
       env:
         CARGO_NET_OFFLINE: 'true'
+        # Catalogues live under /app in the sandbox (src/ui/i18n.rs).
+        USBGUARD_GUI_LOCALEDIR: /app/share/locale
     build-commands:
       - cargo --offline fetch --manifest-path Cargo.toml
       - cargo --offline build --release
       - install -Dm755 target/release/usbguard-gui /app/bin/usbguard-gui
+      - for lang in $(grep -v '^#' po/LINGUAS); do install -d /app/share/locale/$lang/LC_MESSAGES && msgfmt -o /app/share/locale/$lang/LC_MESSAGES/usbguard-gui.mo po/$lang.po; done
       - install -Dm644 data/io.github.onyks_os.UsbguardGui.desktop /app/share/applications/io.github.onyks_os.UsbguardGui.desktop
       - install -Dm644 data/io.github.onyks_os.UsbguardGui.metainfo.xml /app/share/metainfo/io.github.onyks_os.UsbguardGui.metainfo.xml
       - install -Dm644 data/io.github.onyks_os.UsbguardGui.gschema.xml /app/share/glib-2.0/schemas/io.github.onyks_os.UsbguardGui.gschema.xml

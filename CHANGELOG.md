@@ -33,6 +33,10 @@ Nothing is released yet. See
 - Notifications for newly inserted, unauthorized devices, with an "Allow for this session" quick
   action that re-checks the device's identity before acting; background mode; a status icon
   (`ksni`) where the desktop supports one; "Start at login".
+- Italian translation, and the gettext pipeline for more (`po/`, `make i18n`, `docs/translating.md`).
+  The command-line output stays in English for bug reports.
+- `cargo run --example demo-bridge`: a stand-in for USBGuard with invented devices, for screenshots
+  and development; development builds reach it with `USBGUARD_GUI_BUS=session`.
 - Packages: `.deb` and `.rpm` (`make package-deb`, `make package-rpm`), an Arch `PKGBUILD`, and a
   Flatpak manifest. No post-install scripts.
 - Read-only GTK 4 / libadwaita window: device list with filter, policy list in evaluation order,

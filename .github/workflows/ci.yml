@@ -45,6 +45,11 @@ jobs:
       - name: Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
+      # Translations compile, and the translated desktop and metainfo files
+      # committed in data/ match po/.
+      - name: Translations
+        run: sudo apt-get install -y --no-install-recommends gettext && make i18n-check
+
   test:
     name: Tests (${{ matrix.toolchain }})
     needs: lint

@@ -22,9 +22,12 @@ use crate::dbus::diagnostics::{self, ApiLevel};
 use crate::model::{
     AttributeName, ParseError, Persistence, Rule, RuleHandle, RuleTarget, SetOperator,
 };
-use crate::rules::builder::{FieldInput, build_rule, value_hint};
+use crate::rules::builder::{FieldInput, build_rule};
 use crate::rules::{parse_rule, render_checked};
 use crate::runtime::runtime;
+use gettextrs::gettext;
+
+use super::i18n::{self, fill, value_hint};
 
 /// What the user asked to add.
 #[derive(Debug, Clone)]
@@ -37,8 +40,8 @@ pub(super) struct NewRule {
 
 const TARGETS: [RuleTarget; 3] = [RuleTarget::Allow, RuleTarget::Block, RuleTarget::Reject];
 /// The operator dropdown: index 0 is "no operator".
-const OPERATOR_LABELS: [&str; 7] = [
-    "(single value)",
+/// The operators themselves are rule keywords and are never translated.
+const OPERATOR_LABELS: [&str; 6] = [
     "all-of",
     "one-of",
     "none-of",
@@ -148,7 +151,7 @@ pub(super) fn present(
 
     let add_field = gtk::Button::builder()
         .icon_name("list-add-symbolic")
-        .tooltip_text("Add an attribute")
+        .tooltip_text(gettext("Add an attribute"))
         .css_classes(["flat"])
         .build();
     add_field.connect_clicked({
@@ -160,7 +163,7 @@ pub(super) fn present(
     // The persistence switch exists only where appendRule has `temporary`.
     let (tx, rx) = async_channel::bounded(1);
     runtime().spawn(async move {
-        let level = match zbus::Connection::system().await {
+        let level = match crate::dbus::bus::connect().await {
             Ok(connection) => diagnostics::api_level(&connection).await,
             Err(_) => None,
         };
@@ -181,9 +184,9 @@ pub(super) fn present(
 }
 
 fn build(rules: Vec<RuleHandle>, default_persistence: Persistence) -> Form {
-    let cancel = gtk::Button::with_label("Cancel");
+    let cancel = gtk::Button::with_label(&gettext("Cancel"));
     let add = gtk::Button::builder()
-        .label("Add")
+        .label(gettext("Add"))
         .css_classes(["suggested-action"])
         .sensitive(false)
         .build();
@@ -196,7 +199,7 @@ fn build(rules: Vec<RuleHandle>, default_persistence: Persistence) -> Form {
 
     // Guided mode.
     let target = adw::ComboRow::builder()
-        .title("Target")
+        .title(gettext("Target"))
         .model(&gtk::StringList::new(&["allow", "block", "reject"]))
         .build();
     let target_group = adw::PreferencesGroup::new();
@@ -206,10 +209,10 @@ fn build(rules: Vec<RuleHandle>, default_persistence: Persistence) -> Form {
         .css_classes(["boxed-list"])
         .build();
     let fields_group = adw::PreferencesGroup::builder()
-        .title("Attributes")
-        .description(
+        .title(gettext("Attributes"))
+        .description(gettext(
             "A device matches when every attribute matches. No attribute matches every device.",
-        )
+        ))
         .build();
     fields_group.add(&fields_box);
     let guided = gtk::Box::new(gtk::Orientation::Vertical, 18);
@@ -222,16 +225,19 @@ fn build(rules: Vec<RuleHandle>, default_persistence: Persistence) -> Form {
         .css_classes(["monospace"])
         .build();
     let text_group = adw::PreferencesGroup::builder()
-        .title("Rule text")
-        .description(
+        .title(gettext("Rule text"))
+        // Translators: allow, block, and reject are rule keywords: do not translate them.
+        .description(gettext(
             "The usbguard-rules.conf(5) syntax. The target must be allow, block, or reject.",
-        )
+        ))
         .build();
     text_group.add(&text);
 
     let mode = gtk::Stack::builder().vhomogeneous(false).build();
-    mode.add_titled(&guided, Some("guided"), "Guided");
-    mode.add_titled(&text_group, Some("text"), "Text");
+    // Translators: the rule dialog mode that builds a rule field by field.
+    mode.add_titled(&guided, Some("guided"), &gettext("Guided"));
+    // Translators: the rule dialog mode where the rule is typed as text.
+    mode.add_titled(&text_group, Some("text"), &gettext("Text"));
     let switcher = gtk::StackSwitcher::builder()
         .stack(&mode)
         .halign(gtk::Align::Center)
@@ -263,31 +269,39 @@ fn build(rules: Vec<RuleHandle>, default_persistence: Persistence) -> Form {
     preview_box.append(&message);
     let preview_frame = gtk::Frame::builder().child(&preview_box).build();
     let preview_group = adw::PreferencesGroup::builder()
-        .title("Will be sent as")
+        .title(gettext("Will be sent as"))
         .build();
     preview_group.add(&preview_frame);
 
     // Placement.
-    let mut positions: Vec<String> = vec!["At the end".to_owned()];
+    let mut positions: Vec<String> = vec![gettext("At the end")];
     positions.extend(rules.iter().map(|r| {
         let mut short: String = r.text.chars().take(48).collect();
         if r.text.chars().count() > 48 {
             short.push('…');
         }
-        format!("After {}. {short}", r.position + 1)
+        fill(
+            &gettext("After {position}. {rule}"),
+            &[
+                ("position", &(r.position + 1).to_string()),
+                ("rule", &short),
+            ],
+        )
     }));
     let position_refs: Vec<&str> = positions.iter().map(String::as_str).collect();
     let position = adw::ComboRow::builder()
-        .title("Position")
-        .subtitle("The first matching rule decides")
+        .title(gettext("Position"))
+        .subtitle(gettext("The first matching rule decides"))
         .model(&gtk::StringList::new(&position_refs))
         .build();
     let persistent = adw::SwitchRow::builder()
-        .title("Keep after USBGuard restarts")
-        .subtitle("Off: the rule lasts until the daemon restarts")
+        .title(gettext("Keep after USBGuard restarts"))
+        .subtitle(gettext("Off: the rule lasts until USBGuard restarts"))
         .active(default_persistence == Persistence::Permanent)
         .build();
-    let placement = adw::PreferencesGroup::builder().title("Placement").build();
+    let placement = adw::PreferencesGroup::builder()
+        .title(gettext("Placement"))
+        .build();
     placement.add(&position);
     placement.add(&persistent);
 
@@ -314,7 +328,7 @@ fn build(rules: Vec<RuleHandle>, default_persistence: Persistence) -> Form {
     ));
 
     let dialog = adw::Dialog::builder()
-        .title("New Rule")
+        .title(gettext("New Rule"))
         .content_width(640)
         .child(&toolbar)
         .build();
@@ -346,15 +360,20 @@ fn build(rules: Vec<RuleHandle>, default_persistence: Persistence) -> Form {
 fn add_field_row(form: &Rc<Form>, refresh: &Rc<dyn Fn()>) {
     let names: Vec<&str> = AttributeName::ALL.iter().map(|a| a.keyword()).collect();
     let name = gtk::DropDown::from_strings(&names);
-    let operator = gtk::DropDown::from_strings(&OPERATOR_LABELS);
-    operator.set_tooltip_text(Some("How several values are compared with the device's"));
+    let single = gettext("(single value)");
+    let mut operators: Vec<&str> = vec![single.as_str()];
+    operators.extend(OPERATOR_LABELS);
+    let operator = gtk::DropDown::from_strings(&operators);
+    operator.set_tooltip_text(Some(&gettext(
+        "How several values are compared with the device’s",
+    )));
     let entry = gtk::Entry::builder()
         .hexpand(true)
         .placeholder_text(value_hint(AttributeName::Id))
         .build();
     let remove = gtk::Button::builder()
         .icon_name("list-remove-symbolic")
-        .tooltip_text("Remove this attribute")
+        .tooltip_text(gettext("Remove this attribute"))
         .css_classes(["flat"])
         .build();
     let root = gtk::Box::builder()
@@ -374,7 +393,7 @@ fn add_field_row(form: &Rc<Form>, refresh: &Rc<dyn Fn()>) {
         let (entry, refresh) = (entry.clone(), refresh.clone());
         move |dd| {
             if let Some(a) = AttributeName::ALL.get(dd.selected() as usize) {
-                entry.set_placeholder_text(Some(value_hint(*a)));
+                entry.set_placeholder_text(Some(&value_hint(*a)));
             }
             refresh();
         }
@@ -431,7 +450,7 @@ fn recompute(form: &Form) {
             if let Some(f) = form.fields.borrow().get(e.row) {
                 f.entry.add_css_class("error");
             }
-            e.message
+            i18n::field_error(&e)
         })
     } else {
         let text = form.text.text();
@@ -440,9 +459,12 @@ fn recompute(form: &Form) {
 
     // Round-trip check before anything is sent (§7.2).
     let result = result.and_then(|rule| {
-        render_checked(&rule)
-            .map(|text| (rule, text))
-            .map_err(|e| format!("internal error: the rule does not survive rendering ({e})"))
+        render_checked(&rule).map(|text| (rule, text)).map_err(|e| {
+            fill(
+                &gettext("Internal error: the rule does not survive rendering ({error})"),
+                &[("error", &i18n::parse_error(e.kind))],
+            )
+        })
     });
 
     match result {
@@ -467,10 +489,12 @@ fn caret_message(text: &str, err: ParseError) -> String {
     let column = text
         .get(..err.offset.min(text.len()))
         .map_or(err.offset, |prefix| prefix.chars().count());
-    format!(
-        "{} (character {}):\n{text}\n{}^",
-        err.kind.describe(),
-        column + 1,
-        " ".repeat(column)
-    )
+    let heading = fill(
+        &gettext("{problem} (character {column}):"),
+        &[
+            ("problem", &i18n::parse_error(err.kind)),
+            ("column", &(column + 1).to_string()),
+        ],
+    );
+    format!("{heading}\n{text}\n{}^", " ".repeat(column))
 }

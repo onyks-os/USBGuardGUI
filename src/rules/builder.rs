@@ -23,28 +23,32 @@ pub struct FieldInput {
     pub text: String,
 }
 
-/// Why a row is invalid.
+/// Why a row is invalid. Structured rather than a sentence, so the
+/// interface can word it in the user's language.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum FieldErrorKind {
+    /// The attribute already appears in an earlier row.
+    Duplicate(AttributeName),
+    /// A word is not a valid value for the attribute.
+    InvalidValue {
+        /// Which attribute.
+        name: AttributeName,
+        /// The offending word, as typed.
+        word: String,
+    },
+    /// A list attribute has no value at all.
+    Empty,
+    /// A set operator on a text attribute: needs the text mode.
+    SetOfText,
+}
+
+/// An invalid row.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FieldError {
     /// Index of the offending row.
     pub row: usize,
-    /// What to tell the user.
-    pub message: String,
-}
-
-/// The expected shape of a value, for placeholder text and error messages.
-#[must_use]
-pub const fn value_hint(name: AttributeName) -> &'static str {
-    match name {
-        AttributeName::Id => "vendor:product, e.g. 1234:5678 or 1234:*",
-        AttributeName::WithInterface => "class:subclass:protocol, e.g. 08:06:50 or 03:*:*",
-        AttributeName::ViaPort => "port, e.g. 1-2 or 1-2.3",
-        AttributeName::Hash | AttributeName::ParentHash => "hash as shown by usbguard",
-        AttributeName::Name
-        | AttributeName::Serial
-        | AttributeName::WithConnectType
-        | AttributeName::Label => "text",
-    }
+    /// What is wrong with it.
+    pub kind: FieldErrorKind,
 }
 
 /// Builds a policy rule from the form.
@@ -60,12 +64,9 @@ pub fn build_rule(target: RuleTarget, fields: &[FieldInput]) -> Result<Rule, Fie
         ..Rule::default()
     };
     for (row, field) in fields.iter().enumerate() {
-        let error = |message: String| FieldError { row, message };
+        let error = |kind: FieldErrorKind| FieldError { row, kind };
         if rule.attribute(field.name).is_some() {
-            return Err(error(format!(
-                "“{}” is already used above",
-                field.name.keyword()
-            )));
+            return Err(error(FieldErrorKind::Duplicate(field.name)));
         }
         let values = match field.name {
             AttributeName::Id | AttributeName::WithInterface => {
@@ -75,18 +76,18 @@ pub fn build_rule(target: RuleTarget, fields: &[FieldInput]) -> Result<Rule, Fie
                     .map(|word| parse_structured(field.name, word).ok_or(word))
                     .collect();
                 let parsed = parsed.map_err(|word| {
-                    error(format!(
-                        "“{word}” is not valid here: expected {}",
-                        value_hint(field.name)
-                    ))
+                    error(FieldErrorKind::InvalidValue {
+                        name: field.name,
+                        word: word.to_owned(),
+                    })
                 })?;
                 match (parsed.as_slice(), field.operator) {
-                    ([], _) => return Err(error("enter at least one value".to_owned())),
+                    ([], _) => return Err(error(FieldErrorKind::Empty)),
                     ([_], None) => AttributeValues::Single(
                         parsed
                             .into_iter()
                             .next()
-                            .ok_or_else(|| error("enter at least one value".to_owned()))?,
+                            .ok_or_else(|| error(FieldErrorKind::Empty))?,
                     ),
                     (_, operator) => AttributeValues::Set {
                         operator,
@@ -96,10 +97,7 @@ pub fn build_rule(target: RuleTarget, fields: &[FieldInput]) -> Result<Rule, Fie
             }
             _ => {
                 if field.operator.is_some() {
-                    return Err(error(
-                        "a set of text values needs the text mode, where each value is quoted"
-                            .to_owned(),
-                    ));
+                    return Err(error(FieldErrorKind::SetOfText));
                 }
                 AttributeValues::Single(AttributeValue::String(RuleString::from(
                     field.text.as_str(),
@@ -126,7 +124,7 @@ fn parse_structured(name: AttributeName, word: &str) -> Option<AttributeValue> {
 
 #[cfg(test)]
 mod tests {
-    use super::{FieldInput, build_rule};
+    use super::{FieldErrorKind, FieldInput, build_rule};
     use crate::model::{AttributeName, RuleTarget, SetOperator};
     use crate::rules::render_checked;
 
@@ -187,7 +185,13 @@ mod tests {
         )
         .unwrap_err();
         assert_eq!(err.row, 1);
-        assert!(err.message.contains("12:34"));
+        assert_eq!(
+            err.kind,
+            FieldErrorKind::InvalidValue {
+                name: AttributeName::Id,
+                word: "12:34".to_owned()
+            }
+        );
 
         let dup = build_rule(
             RuleTarget::Allow,

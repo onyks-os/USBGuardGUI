@@ -9,6 +9,10 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 
+use gettextrs::gettext;
+
+use super::i18n::fill;
+
 use crate::model::{AttributeName, Parameter, RuleHandle};
 use crate::rules::parse_rule;
 
@@ -31,11 +35,11 @@ pub(super) enum PolicyAction {
 pub(super) type PolicyHandler = Rc<dyn Fn(PolicyAction)>;
 
 /// Human-readable meaning of a parameter, shown as the row subtitle.
-const fn describe(parameter: Parameter) -> &'static str {
+fn describe(parameter: Parameter) -> String {
     match parameter {
-        Parameter::ImplicitPolicyTarget => "What happens to a device that matches no rule",
+        Parameter::ImplicitPolicyTarget => gettext("What happens to a device that matches no rule"),
         Parameter::InsertedDevicePolicy => {
-            "What happens to a device plugged in while USBGuard runs"
+            gettext("What happens to a device plugged in while USBGuard runs")
         }
     }
 }
@@ -71,11 +75,11 @@ impl PolicyView {
 
         // Runtime parameters.
         let group = adw::PreferencesGroup::builder()
-            .title("Runtime parameters")
-            .description(
+            .title(gettext("Runtime parameters"))
+            .description(gettext(
                 "Changes apply immediately and last until USBGuard restarts. Everything else \
                  in usbguard-daemon.conf is startup configuration and cannot be changed from here.",
-            )
+            ))
             .build();
         let parameters: Rc<Vec<ParameterRow>> = Rc::new(
             Parameter::ALL
@@ -83,7 +87,7 @@ impl PolicyView {
                 .map(|parameter| {
                     let row = adw::ComboRow::builder()
                         .title(parameter.name())
-                        .subtitle(describe(parameter))
+                        .subtitle(describe(parameter).as_str())
                         .model(&gtk::StringList::new(parameter.allowed_values()))
                         .sensitive(false)
                         .build();
@@ -128,7 +132,7 @@ impl PolicyView {
 
         // The ruleset.
         let add_button = gtk::Button::builder()
-            .label("Add Rule…")
+            .label(gettext("Add Rule…"))
             .css_classes(["suggested-action"])
             .halign(gtk::Align::End)
             .build();
@@ -157,21 +161,23 @@ impl PolicyView {
             .build();
         let error = adw::StatusPage::builder()
             .icon_name("dialog-warning-symbolic")
-            .title("The ruleset could not be read")
+            .title(gettext("The ruleset could not be read"))
             .build();
         let list_stack = gtk::Stack::builder().vhomogeneous(false).build();
         list_stack.add_named(
             &adw::StatusPage::builder()
                 .icon_name("content-loading-symbolic")
-                .title("Reading the ruleset…")
+                .title(gettext("Reading the ruleset…"))
                 .build(),
             Some("loading"),
         );
         list_stack.add_named(
             &adw::StatusPage::builder()
                 .icon_name("view-list-symbolic")
-                .title("The ruleset is empty")
-                .description("Devices are treated according to the implicit policy target.")
+                .title(gettext("The ruleset is empty"))
+                .description(gettext(
+                    "Devices are treated according to the implicit policy target.",
+                ))
                 .build(),
             Some("empty"),
         );
@@ -293,6 +299,7 @@ impl PolicyView {
             .ok()
             .and_then(|r| r.string_value(AttributeName::Label).cloned());
         if let Some(label) = label {
+            // `label` is the rule keyword: it stays untranslated.
             row.set_subtitle(&format!("label: {}", label.to_string_lossy()));
         }
         row.add_prefix(
@@ -303,7 +310,10 @@ impl PolicyView {
                 .css_classes(["numeric", "dim-label"])
                 .build(),
         );
-        row.set_tooltip_text(Some(&format!("Daemon rule id: {}", rule.id)));
+        row.set_tooltip_text(Some(&fill(
+            &gettext("Daemon rule id: {id}"),
+            &[("id", &rule.id.to_string())],
+        )));
 
         let remove = gtk::Button::builder()
             .icon_name("user-trash-symbolic")
@@ -312,8 +322,9 @@ impl PolicyView {
             .build();
         let block = self.remove_block.borrow();
         remove.set_sensitive(block.is_none());
-        remove.set_tooltip_text(Some(block.as_deref().unwrap_or("Remove this rule")));
-        remove.update_property(&[gtk::accessible::Property::Label("Remove rule")]);
+        let remove_text = gettext("Remove this rule");
+        remove.set_tooltip_text(Some(block.as_deref().unwrap_or(&remove_text)));
+        remove.update_property(&[gtk::accessible::Property::Label(&gettext("Remove rule"))]);
         remove.connect_clicked({
             let (handler, rule) = (self.handler.clone(), rule.clone());
             move |_| handler(PolicyAction::Remove(rule.clone()))

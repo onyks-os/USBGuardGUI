@@ -4,13 +4,14 @@
   <id>io.github.onyks_os.UsbguardGui</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
-
   <name>USBGuardGUI</name>
+  <name xml:lang="it">USBGuardGUI</name>
   <summary>Control which USB devices connect</summary>
+  <summary xml:lang="it">Controlla quali dispositivi USB si collegano</summary>
   <developer id="io.github.onyks_os">
     <name>onyks-os</name>
+    <name xml:lang="it">onyks-os</name>
   </developer>
-
   <description>
     <p>
       A desktop interface for USBGuard, the Linux daemon that decides which USB devices are
@@ -18,41 +19,48 @@
       read the policy rules in the order the daemon evaluates them, and find out precisely why
       access fails when it does.
     </p>
+    <p xml:lang="it">Un’interfaccia desktop per USBGuard, il demone Linux che decide quali dispositivi USB possono comunicare con il computer. Mostra ogni dispositivo collegato e se è autorizzato, le regole nell’ordine in cui il demone le valuta, e spiega con precisione perché l’accesso non riesce quando succede.</p>
     <p>
       The application runs without any privileges of its own. Every change is made by the
       USBGuard daemon, after the system's own authorization checks have approved it.
     </p>
+    <p xml:lang="it">L’applicazione non ha privilegi propri. Ogni modifica la esegue il demone USBGuard, dopo che i controlli di autorizzazione del sistema l’hanno approvata.</p>
     <ul>
       <li>Live device list, resilient to hubs with dozens of devices</li>
+      <li xml:lang="it">Elenco dei dispositivi in tempo reale, che regge anche hub con decine di dispositivi</li>
       <li>The policy ruleset in evaluation order</li>
+      <li xml:lang="it">Le regole nell’ordine di valutazione</li>
       <li>Diagnostics that name the exact cause of an access problem and its remedy</li>
+      <li xml:lang="it">Una diagnostica che indica la causa esatta di un problema di accesso e come risolverlo</li>
       <li>Changes no system configuration: every change goes through USBGuard</li>
+      <li xml:lang="it">Non modifica la configurazione del sistema: ogni modifica passa da USBGuard</li>
     </ul>
     <p>
       Requires the USBGuard daemon and its D-Bus bridge (usbguard-dbus) on the host.
     </p>
+    <p xml:lang="it">Richiede il demone USBGuard e il suo bridge D-Bus (usbguard-dbus) sul sistema.</p>
   </description>
-
   <launchable type="desktop-id">io.github.onyks_os.UsbguardGui.desktop</launchable>
   <provides>
     <binary>usbguard-gui</binary>
   </provides>
-
   <url type="homepage">https://github.com/onyks-os/USBGuardGUI</url>
   <url type="bugtracker">https://github.com/onyks-os/USBGuardGUI/issues</url>
   <url type="vcs-browser">https://github.com/onyks-os/USBGuardGUI</url>
-
   <categories>
     <category>System</category>
     <category>Security</category>
   </categories>
   <keywords>
     <keyword>usb</keyword>
+    <keyword xml:lang="it">usb</keyword>
     <keyword>usbguard</keyword>
+    <keyword xml:lang="it">usbguard</keyword>
     <keyword>device</keyword>
+    <keyword xml:lang="it">dispositivo</keyword>
     <keyword>security</keyword>
+    <keyword xml:lang="it">sicurezza</keyword>
   </keywords>
-
   <requires>
     <display_length compare="ge">360</display_length>
   </requires>
@@ -61,23 +69,25 @@
     <control>keyboard</control>
     <control>touch</control>
   </supports>
-
   <branding>
     <color type="primary" scheme_preference="light">#8ff0a4</color>
     <color type="primary" scheme_preference="dark">#26a269</color>
   </branding>
-
   <content_rating type="oars-1.1"/>
-
   <releases>
     <release version="0.1.0" date="2026-09-23" type="stable">
       <description>
         <p>First release.</p>
+        <p xml:lang="it">Prima versione.</p>
         <ul>
           <li>Live device list; allow, block, or reject a device for this session or permanently</li>
+          <li xml:lang="it">Elenco dei dispositivi in tempo reale; consenti, blocca o rifiuta un dispositivo per questa sessione o permanentemente</li>
           <li>Policy view in evaluation order, with a guided rule editor and safe rule removal</li>
+          <li xml:lang="it">Vista delle regole nell’ordine di valutazione, con un editor guidato e una rimozione sicura</li>
           <li>Notifications for newly inserted devices that are not authorized</li>
+          <li xml:lang="it">Notifiche per i dispositivi appena collegati e non autorizzati</li>
           <li>Diagnostics that name the exact cause of an access problem, and usbguard-gui --diagnose</li>
+          <li xml:lang="it">Una diagnostica che indica la causa esatta di un problema di accesso, e usbguard-gui --diagnose</li>
         </ul>
       </description>
     </release>

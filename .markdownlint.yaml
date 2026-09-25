@@ -21,3 +21,8 @@ MD024:
 # every edit a reflow of the whole table. It changes nothing about the rendered
 # output.
 MD060: false
+
+# MkDocs Material nests fenced code blocks inside tabs (=== "…") and admonitions
+# (!!! …) by indenting them four spaces; markdownlint reads that as an indented
+# code block and reports a style mismatch that the rendered site does not have.
+MD046: false
