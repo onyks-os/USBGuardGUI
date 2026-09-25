@@ -9,8 +9,12 @@ use std::rc::{Rc, Weak};
 use adw::prelude::*;
 use gtk::{gio, glib};
 
+use gettextrs::{gettext, ngettext};
+
+use super::APP_NAME;
 use super::config::Config;
 use super::device_view::{DeviceAction, DeviceView, ModifyBlock};
+use super::i18n::{self, fill};
 use super::notify::Notifier;
 use super::policy_view::{PolicyAction, PolicyView};
 use super::rule_dialog::{self, NewRule};
@@ -35,13 +39,14 @@ enum Indicator {
 }
 
 impl Indicator {
-    const fn presentation(self) -> (&'static str, &'static str) {
+    fn presentation(self) -> (&'static str, String) {
         match self {
-            Self::Checking => ("content-loading-symbolic", "Checking…"),
-            Self::Connected => ("emblem-ok-symbolic", "Connected"),
-            Self::ReadOnly => ("changes-prevent-symbolic", "Read-only"),
-            Self::Denied => ("dialog-warning-symbolic", "Access denied"),
-            Self::Disconnected => ("network-offline-symbolic", "Disconnected"),
+            Self::Checking => ("content-loading-symbolic", gettext("Checking…")),
+            Self::Connected => ("emblem-ok-symbolic", gettext("Connected")),
+            // Translators: the connection state when changes are not permitted.
+            Self::ReadOnly => ("changes-prevent-symbolic", gettext("Read-only")),
+            Self::Denied => ("dialog-warning-symbolic", gettext("Access denied")),
+            Self::Disconnected => ("network-offline-symbolic", gettext("Disconnected")),
         }
     }
 }
@@ -155,30 +160,34 @@ impl MainWindow {
         stack.add_titled_with_icon(
             &devices.root,
             Some("devices"),
-            "Devices",
+            &gettext("Devices"),
             "drive-removable-media-symbolic",
         );
         stack.add_titled_with_icon(
             &policy.root,
             Some(POLICY_PAGE),
-            "Policy",
+            // Translators: the page listing USBGuard's rules.
+            &gettext("Policy"),
             "view-list-symbolic",
         );
 
         let indicator = adw::ButtonContent::new();
         let status_button = gtk::Button::builder()
             .child(&indicator)
-            .tooltip_text("Show USBGuard access diagnostics")
+            .tooltip_text(gettext("Show USBGuard access diagnostics"))
             .build();
 
         let menu = gio::Menu::new();
-        menu.append(Some("_Preferences"), Some("win.preferences"));
-        menu.append(Some("_About USBGuard"), Some("win.about"));
-        menu.append(Some("_Quit"), Some("app.quit"));
+        menu.append(Some(&gettext("_Preferences")), Some("win.preferences"));
+        menu.append(
+            Some(&fill(&gettext("_About {app}"), &[("app", APP_NAME)])),
+            Some("win.about"),
+        );
+        menu.append(Some(&gettext("_Quit")), Some("app.quit"));
         let menu_button = gtk::MenuButton::builder()
             .icon_name("open-menu-symbolic")
             .menu_model(&menu)
-            .tooltip_text("Main menu")
+            .tooltip_text(gettext("Main menu"))
             .primary(true)
             .build();
 
@@ -207,7 +216,7 @@ impl MainWindow {
         let (width, height) = config.window_size();
         let window = adw::ApplicationWindow::builder()
             .application(app)
-            .title("USBGuard")
+            .title(APP_NAME)
             .default_width(width)
             .default_height(height)
             .maximized(config.window_maximized())
@@ -316,14 +325,26 @@ impl MainWindow {
         self.0.window.set_visible(false);
         if self.0.config.take_background_notice() {
             let has_tray = self.0.tray.borrow().is_some();
-            let n = gio::Notification::new("USBGuard is still running");
-            n.set_body(Some(if has_tray {
-                "It will announce newly inserted devices. Use the status icon to reopen it or quit."
+            let n = gio::Notification::new(&fill(
+                &gettext("{app} is still running"),
+                &[("app", APP_NAME)],
+            ));
+            let body = if has_tray {
+                gettext(
+                    "It will announce newly inserted devices. Use the status icon to reopen it \
+                     or quit.",
+                )
             } else {
-                "It will announce newly inserted devices. This desktop has no status icon area: \
-                 open USBGuard again from the application menu to show the window, and quit \
-                 from its main menu."
-            }));
+                fill(
+                    &gettext(
+                        "It will announce newly inserted devices. This desktop has no status \
+                         icon area: open {app} again from the application menu to show the \
+                         window, and quit from its main menu.",
+                    ),
+                    &[("app", APP_NAME)],
+                )
+            };
+            n.set_body(Some(&body));
             self.0.app.send_notification(Some("background"), &n);
         }
     }
@@ -376,7 +397,9 @@ impl MainWindow {
             }
             _ => {
                 self.show_devices();
-                self.toast("That device is no longer connected. Nothing was changed.");
+                self.toast(&gettext(
+                    "That device is no longer connected. Nothing was changed.",
+                ));
             }
         }
     }
@@ -398,7 +421,7 @@ impl MainWindow {
     fn set_indicator(&self, indicator: Indicator) {
         let (icon, label) = indicator.presentation();
         self.0.indicator.set_icon_name(icon);
-        self.0.indicator.set_label(label);
+        self.0.indicator.set_label(&label);
     }
 
     /// The indicator for a working connection: read-only when both device and
@@ -458,14 +481,28 @@ impl MainWindow {
         }
         if self.0.window.is_visible() && self.0.window.is_active() {
             let text = if let [only] = new.as_slice() {
-                format!(
-                    "“{}” was plugged in and is not authorized",
-                    only.attrs.name.as_deref().unwrap_or("A device").trim()
-                )
+                match only
+                    .attrs
+                    .name
+                    .as_deref()
+                    .map(str::trim)
+                    .filter(|n| !n.is_empty())
+                {
+                    Some(name) => fill(
+                        &gettext("“{device}” was plugged in and is not authorized"),
+                        &[("device", name)],
+                    ),
+                    None => gettext("A device was plugged in and is not authorized"),
+                }
             } else {
-                format!(
-                    "{} devices were plugged in and are not authorized",
-                    new.len()
+                let count = u32::try_from(new.len()).unwrap_or(u32::MAX);
+                fill(
+                    &ngettext(
+                        "{count} device was plugged in and is not authorized",
+                        "{count} devices were plugged in and are not authorized",
+                        count,
+                    ),
+                    &[("count", &count.to_string())],
                 )
             };
             self.toast(&text);
@@ -526,7 +563,10 @@ impl MainWindow {
     // -----------------------------------------------------------------------
 
     fn deny_write(&self, write: Write, reason: &str) {
-        let reason = format!("Not permitted: {reason}. See the diagnostics for the remedy.");
+        let reason = fill(
+            &gettext("Not permitted: {reason}. See the diagnostics for the remedy."),
+            &[("reason", reason)],
+        );
         {
             let mut state = self.0.state.borrow_mut();
             let slot = match write {
@@ -578,10 +618,12 @@ impl MainWindow {
                 let name = self.device_name(id);
                 let this = self.clone();
                 self.confirm(
-                    &format!("Reject “{name}”?"),
-                    "Rejecting removes the device from the system. It can only be used again \
-                     after it is physically unplugged and plugged back in.",
-                    "Reject",
+                    &fill(&gettext("Reject “{device}”?"), &[("device", &name)]),
+                    &gettext(
+                        "Rejecting removes the device from the system. It can only be used \
+                         again after it is physically unplugged and plugged back in.",
+                    ),
+                    &gettext("Reject"),
                     true,
                     move |yes| {
                         if yes {
@@ -608,7 +650,7 @@ impl MainWindow {
             .and_then(|d| d.attrs.name)
             .map(|n| n.trim().to_owned())
             .filter(|n| !n.is_empty())
-            .unwrap_or_else(|| format!("device {id}"))
+            .unwrap_or_else(|| fill(&gettext("device {id}"), &[("id", &id.to_string())]))
     }
 
     fn start_device_op(&self, id: DeviceId, policy: DevicePolicy, persistence: Persistence) {
@@ -670,9 +712,9 @@ impl MainWindow {
         op.cancel();
         self.0.state.borrow_mut().devices.set_pending(device, None);
         self.refresh_devices();
-        self.toast(
+        self.toast(&gettext(
             "Stopped waiting. USBGuard may already have acted; the list shows what it actually did.",
-        );
+        ));
         // Cancellation is client-side only: re-read rather than presume.
         reload_devices(self.0.ui_tx.clone());
     }
@@ -691,10 +733,13 @@ impl MainWindow {
             PolicyAction::Remove(handle) => {
                 let this = self.clone();
                 let (heading, body) = (
-                    format!("Remove rule {}?", handle.position + 1),
+                    fill(
+                        &gettext("Remove rule {position}?"),
+                        &[("position", &(handle.position + 1).to_string())],
+                    ),
                     handle.text.clone(),
                 );
-                self.confirm(&heading, &body, "Remove", true, move |yes| {
+                self.confirm(&heading, &body, &gettext("Remove"), true, move |yes| {
                     if yes {
                         this.start_remove(handle.clone(), false);
                     }
@@ -707,12 +752,18 @@ impl MainWindow {
             } => {
                 let this = self.clone();
                 self.confirm(
-                    &format!("Change {parameter}?"),
-                    &format!(
-                        "From “{old}” to “{new}”. The change applies immediately and lasts until \
-                         USBGuard restarts."
+                    &fill(
+                        &gettext("Change {parameter}?"),
+                        &[("parameter", parameter.name())],
                     ),
-                    "Change",
+                    &fill(
+                        &gettext(
+                            "From “{old}” to “{new}”. The change applies immediately and lasts \
+                             until USBGuard restarts.",
+                        ),
+                        &[("old", &old), ("new", &new)],
+                    ),
+                    &gettext("Change"),
                     false,
                     move |yes| {
                         if yes {
@@ -766,16 +817,22 @@ impl MainWindow {
     /// Several rules share the text: ask which one, by evaluation position.
     fn ask_which_rule(&self, candidates: Vec<RuleHandle>) {
         let dialog = adw::AlertDialog::new(
-            Some("Which rule?"),
-            Some(
+            Some(&gettext("Which rule?")),
+            Some(&gettext(
                 "Several rules have exactly this text. They differ only in their position in \
                  the evaluation order. Choose the one to remove.",
-            ),
+            )),
         );
-        dialog.add_response("cancel", "Cancel");
+        dialog.add_response("cancel", &gettext("Cancel"));
         for c in &candidates {
             let id = format!("pos-{}", c.position);
-            dialog.add_response(&id, &format!("Rule {}", c.position + 1));
+            dialog.add_response(
+                &id,
+                &fill(
+                    &gettext("Rule {position}"),
+                    &[("position", &(c.position + 1).to_string())],
+                ),
+            );
             dialog.set_response_appearance(&id, adw::ResponseAppearance::Destructive);
         }
         dialog.set_close_response("cancel");
@@ -810,16 +867,29 @@ impl MainWindow {
                 self.refresh_devices();
                 match result {
                     Ok(_) => {
-                        let verb = match policy {
-                            DevicePolicy::Allow => "Allowed",
-                            DevicePolicy::Block => "Blocked",
-                            DevicePolicy::Reject => "Rejected",
+                        // Whole sentences, not assembled from pieces:
+                        // word order differs between languages.
+                        let template = match (policy, persistence) {
+                            (DevicePolicy::Allow, Persistence::RuntimeOnly) => {
+                                gettext("Allowed “{device}” for this session")
+                            }
+                            (DevicePolicy::Allow, Persistence::Permanent) => {
+                                gettext("Allowed “{device}” permanently")
+                            }
+                            (DevicePolicy::Block, Persistence::RuntimeOnly) => {
+                                gettext("Blocked “{device}” for this session")
+                            }
+                            (DevicePolicy::Block, Persistence::Permanent) => {
+                                gettext("Blocked “{device}” permanently")
+                            }
+                            (DevicePolicy::Reject, Persistence::RuntimeOnly) => {
+                                gettext("Rejected “{device}” for this session")
+                            }
+                            (DevicePolicy::Reject, Persistence::Permanent) => {
+                                gettext("Rejected “{device}” permanently")
+                            }
                         };
-                        let scope = match persistence {
-                            Persistence::RuntimeOnly => "for this session",
-                            Persistence::Permanent => "permanently",
-                        };
-                        self.toast(&format!("{verb} “{name}” {scope}"));
+                        self.toast(&fill(&template, &[("device", &name)]));
                         if persistence == Persistence::Permanent {
                             self.mark_rules_stale();
                         }
@@ -831,11 +901,14 @@ impl MainWindow {
                 self.mark_rules_stale();
                 match result {
                     Ok(OperationOutcome::RuleRemoved(RemoveOutcome::Removed)) => {
-                        self.toast("Rule removed");
+                        self.toast(&gettext("Rule removed"));
                     }
-                    Ok(OperationOutcome::RuleRemoved(RemoveOutcome::AlreadyGone)) => self.toast(
-                        "That rule no longer exists — it was removed elsewhere. Nothing was changed.",
-                    ),
+                    Ok(OperationOutcome::RuleRemoved(RemoveOutcome::AlreadyGone)) => {
+                        self.toast(&gettext(
+                            "That rule no longer exists — it was removed elsewhere. Nothing was \
+                             changed.",
+                        ));
+                    }
                     Ok(OperationOutcome::RuleRemoved(RemoveOutcome::Ambiguous { candidates })) => {
                         self.ask_which_rule(candidates);
                     }
@@ -846,14 +919,17 @@ impl MainWindow {
             (OpKind::AppendRule, result) => {
                 self.mark_rules_stale();
                 match result {
-                    Ok(_) => self.toast("Rule added"),
+                    Ok(_) => self.toast(&gettext("Rule added")),
                     Err(err) => self.report(&err, Write::Rules),
                 }
             }
             (OpKind::SetParameter { parameter, new }, result) => match result {
                 Ok(_) => {
                     self.0.policy.set_parameter(parameter, &new);
-                    self.toast(&format!("{parameter} is now “{new}”"));
+                    self.toast(&fill(
+                        &gettext("{parameter} is now “{value}”"),
+                        &[("parameter", parameter.name()), ("value", &new)],
+                    ));
                 }
                 Err(err) => {
                     self.0.policy.revert_parameter(parameter);
@@ -880,28 +956,32 @@ impl MainWindow {
             AppError::Denied(
                 state @ (AccessState::DeniedByBusPolicy | AccessState::DeniedByIpcAcl),
             ) => {
-                self.deny_write(write, state.summary());
-                self.toast(&format!("Not permitted: {state}"));
+                let summary = i18n::access_summary(state);
+                self.deny_write(write, &summary);
+                self.toast(&fill(
+                    &gettext("Not permitted: {reason}"),
+                    &[("reason", &summary)],
+                ));
             }
-            AppError::Denied(AccessState::NoPolkitAgent) => self.toast(
+            AppError::Denied(AccessState::NoPolkitAgent) => self.toast(&gettext(
                 "Not authorized, and no Polkit agent seems to be running to ask for a password. \
                  See the diagnostics.",
-            ),
-            AppError::Denied(_) => self.toast(
+            )),
+            AppError::Denied(_) => self.toast(&gettext(
                 "Not authorized. If the password prompt was cancelled, try again; otherwise the \
                  diagnostics explain how to grant access.",
-            ),
-            AppError::Cancelled => self.toast(
+            )),
+            AppError::Cancelled => self.toast(&gettext(
                 "Cancelled. USBGuard may already have acted; what is shown is what it reports.",
-            ),
+            )),
             AppError::Stale => {
-                self.toast(
+                self.toast(&gettext(
                     "The ruleset changed in the meantime, so nothing was done. It has been \
                      re-read; please choose again.",
-                );
+                ));
                 self.mark_rules_stale();
             }
-            other => self.toast(&other.to_string()),
+            other => self.toast(&i18n::app_error(other)),
         }
     }
 
@@ -942,12 +1022,15 @@ impl MainWindow {
             UiEvent::RuleSnapshot(rules) => self.0.policy.set_rules(rules),
             UiEvent::RuleSnapshotFailed(err) => {
                 self.0.state.borrow_mut().rules_stale = true;
-                self.0.policy.set_error(&err.to_string());
+                self.0.policy.set_error(&i18n::app_error(&err));
             }
             UiEvent::InvalidateRuleCache => self.mark_rules_stale(),
             UiEvent::ParameterChanged { name, value } => self.parameter_changed(&name, &value),
             UiEvent::DaemonException { reason, .. } => {
-                self.toast(&format!("USBGuard reported an error: {reason}"));
+                self.toast(&fill(
+                    &gettext("USBGuard reported an error: {reason}"),
+                    &[("reason", &reason)],
+                ));
             }
             UiEvent::OperationFinished { op, result } => self.finish(op, result),
             UiEvent::AccessStateChanged(access) => self.apply_access(access),
@@ -957,8 +1040,11 @@ impl MainWindow {
                 self.set_indicator(Indicator::Disconnected);
                 if !self.access_problem() {
                     self.show_banner(
-                        "Connection to USBGuard lost. Retrying… The list below may be out of date.",
-                        Some("Details"),
+                        &gettext(
+                            "Connection to USBGuard lost. Retrying… The list below may be out of \
+                             date.",
+                        ),
+                        Some(&gettext("Details")),
                     );
                 }
             }
@@ -988,7 +1074,10 @@ impl MainWindow {
             matches!(kind, OpKind::SetParameter { parameter: p, new } if *p == parameter && new == value)
         });
         if !ours && previous.is_some_and(|p| p != value) {
-            self.toast(&format!("{name} was changed to “{value}”"));
+            self.toast(&fill(
+                &gettext("{parameter} was changed to “{value}”"),
+                &[("parameter", name), ("value", value)],
+            ));
         }
     }
 
@@ -1017,8 +1106,11 @@ impl MainWindow {
                     Indicator::Disconnected
                 });
                 self.show_banner(
-                    &format!("USBGuard: {}", state.summary()),
-                    Some("How to fix"),
+                    &fill(
+                        &gettext("USBGuard: {problem}"),
+                        &[("problem", &i18n::access_summary(state))],
+                    ),
+                    Some(&gettext("How to fix")),
                 );
             }
         }

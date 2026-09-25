@@ -42,7 +42,7 @@ pub fn start(ui_tx: Sender<UiEvent>) -> JoinHandle<()> {
     runtime().spawn(supervise(
         Client::connect_system,
         |max| async move {
-            if let Ok(connection) = Connection::system().await {
+            if let Ok(connection) = super::bus::connect().await {
                 wait_for_bridge(&connection, max).await
             } else {
                 tokio::time::sleep(max).await;

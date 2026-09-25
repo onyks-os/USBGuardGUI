@@ -1,16 +1,12 @@
 [Desktop Entry]
 Type=Application
-Name[it]=USBGuardGUI
 Name=USBGuardGUI
-GenericName[it]=Controllo dei dispositivi USB
 GenericName=USB Device Policy
-Comment[it]=Controlla quali dispositivi USB si collegano
 Comment=Control which USB devices connect
 Exec=usbguard-gui
 Icon=io.github.onyks_os.UsbguardGui
 Terminal=false
 Categories=System;Security;GTK;
-Keywords[it]=usb;usbguard;dispositivo;sicurezza;policy;autorizzazione;
 Keywords=usb;usbguard;device;security;policy;authorization;
 StartupNotify=true
 DBusActivatable=false

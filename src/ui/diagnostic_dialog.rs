@@ -10,11 +10,15 @@ use crate::cli::format_report;
 use crate::dbus::diagnostics;
 use crate::remedy::{Distro, remedy};
 use crate::runtime::runtime;
+use gettextrs::gettext;
 
 /// Opens the dialog over `parent`.
 pub(super) fn present(parent: &impl IsA<gtk::Widget>) {
-    let dialog = adw::AlertDialog::new(Some("USBGuard access"), Some("Checking…"));
-    dialog.add_response("close", "Close");
+    let dialog = adw::AlertDialog::new(
+        Some(&gettext("USBGuard access")),
+        Some(&gettext("Checking…")),
+    );
+    dialog.add_response("close", &gettext("Close"));
     dialog.set_close_response("close");
 
     let report_label = gtk::Label::builder()
@@ -37,12 +41,12 @@ pub(super) fn present(parent: &impl IsA<gtk::Widget>) {
             return;
         };
         let distro = Distro::detect();
-        dialog.set_body(report.state.summary());
+        dialog.set_body(&super::i18n::access_summary(&report.state));
         report_label.set_text(&format_report(&report, distro));
 
         if let Some(remedy) = remedy(&report.state, distro).filter(|r| !r.commands.is_empty()) {
             let commands = remedy.commands.join("\n");
-            dialog.add_response("copy", "Copy commands");
+            dialog.add_response("copy", &gettext("Copy commands"));
             dialog.set_response_appearance("copy", adw::ResponseAppearance::Suggested);
             dialog.connect_response(Some("copy"), move |d, _| {
                 d.clipboard().set_text(&commands);

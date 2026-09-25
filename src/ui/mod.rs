@@ -13,6 +13,7 @@ mod autostart;
 mod config;
 mod device_view;
 mod diagnostic_dialog;
+mod i18n;
 mod notify;
 mod policy_view;
 mod preferences;
@@ -39,6 +40,10 @@ use window::MainWindow;
 /// (§1.5). `onyks_os`, not `onyks-os`: GApplication rejects the hyphen.
 pub const APP_ID: &str = "io.github.onyks_os.UsbguardGui";
 
+/// The name the user sees: menu, window title, About dialog. Kept in one
+/// place; translations refer to it as `{app}`.
+pub(super) const APP_NAME: &str = "USBGuardGUI";
+
 /// Capacity of the event channel. Events are already coalesced (§5.4), so
 /// this is never reached in practice.
 const CHANNEL_CAPACITY: usize = 64;
@@ -46,6 +51,7 @@ const CHANNEL_CAPACITY: usize = 64;
 /// Runs the application until the last window closes.
 #[must_use]
 pub fn run(background: bool) -> ExitCode {
+    i18n::init();
     let app = adw::Application::builder().application_id(APP_ID).build();
     let config = Config::load();
     // The flag overrides the setting (docs/interfaces.md §2).

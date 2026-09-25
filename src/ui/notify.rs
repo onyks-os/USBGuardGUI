@@ -20,6 +20,9 @@ use gtk::{gio, glib};
 
 use crate::model::{Device, DeviceId};
 use crate::runtime::runtime;
+use gettextrs::{gettext, ngettext};
+
+use super::i18n::fill;
 
 /// One notification id: a new burst replaces the previous notification
 /// instead of stacking thirty of them.
@@ -43,7 +46,15 @@ fn display_name(device: &Device) -> String {
         .as_deref()
         .map(str::trim)
         .filter(|n| !n.is_empty())
-        .map_or_else(|| format!("USB device {}", device.id), str::to_owned)
+        .map_or_else(
+            || {
+                fill(
+                    &gettext("USB device {id}"),
+                    &[("id", &device.id.to_string())],
+                )
+            },
+            str::to_owned,
+        )
 }
 
 pub(super) struct Notifier {
@@ -82,25 +93,41 @@ impl Notifier {
             return;
         };
         let notification = if let [only] = devices {
-            let n = gio::Notification::new("USB device blocked");
-            n.set_body(Some(&format!(
-                "“{}” was plugged in and is not authorized.",
-                display_name(only)
+            let n = gio::Notification::new(&gettext("USB device blocked"));
+            n.set_body(Some(&fill(
+                &gettext("“{device}” was plugged in and is not authorized."),
+                &[("device", &display_name(only))],
             )));
             if self.actions.get() != Some(false) {
                 n.add_button_with_target_value(
-                    "Allow for this session",
+                    &gettext("Allow for this session"),
                     "app.allow-device",
                     Some(&only.id.get().to_variant()),
                 );
             }
             n
         } else {
-            let n = gio::Notification::new(&format!("{} USB devices blocked", devices.len()));
+            let count = u32::try_from(devices.len()).unwrap_or(u32::MAX);
+            let n = gio::Notification::new(&fill(
+                &ngettext(
+                    "{count} USB device blocked",
+                    "{count} USB devices blocked",
+                    count,
+                ),
+                &[("count", &count.to_string())],
+            ));
             let names: Vec<String> = devices.iter().take(4).map(display_name).collect();
             let more = devices.len().saturating_sub(names.len());
             let body = if more > 0 {
-                format!("{} and {more} more", names.join(", "))
+                let more = u32::try_from(more).unwrap_or(u32::MAX);
+                fill(
+                    &ngettext(
+                        "{devices} and {count} more",
+                        "{devices} and {count} more",
+                        more,
+                    ),
+                    &[("devices", &names.join(", ")), ("count", &more.to_string())],
+                )
             } else {
                 names.join(", ")
             };

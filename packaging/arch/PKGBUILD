@@ -16,7 +16,7 @@ url='https://github.com/onyks-os/USBGuardGUI'
 license=('MIT')
 depends=('gtk4' 'libadwaita' 'usbguard' 'glib2' 'gcc-libs' 'glibc')
 optdepends=('polkit: authorization prompts for changes')
-makedepends=('cargo')
+makedepends=('cargo' 'gettext')
 options=('!lto')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
 # Filled in at release time: `updpkgsums` after the tag exists.
@@ -45,6 +45,11 @@ package() {
     cd "USBGuardGUI-$pkgver"
     local id=io.github.onyks_os.UsbguardGui
     install -Dm755 target/release/usbguard-gui "$pkgdir/usr/bin/usbguard-gui"
+    local lang
+    for lang in $(grep -v '^#' po/LINGUAS); do
+        install -d "$pkgdir/usr/share/locale/$lang/LC_MESSAGES"
+        msgfmt -o "$pkgdir/usr/share/locale/$lang/LC_MESSAGES/usbguard-gui.mo" "po/$lang.po"
+    done
     install -Dm644 "data/$id.desktop" "$pkgdir/usr/share/applications/$id.desktop"
     install -Dm644 "data/$id.metainfo.xml" "$pkgdir/usr/share/metainfo/$id.metainfo.xml"
     install -Dm644 "data/$id.gschema.xml" "$pkgdir/usr/share/glib-2.0/schemas/$id.gschema.xml"

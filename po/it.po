@@ -1,0 +1,1008 @@
+# Italian translations for PACKAGE package
+# Traduzioni italiane per il pacchetto PACKAGE.
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: USBGuard GUI\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-25 19:43+0200\n"
+"PO-Revision-Date: 2026-09-25 19:39+0200\n"
+"Last-Translator: onyks-os\n"
+"Language-Team: Italian\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Translators: the authorization state of a USB device.
+#: src/ui/device_view.rs:44
+msgid "Allowed"
+msgstr "Consentito"
+
+#. Translators: the authorization state of a USB device.
+#: src/ui/device_view.rs:46
+msgid "Blocked"
+msgstr "Bloccato"
+
+#. Translators: the authorization state of a USB device.
+#: src/ui/device_view.rs:48
+msgid "Rejected"
+msgstr "Rifiutato"
+
+#. Translators: the authorization state of a USB device.
+#: src/ui/device_view.rs:50
+msgid "Unknown"
+msgstr "Sconosciuto"
+
+#: src/ui/device_view.rs:56
+msgid "Working…"
+msgstr "In corso…"
+
+#: src/ui/device_view.rs:57
+msgid "Waiting for authentication"
+msgstr "In attesa di autenticazione"
+
+#: src/ui/device_view.rs:58
+msgid "Still waiting — is a Polkit agent running?"
+msgstr "Ancora in attesa: c’è un agente Polkit in esecuzione?"
+
+#: src/ui/device_view.rs:87
+msgid "Blocked only"
+msgstr "Solo bloccati"
+
+#: src/ui/device_view.rs:88
+msgid "Show only devices that are not authorized"
+msgstr "Mostra solo i dispositivi non autorizzati"
+
+#: src/ui/device_view.rs:111
+msgid "Filter by name, ID, or serial"
+msgstr "Filtra per nome, ID o numero di serie"
+
+#: src/ui/device_view.rs:162
+msgid "Connecting to USBGuard…"
+msgstr "Connessione a USBGuard…"
+
+#: src/ui/device_view.rs:169
+msgid "No USB devices"
+msgstr "Nessun dispositivo USB"
+
+#: src/ui/device_view.rs:170
+msgid "USBGuard reports no connected devices."
+msgstr "USBGuard non segnala dispositivi collegati."
+
+#: src/ui/device_view.rs:222
+msgid "Name"
+msgstr "Nome"
+
+#: src/ui/device_view.rs:224
+#, rust-format
+msgid "(unreadable) {rule}"
+msgstr "(illeggibile) {rule}"
+
+#: src/ui/device_view.rs:229
+msgid "ID"
+msgstr "ID"
+
+#: src/ui/device_view.rs:234
+msgid "Serial"
+msgstr "Numero di serie"
+
+#: src/ui/device_view.rs:237
+msgid "Port"
+msgstr "Porta"
+
+#: src/ui/device_view.rs:245
+#, rust-format
+msgid "Daemon device id: {id}"
+msgstr "ID del dispositivo nel demone: {id}"
+
+#: src/ui/device_view.rs:252
+msgid "Could not be parsed:"
+msgstr "Impossibile interpretare:"
+
+#: src/ui/device_view.rs:326
+msgid "State"
+msgstr "Stato"
+
+#: src/ui/device_view.rs:355 src/ui/rule_dialog.rs:187 src/ui/window.rs:826
+msgid "Cancel"
+msgstr "Annulla"
+
+#: src/ui/device_view.rs:357
+msgid ""
+"Stop waiting. The daemon may already have acted; the list will show what it "
+"actually did."
+msgstr ""
+"Smetti di attendere. Il demone potrebbe aver già agito: l’elenco mostrerà "
+"cosa ha fatto davvero."
+
+#: src/ui/device_view.rs:411
+msgid "Actions"
+msgstr "Azioni"
+
+#: src/ui/device_view.rs:422
+msgid "Allow"
+msgstr "Consenti"
+
+#: src/ui/device_view.rs:422
+msgid "Allow this device"
+msgstr "Consenti questo dispositivo"
+
+#: src/ui/device_view.rs:423
+msgid "Block"
+msgstr "Blocca"
+
+#: src/ui/device_view.rs:423
+msgid "Block this device"
+msgstr "Blocca questo dispositivo"
+
+#: src/ui/device_view.rs:424 src/ui/window.rs:626
+msgid "Reject"
+msgstr "Rifiuta"
+
+#: src/ui/device_view.rs:424
+msgid "Reject this device"
+msgstr "Rifiuta questo dispositivo"
+
+#: src/ui/device_view.rs:426 src/ui/preferences.rs:21
+msgid "This session only"
+msgstr "Solo per questa sessione"
+
+#: src/ui/device_view.rs:427
+msgid "Undone when USBGuard restarts"
+msgstr "Annullato al riavvio di USBGuard"
+
+#: src/ui/device_view.rs:428 src/ui/preferences.rs:22
+msgid "Permanently"
+msgstr "Permanentemente"
+
+#: src/ui/device_view.rs:429
+msgid "Written to the policy; survives a restart"
+msgstr "Scritto nelle regole; resta dopo un riavvio"
+
+#: src/ui/diagnostic_dialog.rs:18
+msgid "USBGuard access"
+msgstr "Accesso a USBGuard"
+
+#: src/ui/diagnostic_dialog.rs:19 src/ui/window.rs:44
+msgid "Checking…"
+msgstr "Verifica in corso…"
+
+#: src/ui/diagnostic_dialog.rs:21
+msgid "Close"
+msgstr "Chiudi"
+
+#: src/ui/diagnostic_dialog.rs:49
+msgid "Copy commands"
+msgstr "Copia i comandi"
+
+#: src/ui/i18n.rs:60 src/ui/window.rs:45
+msgid "Connected"
+msgstr "Connesso"
+
+#: src/ui/i18n.rs:61
+msgid "No system D-Bus in this session"
+msgstr "Nessun D-Bus di sistema in questa sessione"
+
+#: src/ui/i18n.rs:62
+msgid "The USBGuard D-Bus bridge is not installed"
+msgstr "Il bridge D-Bus di USBGuard non è installato"
+
+#: src/ui/i18n.rs:63
+msgid "The USBGuard D-Bus bridge is not running"
+msgstr "Il bridge D-Bus di USBGuard non è in esecuzione"
+
+#: src/ui/i18n.rs:64
+msgid "Refused by the D-Bus bus policy"
+msgstr "Rifiutato dalla policy del bus D-Bus"
+
+#: src/ui/i18n.rs:65
+msgid "Refused by Polkit"
+msgstr "Rifiutato da Polkit"
+
+#: src/ui/i18n.rs:66
+msgid "Refused by USBGuard’s access control"
+msgstr "Rifiutato dal controllo degli accessi di USBGuard"
+
+#: src/ui/i18n.rs:67
+msgid "No Polkit authentication agent is running"
+msgstr "Nessun agente di autenticazione Polkit in esecuzione"
+
+#: src/ui/i18n.rs:68 src/ui/window.rs:48
+msgid "Access denied"
+msgstr "Accesso negato"
+
+#: src/ui/i18n.rs:76 src/ui/window.rs:962
+#, rust-format
+msgid "Not permitted: {reason}"
+msgstr "Non consentito: {reason}"
+
+#: src/ui/i18n.rs:80
+#, rust-format
+msgid "USBGuard cannot be reached: {detail}"
+msgstr "Impossibile raggiungere USBGuard: {detail}"
+
+#: src/ui/i18n.rs:85
+#, rust-format
+msgid "USBGuard refused the request: {detail}"
+msgstr "USBGuard ha rifiutato la richiesta: {detail}"
+
+#: src/ui/i18n.rs:89
+msgid "The operation was cancelled"
+msgstr "L’operazione è stata annullata"
+
+#: src/ui/i18n.rs:90
+msgid "The ruleset changed in the meantime"
+msgstr "Le regole sono cambiate nel frattempo"
+
+#: src/ui/i18n.rs:97
+msgid "The rule is too long"
+msgstr "La regola è troppo lunga"
+
+#: src/ui/i18n.rs:98
+msgid "Parentheses are nested too deeply"
+msgstr "Troppi livelli di parentesi annidate"
+
+#: src/ui/i18n.rs:99
+msgid "The rule is empty"
+msgstr "La regola è vuota"
+
+#: src/ui/i18n.rs:100
+msgid "A quoted text is not closed"
+msgstr "Un testo tra virgolette non è chiuso"
+
+#: src/ui/i18n.rs:101
+msgid "Invalid escape sequence in a quoted text"
+msgstr "Sequenza di escape non valida in un testo tra virgolette"
+
+#: src/ui/i18n.rs:102
+msgid "A parenthesis is not closed"
+msgstr "Una parentesi non è chiusa"
+
+#: src/ui/i18n.rs:103
+msgid "The rule ends too early"
+msgstr "La regola finisce troppo presto"
+
+#: src/ui/i18n.rs:104
+msgid "Unexpected text"
+msgstr "Testo inatteso"
+
+#. Translators: allow, block, and reject are rule keywords: do not translate them.
+#: src/ui/i18n.rs:106
+msgid "Expected allow, block, or reject"
+msgstr "Atteso allow, block o reject"
+
+#: src/ui/i18n.rs:107
+msgid "Unknown attribute"
+msgstr "Attributo sconosciuto"
+
+#: src/ui/i18n.rs:108
+msgid "The same attribute appears twice"
+msgstr "Lo stesso attributo compare due volte"
+
+#: src/ui/i18n.rs:109
+msgid "Invalid value for this attribute"
+msgstr "Valore non valido per questo attributo"
+
+#: src/ui/i18n.rs:110
+msgid "Unknown condition"
+msgstr "Condizione sconosciuta"
+
+#: src/ui/i18n.rs:111
+msgid "Invalid condition parameter"
+msgstr "Parametro della condizione non valido"
+
+#: src/ui/i18n.rs:112
+msgid "Too many values in one set"
+msgstr "Troppi valori in un insieme"
+
+#: src/ui/i18n.rs:119
+msgid "vendor:product, e.g. 1234:5678 or 1234:*"
+msgstr "produttore:prodotto, es. 1234:5678 o 1234:*"
+
+#: src/ui/i18n.rs:120
+msgid "class:subclass:protocol, e.g. 08:06:50 or 03:*:*"
+msgstr "classe:sottoclasse:protocollo, es. 08:06:50 o 03:*:*"
+
+#: src/ui/i18n.rs:121
+msgid "port, e.g. 1-2 or 1-2.3"
+msgstr "porta, es. 1-2 o 1-2.3"
+
+#: src/ui/i18n.rs:122
+msgid "hash as shown by usbguard"
+msgstr "hash come lo mostra usbguard"
+
+#: src/ui/i18n.rs:126
+msgid "text"
+msgstr "testo"
+
+#: src/ui/i18n.rs:134
+#, rust-format
+msgid "“{attribute}” is already used above"
+msgstr "“{attribute}” è già usato sopra"
+
+#: src/ui/i18n.rs:138
+#, rust-format
+msgid "“{value}” is not valid here: expected {shape}"
+msgstr "“{value}” non è valido qui: atteso {shape}"
+
+#: src/ui/i18n.rs:141
+msgid "Enter at least one value"
+msgstr "Inserisci almeno un valore"
+
+#: src/ui/i18n.rs:143
+msgid ""
+"A set of text values needs the text mode, where each value is quoted "
+"separately"
+msgstr ""
+"Un insieme di valori testuali richiede la modalità testo, dove ogni valore "
+"va tra virgolette separatamente"
+
+#: src/ui/notify.rs:52
+#, rust-format
+msgid "USB device {id}"
+msgstr "Dispositivo USB {id}"
+
+#: src/ui/notify.rs:96
+msgid "USB device blocked"
+msgstr "Dispositivo USB bloccato"
+
+#: src/ui/notify.rs:98
+#, rust-format
+msgid "“{device}” was plugged in and is not authorized."
+msgstr "“{device}” è stato collegato e non è autorizzato."
+
+#: src/ui/notify.rs:103
+msgid "Allow for this session"
+msgstr "Consenti per questa sessione"
+
+#: src/ui/notify.rs:113
+#, rust-format
+msgid "{count} USB device blocked"
+msgid_plural "{count} USB devices blocked"
+msgstr[0] "{count} dispositivo USB bloccato"
+msgstr[1] "{count} dispositivi USB bloccati"
+
+#: src/ui/notify.rs:125
+#, rust-format
+msgid "{devices} and {count} more"
+msgid_plural "{devices} and {count} more"
+msgstr[0] "{devices} e {count} altro"
+msgstr[1] "{devices} e altri {count}"
+
+#: src/ui/policy_view.rs:40
+msgid "What happens to a device that matches no rule"
+msgstr "Cosa succede a un dispositivo che non corrisponde a nessuna regola"
+
+#: src/ui/policy_view.rs:42
+msgid "What happens to a device plugged in while USBGuard runs"
+msgstr ""
+"Cosa succede a un dispositivo collegato mentre USBGuard è in esecuzione"
+
+#: src/ui/policy_view.rs:78
+msgid "Runtime parameters"
+msgstr "Parametri di esecuzione"
+
+#: src/ui/policy_view.rs:80
+msgid ""
+"Changes apply immediately and last until USBGuard restarts. Everything else "
+"in usbguard-daemon.conf is startup configuration and cannot be changed from "
+"here."
+msgstr ""
+"Le modifiche si applicano subito e durano fino al riavvio di USBGuard. Il "
+"resto di usbguard-daemon.conf è configurazione di avvio e non si può "
+"modificare da qui."
+
+#: src/ui/policy_view.rs:135
+msgid "Add Rule…"
+msgstr "Aggiungi regola…"
+
+#: src/ui/policy_view.rs:164
+msgid "The ruleset could not be read"
+msgstr "Impossibile leggere le regole"
+
+#: src/ui/policy_view.rs:170
+msgid "Reading the ruleset…"
+msgstr "Lettura delle regole…"
+
+#: src/ui/policy_view.rs:177
+msgid "The ruleset is empty"
+msgstr "Non ci sono regole"
+
+#: src/ui/policy_view.rs:179
+msgid "Devices are treated according to the implicit policy target."
+msgstr ""
+"I dispositivi vengono trattati secondo l’azione implicita della policy."
+
+#: src/ui/policy_view.rs:314
+#, rust-format
+msgid "Daemon rule id: {id}"
+msgstr "ID della regola nel demone: {id}"
+
+#: src/ui/policy_view.rs:325
+msgid "Remove this rule"
+msgstr "Rimuovi questa regola"
+
+#: src/ui/policy_view.rs:327
+msgid "Remove rule"
+msgstr "Rimuovi regola"
+
+#: src/ui/preferences.rs:15
+msgid "Preselected choice for device actions"
+msgstr "Scelta predefinita per le azioni sui dispositivi"
+
+#: src/ui/preferences.rs:17
+msgid ""
+"“This session only” is the safer default: its effect disappears when "
+"USBGuard restarts."
+msgstr ""
+"“Solo per questa sessione” è la scelta più prudente: il suo effetto svanisce "
+"al riavvio di USBGuard."
+
+#: src/ui/preferences.rs:26
+msgid "Device actions"
+msgstr "Azioni sui dispositivi"
+
+#: src/ui/preferences.rs:42
+msgid "Settings cannot be saved: the GSettings schema is not installed"
+msgstr ""
+"Impossibile salvare le impostazioni: lo schema GSettings non è installato"
+
+#: src/ui/preferences.rs:47
+msgid "Announce new devices"
+msgstr "Segnala i nuovi dispositivi"
+
+#: src/ui/preferences.rs:49
+msgid "Notify when a device that is not authorized is plugged in"
+msgstr ""
+"Invia una notifica quando viene collegato un dispositivo non autorizzato"
+
+#: src/ui/preferences.rs:53
+msgid "Keep running in the background"
+msgstr "Continua a funzionare in background"
+
+#: src/ui/preferences.rs:55
+msgid "After the window is closed, keep announcing new devices"
+msgstr ""
+"Dopo la chiusura della finestra, continua a segnalare i nuovi dispositivi"
+
+#: src/ui/preferences.rs:59
+msgid "Start at login"
+msgstr "Avvia all’accesso"
+
+#: src/ui/preferences.rs:61
+msgid "Start hidden when you log in, so the first device is announced too"
+msgstr ""
+"Avvia nascosto all’accesso, così viene segnalato anche il primo dispositivo"
+
+#: src/ui/preferences.rs:81
+msgid "Background"
+msgstr "Background"
+
+#: src/ui/preferences.rs:105
+msgid ""
+"An unprivileged interface to the USBGuard daemon. Every change is made by "
+"the daemon, after the system’s own authorization checks."
+msgstr ""
+"Un’interfaccia senza privilegi per il demone USBGuard. Ogni modifica la "
+"esegue il demone, dopo i controlli di autorizzazione del sistema."
+
+#. Translators: replace with your name(s), one per line, to be credited.
+#: src/ui/preferences.rs:109
+msgid "translator-credits"
+msgstr "onyks-os"
+
+#: src/ui/rule_dialog.rs:154
+msgid "Add an attribute"
+msgstr "Aggiungi un attributo"
+
+#: src/ui/rule_dialog.rs:189
+msgid "Add"
+msgstr "Aggiungi"
+
+#: src/ui/rule_dialog.rs:202
+msgid "Target"
+msgstr "Azione"
+
+#: src/ui/rule_dialog.rs:212
+msgid "Attributes"
+msgstr "Attributi"
+
+#: src/ui/rule_dialog.rs:214
+msgid ""
+"A device matches when every attribute matches. No attribute matches every "
+"device."
+msgstr ""
+"Un dispositivo corrisponde quando corrispondono tutti gli attributi. Senza "
+"attributi, corrisponde ogni dispositivo."
+
+#: src/ui/rule_dialog.rs:228
+msgid "Rule text"
+msgstr "Testo della regola"
+
+#: src/ui/rule_dialog.rs:231
+msgid ""
+"The usbguard-rules.conf(5) syntax. The target must be allow, block, or "
+"reject."
+msgstr ""
+"La sintassi di usbguard-rules.conf(5). L’azione deve essere allow, block o "
+"reject."
+
+#. Translators: the rule dialog mode that builds a rule field by field.
+#: src/ui/rule_dialog.rs:238
+msgid "Guided"
+msgstr "Guidata"
+
+#. Translators: the rule dialog mode where the rule is typed as text.
+#: src/ui/rule_dialog.rs:240
+msgid "Text"
+msgstr "Testo"
+
+#: src/ui/rule_dialog.rs:272
+msgid "Will be sent as"
+msgstr "Verrà inviata così"
+
+#: src/ui/rule_dialog.rs:277
+msgid "At the end"
+msgstr "In fondo"
+
+#: src/ui/rule_dialog.rs:284
+#, rust-format
+msgid "After {position}. {rule}"
+msgstr "Dopo {position}. {rule}"
+
+#: src/ui/rule_dialog.rs:293
+msgid "Position"
+msgstr "Posizione"
+
+#: src/ui/rule_dialog.rs:294
+msgid "The first matching rule decides"
+msgstr "Decide la prima regola che corrisponde"
+
+#: src/ui/rule_dialog.rs:298
+msgid "Keep after USBGuard restarts"
+msgstr "Mantieni dopo il riavvio di USBGuard"
+
+#: src/ui/rule_dialog.rs:299
+msgid "Off: the rule lasts until USBGuard restarts"
+msgstr "Se disattivato, la regola dura fino al riavvio di USBGuard"
+
+#: src/ui/rule_dialog.rs:303
+msgid "Placement"
+msgstr "Collocazione"
+
+#: src/ui/rule_dialog.rs:331
+msgid "New Rule"
+msgstr "Nuova regola"
+
+#: src/ui/rule_dialog.rs:363
+msgid "(single value)"
+msgstr "(valore singolo)"
+
+#: src/ui/rule_dialog.rs:368
+msgid "How several values are compared with the device’s"
+msgstr "Come vengono confrontati più valori con quelli del dispositivo"
+
+#: src/ui/rule_dialog.rs:376
+msgid "Remove this attribute"
+msgstr "Rimuovi questo attributo"
+
+#: src/ui/rule_dialog.rs:464
+#, rust-format
+msgid "Internal error: the rule does not survive rendering ({error})"
+msgstr ""
+"Errore interno: la regola non sopravvive alla conversione in testo ({error})"
+
+#: src/ui/rule_dialog.rs:493
+#, rust-format
+msgid "{problem} (character {column}):"
+msgstr "{problem} (carattere {column}):"
+
+#: src/ui/tray.rs:54
+#, rust-format
+msgid "{total} USB devices, {blocked} not authorized"
+msgstr "{total} dispositivi USB, {blocked} non autorizzati"
+
+#: src/ui/tray.rs:71
+#, rust-format
+msgid "Show {app}"
+msgstr "Mostra {app}"
+
+#: src/ui/tray.rs:80
+msgid "Quit"
+msgstr "Esci"
+
+#. Translators: the connection state when changes are not permitted.
+#: src/ui/window.rs:47
+msgid "Read-only"
+msgstr "Sola lettura"
+
+#: src/ui/window.rs:49
+msgid "Disconnected"
+msgstr "Disconnesso"
+
+#: src/ui/window.rs:163
+msgid "Devices"
+msgstr "Dispositivi"
+
+#. Translators: the page listing USBGuard's rules.
+#: src/ui/window.rs:170
+msgid "Policy"
+msgstr "Regole"
+
+#: src/ui/window.rs:177
+msgid "Show USBGuard access diagnostics"
+msgstr "Mostra la diagnostica dell’accesso a USBGuard"
+
+#: src/ui/window.rs:181
+msgid "_Preferences"
+msgstr "_Preferenze"
+
+#: src/ui/window.rs:183
+#, rust-format
+msgid "_About {app}"
+msgstr "I_nformazioni su {app}"
+
+#: src/ui/window.rs:186
+msgid "_Quit"
+msgstr "_Esci"
+
+#: src/ui/window.rs:190
+msgid "Main menu"
+msgstr "Menu principale"
+
+#: src/ui/window.rs:329
+#, rust-format
+msgid "{app} is still running"
+msgstr "{app} è ancora in esecuzione"
+
+#: src/ui/window.rs:334
+msgid ""
+"It will announce newly inserted devices. Use the status icon to reopen it or "
+"quit."
+msgstr ""
+"Continuerà a segnalare i dispositivi appena collegati. Usa l’icona di stato "
+"per riaprirlo o per uscire."
+
+#: src/ui/window.rs:340
+#, rust-format
+msgid ""
+"It will announce newly inserted devices. This desktop has no status icon "
+"area: open {app} again from the application menu to show the window, and "
+"quit from its main menu."
+msgstr ""
+"Continuerà a segnalare i dispositivi appena collegati. Questo desktop non ha "
+"un’area per le icone di stato: apri di nuovo {app} dal menu delle "
+"applicazioni per mostrare la finestra, ed esci dal suo menu principale."
+
+#: src/ui/window.rs:401
+msgid "That device is no longer connected. Nothing was changed."
+msgstr "Quel dispositivo non è più collegato. Non è stato modificato nulla."
+
+#: src/ui/window.rs:492
+#, rust-format
+msgid "“{device}” was plugged in and is not authorized"
+msgstr "“{device}” è stato collegato e non è autorizzato"
+
+#: src/ui/window.rs:495
+msgid "A device was plugged in and is not authorized"
+msgstr "È stato collegato un dispositivo non autorizzato"
+
+#: src/ui/window.rs:501
+#, rust-format
+msgid "{count} device was plugged in and is not authorized"
+msgid_plural "{count} devices were plugged in and are not authorized"
+msgstr[0] "È stato collegato {count} dispositivo non autorizzato"
+msgstr[1] "Sono stati collegati {count} dispositivi non autorizzati"
+
+#: src/ui/window.rs:567
+#, rust-format
+msgid "Not permitted: {reason}. See the diagnostics for the remedy."
+msgstr "Non consentito: {reason}. La diagnostica indica come rimediare."
+
+#: src/ui/window.rs:621
+#, rust-format
+msgid "Reject “{device}”?"
+msgstr "Rifiutare “{device}”?"
+
+#: src/ui/window.rs:623
+msgid ""
+"Rejecting removes the device from the system. It can only be used again "
+"after it is physically unplugged and plugged back in."
+msgstr ""
+"Rifiutare un dispositivo lo rimuove dal sistema. Si potrà usare di nuovo "
+"solo dopo averlo scollegato e ricollegato fisicamente."
+
+#: src/ui/window.rs:653
+#, rust-format
+msgid "device {id}"
+msgstr "dispositivo {id}"
+
+#: src/ui/window.rs:716
+msgid ""
+"Stopped waiting. USBGuard may already have acted; the list shows what it "
+"actually did."
+msgstr ""
+"Attesa interrotta. USBGuard potrebbe aver già agito: l’elenco mostra cosa ha "
+"fatto davvero."
+
+#: src/ui/window.rs:737
+#, rust-format
+msgid "Remove rule {position}?"
+msgstr "Rimuovere la regola {position}?"
+
+#: src/ui/window.rs:742
+msgid "Remove"
+msgstr "Rimuovi"
+
+#: src/ui/window.rs:756
+#, rust-format
+msgid "Change {parameter}?"
+msgstr "Modificare {parameter}?"
+
+#: src/ui/window.rs:761
+#, rust-format
+msgid ""
+"From “{old}” to “{new}”. The change applies immediately and lasts until "
+"USBGuard restarts."
+msgstr ""
+"Da “{old}” a “{new}”. La modifica si applica subito e dura fino al riavvio "
+"di USBGuard."
+
+#: src/ui/window.rs:766
+msgid "Change"
+msgstr "Modifica"
+
+#: src/ui/window.rs:820
+msgid "Which rule?"
+msgstr "Quale regola?"
+
+#: src/ui/window.rs:822
+msgid ""
+"Several rules have exactly this text. They differ only in their position in "
+"the evaluation order. Choose the one to remove."
+msgstr ""
+"Più regole hanno esattamente questo testo e differiscono solo per la "
+"posizione nell’ordine di valutazione. Scegli quella da rimuovere."
+
+#: src/ui/window.rs:832
+#, rust-format
+msgid "Rule {position}"
+msgstr "Regola {position}"
+
+#: src/ui/window.rs:874
+#, rust-format
+msgid "Allowed “{device}” for this session"
+msgstr "“{device}” consentito per questa sessione"
+
+#: src/ui/window.rs:877
+#, rust-format
+msgid "Allowed “{device}” permanently"
+msgstr "“{device}” consentito permanentemente"
+
+#: src/ui/window.rs:880
+#, rust-format
+msgid "Blocked “{device}” for this session"
+msgstr "“{device}” bloccato per questa sessione"
+
+#: src/ui/window.rs:883
+#, rust-format
+msgid "Blocked “{device}” permanently"
+msgstr "“{device}” bloccato permanentemente"
+
+#: src/ui/window.rs:886
+#, rust-format
+msgid "Rejected “{device}” for this session"
+msgstr "“{device}” rifiutato per questa sessione"
+
+#: src/ui/window.rs:889
+#, rust-format
+msgid "Rejected “{device}” permanently"
+msgstr "“{device}” rifiutato permanentemente"
+
+#: src/ui/window.rs:904
+msgid "Rule removed"
+msgstr "Regola rimossa"
+
+#: src/ui/window.rs:908
+msgid ""
+"That rule no longer exists — it was removed elsewhere. Nothing was changed."
+msgstr ""
+"Quella regola non esiste più: è stata rimossa altrove. Non è stato "
+"modificato nulla."
+
+#: src/ui/window.rs:922
+msgid "Rule added"
+msgstr "Regola aggiunta"
+
+#: src/ui/window.rs:930
+#, rust-format
+msgid "{parameter} is now “{value}”"
+msgstr "{parameter} ora vale “{value}”"
+
+#: src/ui/window.rs:967
+msgid ""
+"Not authorized, and no Polkit agent seems to be running to ask for a "
+"password. See the diagnostics."
+msgstr ""
+"Non autorizzato, e non sembra esserci un agente Polkit in esecuzione per "
+"chiedere la password. Consulta la diagnostica."
+
+#: src/ui/window.rs:971
+msgid ""
+"Not authorized. If the password prompt was cancelled, try again; otherwise "
+"the diagnostics explain how to grant access."
+msgstr ""
+"Non autorizzato. Se la richiesta della password è stata annullata, riprova; "
+"altrimenti la diagnostica spiega come concedere l’accesso."
+
+#: src/ui/window.rs:975
+msgid ""
+"Cancelled. USBGuard may already have acted; what is shown is what it reports."
+msgstr ""
+"Annullato. USBGuard potrebbe aver già agito: ciò che vedi è quello che "
+"riporta."
+
+#: src/ui/window.rs:979
+msgid ""
+"The ruleset changed in the meantime, so nothing was done. It has been re-"
+"read; please choose again."
+msgstr ""
+"Le regole sono cambiate nel frattempo, quindi non è stato fatto nulla. Sono "
+"state rilette: scegli di nuovo."
+
+#: src/ui/window.rs:1031
+#, rust-format
+msgid "USBGuard reported an error: {reason}"
+msgstr "USBGuard ha segnalato un errore: {reason}"
+
+#: src/ui/window.rs:1044
+msgid ""
+"Connection to USBGuard lost. Retrying… The list below may be out of date."
+msgstr ""
+"Connessione a USBGuard persa. Nuovo tentativo in corso… L’elenco qui sotto "
+"potrebbe non essere aggiornato."
+
+#: src/ui/window.rs:1047
+msgid "Details"
+msgstr "Dettagli"
+
+#: src/ui/window.rs:1078
+#, rust-format
+msgid "{parameter} was changed to “{value}”"
+msgstr "{parameter} è stato impostato a “{value}”"
+
+#: src/ui/window.rs:1110
+#, rust-format
+msgid "USBGuard: {problem}"
+msgstr "USBGuard: {problem}"
+
+#: src/ui/window.rs:1113
+msgid "How to fix"
+msgstr "Come risolvere"
+
+#: data/io.github.onyks_os.UsbguardGui.desktop.in:3
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:8
+msgid "USBGuardGUI"
+msgstr "USBGuardGUI"
+
+#: data/io.github.onyks_os.UsbguardGui.desktop.in:4
+msgid "USB Device Policy"
+msgstr "Controllo dei dispositivi USB"
+
+#: data/io.github.onyks_os.UsbguardGui.desktop.in:5
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:9
+msgid "Control which USB devices connect"
+msgstr "Controlla quali dispositivi USB si collegano"
+
+#: data/io.github.onyks_os.UsbguardGui.desktop.in:10
+msgid "usb;usbguard;device;security;policy;authorization;"
+msgstr "usb;usbguard;dispositivo;sicurezza;policy;autorizzazione;"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:11
+msgid "onyks-os"
+msgstr "onyks-os"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:15
+msgid ""
+"A desktop interface for USBGuard, the Linux daemon that decides which USB "
+"devices are allowed to talk to your computer. See every connected device and "
+"whether it is authorized, read the policy rules in the order the daemon "
+"evaluates them, and find out precisely why access fails when it does."
+msgstr ""
+"Un’interfaccia desktop per USBGuard, il demone Linux che decide quali "
+"dispositivi USB possono comunicare con il computer. Mostra ogni dispositivo "
+"collegato e se è autorizzato, le regole nell’ordine in cui il demone le "
+"valuta, e spiega con precisione perché l’accesso non riesce quando succede."
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:21
+msgid ""
+"The application runs without any privileges of its own. Every change is made "
+"by the USBGuard daemon, after the system's own authorization checks have "
+"approved it."
+msgstr ""
+"L’applicazione non ha privilegi propri. Ogni modifica la esegue il demone "
+"USBGuard, dopo che i controlli di autorizzazione del sistema l’hanno "
+"approvata."
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:26
+msgid "Live device list, resilient to hubs with dozens of devices"
+msgstr ""
+"Elenco dei dispositivi in tempo reale, che regge anche hub con decine di "
+"dispositivi"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:27
+msgid "The policy ruleset in evaluation order"
+msgstr "Le regole nell’ordine di valutazione"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:28
+msgid ""
+"Diagnostics that name the exact cause of an access problem and its remedy"
+msgstr ""
+"Una diagnostica che indica la causa esatta di un problema di accesso e come "
+"risolverlo"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:29
+msgid "Changes no system configuration: every change goes through USBGuard"
+msgstr ""
+"Non modifica la configurazione del sistema: ogni modifica passa da USBGuard"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:31
+msgid ""
+"Requires the USBGuard daemon and its D-Bus bridge (usbguard-dbus) on the "
+"host."
+msgstr ""
+"Richiede il demone USBGuard e il suo bridge D-Bus (usbguard-dbus) sul "
+"sistema."
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:50
+msgid "usb"
+msgstr "usb"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:51
+msgid "usbguard"
+msgstr "usbguard"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:52
+msgid "device"
+msgstr "dispositivo"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:53
+msgid "security"
+msgstr "sicurezza"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:75
+msgid "First release."
+msgstr "Prima versione."
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:77
+msgid ""
+"Live device list; allow, block, or reject a device for this session or "
+"permanently"
+msgstr ""
+"Elenco dei dispositivi in tempo reale; consenti, blocca o rifiuta un "
+"dispositivo per questa sessione o permanentemente"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:78
+msgid ""
+"Policy view in evaluation order, with a guided rule editor and safe rule "
+"removal"
+msgstr ""
+"Vista delle regole nell’ordine di valutazione, con un editor guidato e una "
+"rimozione sicura"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:79
+msgid "Notifications for newly inserted devices that are not authorized"
+msgstr "Notifiche per i dispositivi appena collegati e non autorizzati"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:80
+msgid ""
+"Diagnostics that name the exact cause of an access problem, and usbguard-gui "
+"--diagnose"
+msgstr ""
+"Una diagnostica che indica la causa esatta di un problema di accesso, e "
+"usbguard-gui --diagnose"

@@ -13,6 +13,7 @@
 //!
 //! Depends on `model` and `rules`, never on the interface.
 
+pub mod bus;
 pub mod client;
 pub mod coalesce;
 pub mod commands;

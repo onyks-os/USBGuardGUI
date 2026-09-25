@@ -5,20 +5,25 @@
 
 use adw::prelude::*;
 
+use super::APP_NAME;
 use super::config::Config;
 use super::{APP_ID, autostart};
+use gettextrs::gettext;
 
 pub(super) fn present_preferences(parent: &impl IsA<gtk::Widget>, config: &Config) {
     let persistence = adw::ComboRow::builder()
-        .title("Preselected choice for device actions")
-        .subtitle(
+        .title(gettext("Preselected choice for device actions"))
+        .subtitle(gettext(
             "“This session only” is the safer default: its effect disappears when USBGuard \
              restarts.",
-        )
-        .model(&gtk::StringList::new(&["This session only", "Permanently"]))
+        ))
+        .model(&gtk::StringList::new(&[
+            &gettext("This session only"),
+            &gettext("Permanently"),
+        ]))
         .build();
     let group = adw::PreferencesGroup::builder()
-        .title("Device actions")
+        .title(gettext("Device actions"))
         .build();
     group.add(&persistence);
 
@@ -33,22 +38,28 @@ pub(super) fn present_preferences(parent: &impl IsA<gtk::Widget>, config: &Confi
         });
     } else {
         persistence.set_sensitive(false);
-        persistence.set_tooltip_text(Some(
+        persistence.set_tooltip_text(Some(&gettext(
             "Settings cannot be saved: the GSettings schema is not installed",
-        ));
+        )));
     }
 
     let notify = adw::SwitchRow::builder()
-        .title("Announce new devices")
-        .subtitle("Notify when a device that is not authorized is plugged in")
+        .title(gettext("Announce new devices"))
+        .subtitle(gettext(
+            "Notify when a device that is not authorized is plugged in",
+        ))
         .build();
     let background = adw::SwitchRow::builder()
-        .title("Keep running in the background")
-        .subtitle("After the window is closed, keep announcing new devices")
+        .title(gettext("Keep running in the background"))
+        .subtitle(gettext(
+            "After the window is closed, keep announcing new devices",
+        ))
         .build();
     let login = adw::SwitchRow::builder()
-        .title("Start at login")
-        .subtitle("Start hidden when you log in, so the first device is announced too")
+        .title(gettext("Start at login"))
+        .subtitle(gettext(
+            "Start hidden when you log in, so the first device is announced too",
+        ))
         .active(autostart::enabled())
         .visible(!autostart::sandboxed())
         .build();
@@ -66,7 +77,9 @@ pub(super) fn present_preferences(parent: &impl IsA<gtk::Widget>, config: &Confi
         notify.set_sensitive(false);
         background.set_sensitive(false);
     }
-    let session = adw::PreferencesGroup::builder().title("Background").build();
+    let session = adw::PreferencesGroup::builder()
+        .title(gettext("Background"))
+        .build();
     session.add(&notify);
     session.add(&background);
     session.add(&login);
@@ -81,17 +94,19 @@ pub(super) fn present_preferences(parent: &impl IsA<gtk::Widget>, config: &Confi
 
 pub(super) fn present_about(parent: &impl IsA<gtk::Widget>) {
     let about = adw::AboutDialog::builder()
-        .application_name("USBGuard")
+        .application_name(APP_NAME)
         .application_icon(APP_ID)
         .developer_name("onyks-os")
         .version(crate::VERSION)
         .website("https://github.com/onyks-os/USBGuardGUI")
         .issue_url("https://github.com/onyks-os/USBGuardGUI/issues")
         .license_type(gtk::License::MitX11)
-        .comments(
+        .comments(gettext(
             "An unprivileged interface to the USBGuard daemon. Every change is made by the \
-             daemon, after the system's own authorization checks.",
-        )
+             daemon, after the system’s own authorization checks.",
+        ))
+        // Translators: replace with your name(s), one per line, to be credited.
+        .translator_credits(gettext("translator-credits"))
         .build();
     about.present(Some(parent));
 }

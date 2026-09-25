@@ -146,9 +146,13 @@ impl Devices {
     }
 
     #[zbus(name = "applyDevicePolicy")]
-    fn apply_device_policy(
+    /// Like the real daemon, reports the change with `DevicePolicyChanged`
+    /// (and a removal for `reject`), so a window connected to the mock sees
+    /// its rows update.
+    async fn apply_device_policy(
         &self,
         #[zbus(header)] header: Header<'_>,
+        #[zbus(signal_emitter)] emitter: SignalEmitter<'_>,
         id: u32,
         target: u32,
         permanent: bool,
@@ -159,27 +163,45 @@ impl Devices {
             "applyDevicePolicy",
             format!("applyDevicePolicy {id} {target} {permanent}"),
         )?;
-        let mut s = self.0.lock().unwrap();
-        let keyword = match target {
-            0 => "allow",
-            1 => "block",
-            2 => "reject",
-            _ => return Err(fdo::Error::InvalidArgs("bad target".into())),
+        let (old, text, rule_id) = {
+            let mut s = self.0.lock().unwrap();
+            let keyword = match target {
+                0 => "allow",
+                1 => "block",
+                2 => "reject",
+                _ => return Err(fdo::Error::InvalidArgs("bad target".into())),
+            };
+            let Some(device) = s.devices.iter_mut().find(|(d, _)| *d == id) else {
+                return Err(fdo::Error::Failed("unknown device".into()));
+            };
+            let (old_word, rest) = device.1.split_once(' ').unwrap_or((device.1.as_str(), ""));
+            let old = match old_word {
+                "allow" => 0,
+                "reject" => 2,
+                _ => 1,
+            };
+            device.1 = format!("{keyword} {rest}");
+            let text = device.1.clone();
+            let rule_id = if permanent {
+                s.next_rule_id += 1;
+                let rule_id = s.next_rule_id;
+                s.rules.push((rule_id, text.clone()));
+                rule_id
+            } else {
+                0
+            };
+            if target == 2 {
+                s.devices.retain(|(d, _)| *d != id);
+            }
+            (old, text, rule_id)
         };
-        let Some(device) = s.devices.iter_mut().find(|(d, _)| *d == id) else {
-            return Err(fdo::Error::Failed("unknown device".into()));
-        };
-        let rest = device.1.split_once(' ').map_or("", |(_, r)| r).to_owned();
-        device.1 = format!("{keyword} {rest}");
-        let text = device.1.clone();
-        if permanent {
-            s.next_rule_id += 1;
-            let rule_id = s.next_rule_id;
-            s.rules.push((rule_id, text));
-            Ok(rule_id)
-        } else {
-            Ok(0)
+        let _ =
+            Self::device_policy_changed(&emitter, id, old, target, &text, rule_id, HashMap::new())
+                .await;
+        if target == 2 {
+            let _ = Self::device_presence_changed(&emitter, id, 3, 2, &text, HashMap::new()).await;
         }
+        Ok(rule_id)
     }
 
     #[zbus(signal)]

@@ -80,6 +80,8 @@ and startup behaviour only.
 | Variable | Type | Default | Description |
 | :------- | :--- | :------ | :---------- |
 | `USBGUARD_GUI_LOG` | `tracing` `EnvFilter` directive | `warn` | Log verbosity and per-target filtering. See [Logging](#logging). |
+| `LANGUAGE`, `LANG` | locale | system | Interface language (gettext). The command-line output stays in English, so it can be pasted into bug reports. |
+| `USBGUARD_GUI_BUS` | `session` | unset | **Development builds only**: talk to the session bus instead of the system bus, for the demo bridge (`cargo run --example demo-bridge`). Release builds ignore it, so an installed program cannot be redirected to a stand-in for USBGuard. |
 
 ### Logging
 
@@ -155,6 +157,7 @@ That is the complete list. In particular:
 | `/usr/share/glib-2.0/schemas/io.github.onyks_os.UsbguardGui.gschema.xml` | GSettings schema. | Package lifetime |
 | `/usr/share/icons/hicolor/…/io.github.onyks_os.UsbguardGui.svg` | Application icon. | Package lifetime |
 | `/usr/share/locale/…/usbguard-gui.mo` | Translation catalogues. | Package lifetime |
+| `/usr/share/locale/<lang>/LC_MESSAGES/usbguard-gui.mo` | Translation catalogues. | Package lifetime |
 | `/usr/share/doc/usbguard-gui/70-usbguard-gui.rules.example` | Example Polkit rule — **shipped inert, never installed into `/etc/polkit-1/rules.d/`.** | Package lifetime |
 
 The post-install script modifies no system configuration. Its only action is the GSettings schema

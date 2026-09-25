@@ -14,7 +14,7 @@ use super::APP_ID;
 
 const ENTRY: &str = "[Desktop Entry]
 Type=Application
-Name=USBGuard
+Name=USBGuardGUI
 Comment=Announce newly inserted USB devices
 Exec=usbguard-gui --background
 Icon=io.github.onyks_os.UsbguardGui

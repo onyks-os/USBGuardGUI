@@ -6,18 +6,25 @@
 //! `OUT_DIR`, and the program falls back to that directory at run time
 //! (`src/ui/config.rs`). Without `glib-compile-schemas` the build still
 //! succeeds; the program then uses built-in defaults.
+//!
+//! The translations in `po/` are compiled the same way, for the same reason:
+//! packages install them under /usr/share/locale (`make i18n`), but a
+//! `cargo run` finds them in `OUT_DIR` (`src/ui/i18n.rs`). Without `msgfmt`
+//! the interface is simply in English.
 
 use std::path::PathBuf;
 use std::process::Command;
 
 fn main() {
     println!("cargo:rerun-if-changed=data/io.github.onyks_os.UsbguardGui.gschema.xml");
+    println!("cargo:rerun-if-changed=po");
     if std::env::var_os("CARGO_FEATURE_GUI").is_none() {
         return;
     }
     let Some(out_dir) = std::env::var_os("OUT_DIR").map(PathBuf::from) else {
         return;
     };
+    compile_translations(&out_dir);
     let schema_dir = out_dir.join("schemas");
     if std::fs::create_dir_all(&schema_dir).is_err()
         || std::fs::copy(
@@ -44,4 +51,37 @@ fn main() {
             "cargo:warning=glib-compile-schemas failed or is missing; settings will not persist in development runs"
         ),
     }
+}
+
+/// Compiles every language listed in `po/LINGUAS` into
+/// `OUT_DIR/locale/<lang>/LC_MESSAGES/usbguard-gui.mo`.
+fn compile_translations(out_dir: &std::path::Path) {
+    let Ok(linguas) = std::fs::read_to_string("po/LINGUAS") else {
+        return;
+    };
+    let locale_dir = out_dir.join("locale");
+    let languages = linguas
+        .lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty() && !l.starts_with('#'));
+    for lang in languages {
+        let target = locale_dir.join(lang).join("LC_MESSAGES");
+        let compiled = std::fs::create_dir_all(&target).is_ok()
+            && Command::new("msgfmt")
+                .arg("-o")
+                .arg(target.join("usbguard-gui.mo"))
+                .arg(format!("po/{lang}.po"))
+                .status()
+                .is_ok_and(|s| s.success());
+        if !compiled {
+            println!(
+                "cargo:warning=msgfmt failed or is missing; the {lang} translation is not built"
+            );
+            return;
+        }
+    }
+    println!(
+        "cargo:rustc-env=USBGUARD_GUI_DEV_LOCALE_DIR={}",
+        locale_dir.display()
+    );
 }
