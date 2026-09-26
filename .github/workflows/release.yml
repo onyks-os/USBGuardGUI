@@ -110,18 +110,19 @@ jobs:
             !packaging/arch/*-debug-*.pkg.tar.zst
           if-no-files-found: error
 
+  # Built in Flathub's own CI image: it carries the GNOME runtime and SDK and
+  # an AppStream recent enough for the metainfo (Ubuntu's rejects it).
   flatpak:
     name: Flatpak bundle
     needs: version
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-50@sha256:1de59efef01a946d9f28f1ec3458bf6f61dcee3507d7fecdd473f8134da4ec77
+      options: --privileged
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Install flatpak-builder
-        run: |
-          sudo apt-get update && sudo apt-get install -y --no-install-recommends flatpak flatpak-builder python3-venv
-          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
       # The sandboxed build has no network: every crate is listed with its
       # checksum in cargo-sources.json, generated here from Cargo.lock by a
       # pinned revision of flatpak-builder-tools.
@@ -132,20 +133,19 @@ jobs:
           python3 -m venv /tmp/fcg && /tmp/fcg/bin/pip install --quiet aiohttp tomlkit
           curl -sSfL -o /tmp/flatpak-cargo-generator.py "$GENERATOR"
           /tmp/fcg/bin/python /tmp/flatpak-cargo-generator.py Cargo.lock -o packaging/cargo-sources.json
+      # The bundle names Flathub as its runtime repository, so installing it
+      # fetches the GNOME runtime.
       - name: Build the bundle
-        env:
-          VERSION: ${{ needs.version.outputs.version }}
-        run: |
-          flatpak-builder --user --install-deps-from=flathub --disable-rofiles-fuse --force-clean \
-            --repo=flatpak-repo build-flatpak packaging/io.github.onyks_os.UsbguardGui.yaml
-          mkdir -p dist
-          # --runtime-repo: installing the bundle fetches the GNOME runtime from Flathub.
-          flatpak build-bundle --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
-            flatpak-repo "dist/usbguard-gui-${VERSION}.flatpak" io.github.onyks_os.UsbguardGui
+        uses: flathub-infra/flatpak-github-actions/flatpak-builder@933e9e8ca36e85046ebca8e211f0785c6becac40 # master
+        with:
+          manifest-path: packaging/io.github.onyks_os.UsbguardGui.yaml
+          bundle: usbguard-gui-${{ needs.version.outputs.version }}.flatpak
+          cache: false
+          upload-artifact: false
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: flatpak
-          path: dist/*.flatpak
+          path: usbguard-gui-*.flatpak
           if-no-files-found: error
 
   release:
