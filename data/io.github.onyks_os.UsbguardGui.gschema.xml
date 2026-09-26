@@ -38,7 +38,7 @@
       <summary>Whether the one-time notice about tray availability was shown</summary>
     </key>
     <key name="window-width" type="i">
-      <default>960</default>
+      <default>940</default>
       <summary>Window width</summary>
     </key>
     <key name="window-height" type="i">

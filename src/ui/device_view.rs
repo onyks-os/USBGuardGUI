@@ -41,7 +41,7 @@ pub(super) type ModifyBlock = Rc<RefCell<Option<String>>>;
 fn state_presentation(target: Target) -> (&'static str, String) {
     match target {
         // Translators: the authorization state of a USB device.
-        Target::Allow => ("emblem-ok-symbolic", gettext("Allowed")),
+        Target::Allow => ("object-select-symbolic", gettext("Allowed")),
         // Translators: the authorization state of a USB device.
         Target::Block => ("action-unavailable-symbolic", gettext("Blocked")),
         // Translators: the authorization state of a USB device.
