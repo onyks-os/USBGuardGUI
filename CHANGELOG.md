@@ -39,6 +39,9 @@ Nothing is released yet. See
   and development; development builds reach it with `USBGUARD_GUI_BUS=session`.
 - Packages: `.deb` and `.rpm` (`make package-deb`, `make package-rpm`), an Arch `PKGBUILD`, and a
   Flatpak manifest. No post-install scripts.
+- Release pipeline: a `v*` tag builds the `.deb`, `.rpm`, Arch package, and Flatpak bundle, signs
+  every asset with Sigstore, publishes the GitHub Release, and publishes the crate to crates.io
+  (`docs/releasing.md`). Tags with a suffix are rehearsals: pre-releases, not published to crates.io.
 - Read-only GTK 4 / libadwaita window: device list with filter, policy list in evaluation order,
   connection indicator, diagnostic dialog with per-distribution remedies.
 - Phase 0 introspection results (`docs/dbus-introspection/`, `docs/architecture.md` §13.4) and an
