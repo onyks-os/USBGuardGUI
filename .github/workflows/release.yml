@@ -1,5 +1,16 @@
 name: Release
 
+# Pushing a tag v<version> builds every package, signs everything, publishes a
+# GitHub Release, and then publishes the crate to crates.io.
+#
+#   v0.1.0         a release: all of the above
+#   v0.1.0-rc.1    a rehearsal: a GitHub pre-release, never marked "latest",
+#                  and nothing is published to crates.io
+#
+# Packages built: .deb (Debian, Ubuntu), .rpm (Fedora, RHEL), .pkg.tar.zst
+# (Arch), .flatpak (a bundle for any distribution), the bare binary, and the
+# .crate. The tag's base version must equal the version in Cargo.toml.
+
 on:
   push:
     tags:
@@ -8,45 +19,151 @@ on:
 permissions:
   contents: read
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
+  version:
+    name: Check the tag against Cargo.toml
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: check
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(grep -m1 '^version = ' Cargo.toml | cut -d '"' -f2)
+          base="${TAG#v}"; base="${base%%-*}"
+          if [ "$base" != "$version" ]; then
+            echo "::error::tag $TAG does not match Cargo.toml version $version"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  # Built on Ubuntu 24.04: its glibc is older than Fedora's, so the same
+  # binary runs from both the .deb and the .rpm.
+  native:
+    name: .deb, .rpm, binary, .crate
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # gettext: msgfmt compiles the translations the packages install.
+      - name: Install GTK development packages and gettext
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: stable
+      - name: Build the binary and the .crate
+        run: make build
+      - name: Build the .deb and the .rpm
+        run: |
+          cargo install cargo-deb cargo-generate-rpm --locked
+          make package-deb package-rpm
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: native
+          path: dist/*
+          if-no-files-found: error
+
+  arch:
+    name: Arch package
+    needs: version
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      # Retried: an Arch mirror that stalls fails the whole transaction.
+      - name: Install the build dependencies
+        run: |
+          for attempt in 1 2 3; do
+            pacman -Syu --noconfirm --needed base-devel cargo gettext gtk4 libadwaita git && exit 0
+            echo "pacman failed (attempt $attempt), retrying"; sleep 20
+          done
+          exit 1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # makepkg builds from the tag's own tree rather than downloading the
+      # GitHub archive, so a pre-release is built exactly like a release. The
+      # file name matches the PKGBUILD's source=, so makepkg uses it as is.
+      - name: Build with makepkg
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          git config --global --add safe.directory "$PWD"
+          git archive --prefix="USBGuardGUI-${VERSION}/" -o "packaging/arch/usbguard-gui-${VERSION}.tar.gz" HEAD
+          useradd -m builder
+          chown -R builder packaging/arch
+          su builder -c "cd packaging/arch && makepkg -f --nodeps --noconfirm"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: arch
+          path: packaging/arch/*.pkg.tar.zst
+          if-no-files-found: error
+
+  flatpak:
+    name: Flatpak bundle
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install flatpak-builder
+        run: |
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends flatpak flatpak-builder python3-venv
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+      # The sandboxed build has no network: every crate is listed with its
+      # checksum in cargo-sources.json, generated here from Cargo.lock by a
+      # pinned revision of flatpak-builder-tools.
+      - name: Generate cargo-sources.json
+        env:
+          GENERATOR: https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/41c20aa10819cdb2a4f3ca171758a96d1955c018/cargo/flatpak-cargo-generator.py
+        run: |
+          python3 -m venv /tmp/fcg && /tmp/fcg/bin/pip install --quiet aiohttp tomlkit
+          curl -sSfL -o /tmp/flatpak-cargo-generator.py "$GENERATOR"
+          /tmp/fcg/bin/python /tmp/flatpak-cargo-generator.py Cargo.lock -o packaging/cargo-sources.json
+      - name: Build the bundle
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          flatpak-builder --user --install-deps-from=flathub --disable-rofiles-fuse --force-clean \
+            --repo=flatpak-repo build-flatpak packaging/io.github.onyks_os.UsbguardGui.yaml
+          mkdir -p dist
+          flatpak build-bundle flatpak-repo "dist/usbguard-gui-${VERSION}.flatpak" io.github.onyks_os.UsbguardGui
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: flatpak
+          path: dist/*.flatpak
+          if-no-files-found: error
+
   release:
-    name: Build, sign, and publish
+    name: Sign and publish the GitHub Release
+    needs: [native, arch, flatpak]
     runs-on: ubuntu-latest
     permissions:
       contents: write   # create the GitHub Release and upload assets
       id-token: write   # Sigstore keyless signing via OIDC
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0
-
-      # gettext: msgfmt compiles the translations the packages install.
-      - name: Install GTK development packages and gettext
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext
-
-      - name: Set up the Rust toolchain
-        uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+      - name: Collect the packages
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          toolchain: stable
-
-      - name: Build release artifacts
-        run: make build
-
-      # Built on Ubuntu 24.04: its glibc is older than Fedora's, so the same
-      # binary runs in both the .deb and the .rpm.
-      - name: Build .deb and .rpm packages
-        run: |
-          cargo install cargo-deb cargo-generate-rpm --locked
-          make package-deb package-rpm
-
+          path: dist
+          merge-multiple: true
       - name: Generate SBOM
         run: |
           npm install -g @cyclonedx/cdxgen
           cdxgen -o dist/sbom.json
-
       - name: Generate checksums
         run: make checksums
 
@@ -72,3 +189,46 @@ jobs:
           # marks it "latest", so the README's download links stay on the last
           # real release.
           prerelease: ${{ contains(github.ref_name, '-') }}
+
+  # After the GitHub Release, so the packages exist even if crates.io is down;
+  # the job can be re-run on its own. Never for a pre-release.
+  #
+  # Authentication, in order of preference:
+  #   1. Trusted Publishing: set the repository variable
+  #      CRATES_IO_TRUSTED_PUBLISHING=true once crates.io is configured to
+  #      trust this workflow. A 30-minute token is minted per run.
+  #   2. The CARGO_REGISTRY_TOKEN secret of the crates-io environment —
+  #      required for the very first publish, which crates.io does not allow
+  #      through Trusted Publishing.
+  crates-io:
+    name: Publish to crates.io
+    needs: release
+    if: ${{ !contains(github.ref_name, '-') }}
+    runs-on: ubuntu-latest
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write   # Trusted Publishing via OIDC
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # cargo publish builds the packaged crate once more to verify it.
+      - name: Install GTK development packages and gettext
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: stable
+      - name: Authenticate with Trusted Publishing
+        id: auth
+        if: ${{ vars.CRATES_IO_TRUSTED_PUBLISHING == 'true' }}
+        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
+      - name: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token || secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          if [ -z "$CARGO_REGISTRY_TOKEN" ]; then
+            echo "::error::no crates.io credentials: set the CARGO_REGISTRY_TOKEN secret of the crates-io environment, or configure Trusted Publishing"
+            exit 1
+          fi
+          cargo publish --locked

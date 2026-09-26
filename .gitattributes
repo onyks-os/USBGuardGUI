@@ -27,10 +27,10 @@ Makefile text eol=lf
 *.iso   binary
 
 # Exclude non-shipping paths from GitHub language statistics and archives.
+# tests/ ships: the unit tests read its fixtures, and packagers run them.
 docs/**       linguist-documentation
 tests/**      linguist-vendored=false
 .github/**    export-ignore
-tests/**      export-ignore
 docs/**       export-ignore
 .gitattributes export-ignore
 .gitignore     export-ignore

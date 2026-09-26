@@ -11,7 +11,7 @@ repository = "https://github.com/onyks-os/USBGuardGUI"
 documentation = "https://onyks-os.github.io/usbguard-gui/"
 keywords = ["usbguard", "usb", "security", "gtk4", "linux"]
 categories = ["gui"]
-exclude = ["docs/", ".github/", "tests/fixtures/"]
+exclude = ["docs/", ".github/"]
 
 # ---------------------------------------------------------------------------
 # Native packages (docs/architecture.md §14.2). `make package-deb` and

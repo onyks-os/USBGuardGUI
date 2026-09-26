@@ -9,7 +9,7 @@
 # cannot provide them. No --filesystem permission of any kind is requested.
 app-id: io.github.onyks_os.UsbguardGui
 runtime: org.gnome.Platform
-runtime-version: '48'
+runtime-version: '50'
 sdk: org.gnome.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.rust-stable
@@ -55,4 +55,13 @@ modules:
     sources:
       - type: dir
         path: ..
+        # Build output and local scratch space, which can be gigabytes.
+        skip:
+          - target
+          - fuzz/target
+          - dist
+          - build-flatpak
+          - .flatpak-builder
+          - ignore
+          - .remember
       - cargo-sources.json
