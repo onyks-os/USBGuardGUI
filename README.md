@@ -97,7 +97,12 @@ Download the package for your distribution from the
 
 * **Debian / Ubuntu**: `sudo apt install ./usbguard-gui_0.1.0-1_amd64.deb`
 * **Fedora / RHEL**: `sudo dnf install ./usbguard-gui-0.1.0-1.x86_64.rpm`
-* **Arch Linux**: from a clone, `cd packaging/arch && makepkg -si`
+* **Arch Linux**: `sudo pacman -U ./usbguard-gui-0.1.0-1-x86_64.pkg.tar.zst`, or from a clone,
+  `cd packaging/arch && makepkg -si`
+* **Any distribution, as a Flatpak**: `flatpak install --user ./usbguard-gui-0.1.0.flatpak`. USBGuard
+  itself must still come from your distribution: the Flatpak only talks to it over D-Bus.
+* **With Cargo**: `cargo install usbguard-gui` (needs the GTK development packages listed under
+  [From source](#2-from-source)).
 
 The packages pull in USBGuard and its bridge, and change no system configuration: no post-install
 script runs, and the example Polkit rule is installed as documentation, never activated.
