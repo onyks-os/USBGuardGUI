@@ -42,7 +42,7 @@ impl Indicator {
     fn presentation(self) -> (&'static str, String) {
         match self {
             Self::Checking => ("content-loading-symbolic", gettext("Checking…")),
-            Self::Connected => ("emblem-ok-symbolic", gettext("Connected")),
+            Self::Connected => ("object-select-symbolic", gettext("Connected")),
             // Translators: the connection state when changes are not permitted.
             Self::ReadOnly => ("changes-prevent-symbolic", gettext("Read-only")),
             Self::Denied => ("dialog-warning-symbolic", gettext("Access denied")),
@@ -1007,7 +1007,13 @@ impl MainWindow {
                     self.announce_new(&before);
                 }
                 self.0.devices.set_stale(false);
-                if !self.access_problem() {
+                if self.unreachable_reported() {
+                    // The last probe said the bridge could not be reached, and
+                    // yet here is its device list: it came up after the probe
+                    // (the program started first). Ask again rather than keep
+                    // showing a diagnosis that is no longer true.
+                    super::probe_after_present(self.0.ui_tx.clone());
+                } else if !self.access_problem() {
                     self.0.banner.set_revealed(false);
                     self.set_indicator(self.connected_indicator());
                 }
@@ -1060,6 +1066,9 @@ impl MainWindow {
                 }
                 self.0.devices.reset();
                 self.apply_denials();
+                // Whatever was diagnosed before the disconnection may no
+                // longer hold either.
+                super::probe_after_present(self.0.ui_tx.clone());
             }
         }
     }
@@ -1079,6 +1088,19 @@ impl MainWindow {
                 &[("parameter", name), ("value", value)],
             ));
         }
+    }
+
+    /// True when the last probe found the bridge unreachable — a diagnosis a
+    /// working connection proves out of date.
+    fn unreachable_reported(&self) -> bool {
+        matches!(
+            self.0.state.borrow().access,
+            Some(
+                AccessState::BusUnavailable
+                    | AccessState::BridgeNotInstalled
+                    | AccessState::BridgeNotRunning { .. }
+            )
+        )
     }
 
     /// True when the last probe found a problem that the banner is showing.

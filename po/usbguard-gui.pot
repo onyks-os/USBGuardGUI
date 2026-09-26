@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 19:43+0200\n"
+"POT-Creation-Date: 2026-09-26 13:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -810,31 +810,31 @@ msgid ""
 "read; please choose again."
 msgstr ""
 
-#: src/ui/window.rs:1031
+#: src/ui/window.rs:1037
 #, rust-format
 msgid "USBGuard reported an error: {reason}"
 msgstr ""
 
-#: src/ui/window.rs:1044
+#: src/ui/window.rs:1050
 msgid ""
 "Connection to USBGuard lost. Retrying… The list below may be out of date."
 msgstr ""
 
-#: src/ui/window.rs:1047
+#: src/ui/window.rs:1053
 msgid "Details"
 msgstr ""
 
-#: src/ui/window.rs:1078
+#: src/ui/window.rs:1087
 #, rust-format
 msgid "{parameter} was changed to “{value}”"
 msgstr ""
 
-#: src/ui/window.rs:1110
+#: src/ui/window.rs:1132
 #, rust-format
 msgid "USBGuard: {problem}"
 msgstr ""
 
-#: src/ui/window.rs:1113
+#: src/ui/window.rs:1135
 msgid "How to fix"
 msgstr ""
 

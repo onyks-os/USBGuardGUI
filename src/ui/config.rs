@@ -74,7 +74,7 @@ impl Config {
 
     pub(super) fn window_size(&self) -> (i32, i32) {
         (
-            self.int("window-width", 960),
+            self.int("window-width", 940),
             self.int("window-height", 600),
         )
     }

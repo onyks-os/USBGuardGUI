@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: USBGuard GUI\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-25 19:43+0200\n"
+"POT-Creation-Date: 2026-09-26 13:04+0200\n"
 "PO-Revision-Date: 2026-09-25 19:39+0200\n"
 "Last-Translator: onyks-os\n"
 "Language-Team: Italian\n"
@@ -855,33 +855,33 @@ msgstr ""
 "Le regole sono cambiate nel frattempo, quindi non è stato fatto nulla. Sono "
 "state rilette: scegli di nuovo."
 
-#: src/ui/window.rs:1031
+#: src/ui/window.rs:1037
 #, rust-format
 msgid "USBGuard reported an error: {reason}"
 msgstr "USBGuard ha segnalato un errore: {reason}"
 
-#: src/ui/window.rs:1044
+#: src/ui/window.rs:1050
 msgid ""
 "Connection to USBGuard lost. Retrying… The list below may be out of date."
 msgstr ""
 "Connessione a USBGuard persa. Nuovo tentativo in corso… L’elenco qui sotto "
 "potrebbe non essere aggiornato."
 
-#: src/ui/window.rs:1047
+#: src/ui/window.rs:1053
 msgid "Details"
 msgstr "Dettagli"
 
-#: src/ui/window.rs:1078
+#: src/ui/window.rs:1087
 #, rust-format
 msgid "{parameter} was changed to “{value}”"
 msgstr "{parameter} è stato impostato a “{value}”"
 
-#: src/ui/window.rs:1110
+#: src/ui/window.rs:1132
 #, rust-format
 msgid "USBGuard: {problem}"
 msgstr "USBGuard: {problem}"
 
-#: src/ui/window.rs:1113
+#: src/ui/window.rs:1135
 msgid "How to fix"
 msgstr "Come risolvere"
 
