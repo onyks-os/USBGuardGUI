@@ -75,6 +75,9 @@ pub(super) fn present(parent: &impl IsA<gtk::Widget>) {
     let dialog = adw::Dialog::builder()
         .title(gettext("USBGuard access"))
         .content_width(720)
+        // Fixed: the report arrives after the dialog is sized, and a dialog
+        // does not grow to fit it. Longer reports (with a remedy) scroll.
+        .content_height(480)
         .child(&toolbar)
         .build();
     dialog.present(Some(parent));
@@ -92,6 +95,9 @@ pub(super) fn present(parent: &impl IsA<gtk::Widget>) {
         let distro = Distro::detect();
         summary.set_label(&super::i18n::access_summary(&report.state));
         report_label.set_text(format_report(&report, distro).trim_end());
+        // The selectable report is otherwise the first focusable widget, and
+        // opens with a text cursor in it.
+        dialog.set_focus(None::<&gtk::Widget>);
 
         if let Some(remedy) = remedy(&report.state, distro).filter(|r| !r.commands.is_empty()) {
             let commands = remedy.commands.join("\n");
