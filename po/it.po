@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: USBGuard GUI\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 13:04+0200\n"
+"POT-Creation-Date: 2026-09-27 22:21+0200\n"
 "PO-Revision-Date: 2026-09-25 19:39+0200\n"
 "Last-Translator: onyks-os\n"
 "Language-Team: Italian\n"
@@ -164,21 +164,17 @@ msgstr "Permanentemente"
 msgid "Written to the policy; survives a restart"
 msgstr "Scritto nelle regole; resta dopo un riavvio"
 
-#: src/ui/diagnostic_dialog.rs:18
-msgid "USBGuard access"
-msgstr "Accesso a USBGuard"
+#: src/ui/diagnostic_dialog.rs:21
+msgid "Copy commands"
+msgstr "Copia i comandi"
 
-#: src/ui/diagnostic_dialog.rs:19 src/ui/window.rs:44
+#: src/ui/diagnostic_dialog.rs:29 src/ui/window.rs:44
 msgid "Checking…"
 msgstr "Verifica in corso…"
 
-#: src/ui/diagnostic_dialog.rs:21
-msgid "Close"
-msgstr "Chiudi"
-
-#: src/ui/diagnostic_dialog.rs:49
-msgid "Copy commands"
-msgstr "Copia i comandi"
+#: src/ui/diagnostic_dialog.rs:76
+msgid "USBGuard access"
+msgstr "Accesso a USBGuard"
 
 #: src/ui/i18n.rs:60 src/ui/window.rs:45
 msgid "Connected"
@@ -975,11 +971,31 @@ msgstr "dispositivo"
 msgid "security"
 msgstr "sicurezza"
 
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:67
+msgid "Every connected device and whether it is authorized"
+msgstr "Ogni dispositivo collegato e se è autorizzato"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:71
+msgid "Allow, block, or reject a device, for this session or permanently"
+msgstr "Consenti, blocca o rifiuta un dispositivo, per questa sessione o permanentemente"
+
 #: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:75
+msgid "The policy rules in the order USBGuard evaluates them"
+msgstr "Le regole della policy nell’ordine in cui USBGuard le valuta"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:79
+msgid "A guided editor for new rules"
+msgstr "Un editor guidato per le nuove regole"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:83
+msgid "Diagnostics that name the exact cause of an access problem"
+msgstr "Una diagnostica che indica la causa esatta di un problema di accesso"
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:98
 msgid "First release."
 msgstr "Prima versione."
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:77
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:100
 msgid ""
 "Live device list; allow, block, or reject a device for this session or "
 "permanently"
@@ -987,7 +1003,7 @@ msgstr ""
 "Elenco dei dispositivi in tempo reale; consenti, blocca o rifiuta un "
 "dispositivo per questa sessione o permanentemente"
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:78
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:101
 msgid ""
 "Policy view in evaluation order, with a guided rule editor and safe rule "
 "removal"
@@ -995,14 +1011,17 @@ msgstr ""
 "Vista delle regole nell’ordine di valutazione, con un editor guidato e una "
 "rimozione sicura"
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:79
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:102
 msgid "Notifications for newly inserted devices that are not authorized"
 msgstr "Notifiche per i dispositivi appena collegati e non autorizzati"
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:80
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:103
 msgid ""
 "Diagnostics that name the exact cause of an access problem, and usbguard-gui "
 "--diagnose"
 msgstr ""
 "Una diagnostica che indica la causa esatta di un problema di accesso, e "
 "usbguard-gui --diagnose"
+
+#~ msgid "Close"
+#~ msgstr "Chiudi"
