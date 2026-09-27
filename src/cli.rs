@@ -175,7 +175,7 @@ pub fn format_report(report: &ProbeReport, distro: Distro) -> String {
     let mut out = String::new();
     let _ = writeln!(out, "USBGuardGUI {} — access diagnostics\n", crate::VERSION);
     let line = |out: &mut String, label: &str, value: &str| {
-        let _ = writeln!(out, "  {label:<28}{value}");
+        let _ = writeln!(out, "  {label:<24}{value}");
     };
     let bus = if report.state == AccessState::BusUnavailable {
         "unavailable"

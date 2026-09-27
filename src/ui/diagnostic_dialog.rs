@@ -74,7 +74,7 @@ pub(super) fn present(parent: &impl IsA<gtk::Widget>) {
 
     let dialog = adw::Dialog::builder()
         .title(gettext("USBGuard access"))
-        .content_width(720)
+        .content_width(800)
         // Fixed: the report arrives after the dialog is sized, and a dialog
         // does not grow to fit it. Longer reports (with a remedy) scroll.
         .content_height(480)
