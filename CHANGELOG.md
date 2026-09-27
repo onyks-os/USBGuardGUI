@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing is released yet. See
-[ROADMAP.md](https://github.com/onyks-os/USBGuardGUI/blob/main/ROADMAP.md) for the phase order.
+## [0.1.0] - 2026-09-27
+
+The first release.
 
 ### Added
 
@@ -64,12 +65,5 @@ Nothing is released yet. See
 - `docs/architecture.md`: `listRules` takes a label filter, not a query — `""` lists every rule,
   `"match"` would have listed none. Found by introspection before any code depended on it.
 
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-
-[Unreleased]: https://github.com/onyks-os/USBGuardGUI/commits/main
+[Unreleased]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/onyks-os/USBGuardGUI/releases/tag/v0.1.0
