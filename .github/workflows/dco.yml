@@ -30,6 +30,11 @@ jobs:
           while read -r sha; do
             [ -z "$sha" ] && continue
             author="$(git show -s --format='%an <%ae>' "$sha")"
+            # Dependabot cannot sign off. A maintainer reviews and merges its
+            # pull requests, and that merge is the human certification.
+            if [ "$author" = "dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>" ]; then
+              continue
+            fi
             if ! git show -s --format='%B' "$sha" | grep -qiF "Signed-off-by: $author"; then
               echo "::error::Commit $sha is missing 'Signed-off-by: $author'"
               failed=1
