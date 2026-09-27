@@ -11,6 +11,12 @@ updates:
     labels:
       - "dependencies"
       - "ci"
+    # init, analyze, autobuild, and upload-sarif must run the same version:
+    # bumped one at a time, each pull request fails CodeQL.
+    groups:
+      codeql-action:
+        patterns:
+          - "github/codeql-action*"
 
   - package-ecosystem: "cargo"
     directory: "/"
