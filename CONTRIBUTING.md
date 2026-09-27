@@ -182,6 +182,8 @@ git rebase --signoff HEAD~<number-of-commits>
 ```
 
 > Pull requests with unsigned commits will not be merged. The DCO check is enforced by CI.
+> The one exception is Dependabot, which cannot sign off: its commits are exempt, and a maintainer
+> reviews and merges each of its pull requests.
 
 <details>
 <summary>Full DCO text</summary>
