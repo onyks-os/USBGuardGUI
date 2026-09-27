@@ -13,21 +13,70 @@ use crate::runtime::runtime;
 use gettextrs::gettext;
 
 /// Opens the dialog over `parent`.
+///
+/// A full dialog rather than an alert: the report is the `--diagnose` text,
+/// aligned in columns, and an alert is too narrow to show it unwrapped.
 pub(super) fn present(parent: &impl IsA<gtk::Widget>) {
-    let dialog = adw::AlertDialog::new(
-        Some(&gettext("USBGuard access")),
-        Some(&gettext("Checking…")),
-    );
-    dialog.add_response("close", &gettext("Close"));
-    dialog.set_close_response("close");
+    let copy = gtk::Button::builder()
+        .label(gettext("Copy commands"))
+        .css_classes(["suggested-action"])
+        .visible(false)
+        .build();
+    let header = adw::HeaderBar::new();
+    header.pack_start(&copy);
 
+    let summary = gtk::Label::builder()
+        .label(gettext("Checking…"))
+        .xalign(0.0)
+        .wrap(true)
+        .css_classes(["title-4"])
+        .build();
     let report_label = gtk::Label::builder()
         .selectable(true)
         .xalign(0.0)
-        .wrap(true)
+        .yalign(0.0)
         .css_classes(["monospace"])
         .build();
-    dialog.set_extra_child(Some(&report_label));
+    let report_frame = gtk::Frame::builder()
+        .child(
+            &gtk::ScrolledWindow::builder()
+                .child(&report_label)
+                .vscrollbar_policy(gtk::PolicyType::Never)
+                .propagate_natural_height(true)
+                .build(),
+        )
+        .build();
+    report_label.set_margin_top(12);
+    report_label.set_margin_bottom(12);
+    report_label.set_margin_start(12);
+    report_label.set_margin_end(12);
+
+    let column = gtk::Box::builder()
+        .orientation(gtk::Orientation::Vertical)
+        .spacing(12)
+        .margin_top(6)
+        .margin_bottom(18)
+        .margin_start(18)
+        .margin_end(18)
+        .build();
+    column.append(&summary);
+    column.append(&report_frame);
+
+    let toolbar = adw::ToolbarView::new();
+    toolbar.add_top_bar(&header);
+    toolbar.set_content(Some(
+        &gtk::ScrolledWindow::builder()
+            .child(&column)
+            .hscrollbar_policy(gtk::PolicyType::Never)
+            .propagate_natural_height(true)
+            .build(),
+    ));
+
+    let dialog = adw::Dialog::builder()
+        .title(gettext("USBGuard access"))
+        .content_width(720)
+        .child(&toolbar)
+        .build();
     dialog.present(Some(parent));
 
     // The probe runs on Tokio; the result comes back over a one-shot channel
@@ -41,16 +90,15 @@ pub(super) fn present(parent: &impl IsA<gtk::Widget>) {
             return;
         };
         let distro = Distro::detect();
-        dialog.set_body(&super::i18n::access_summary(&report.state));
-        report_label.set_text(&format_report(&report, distro));
+        summary.set_label(&super::i18n::access_summary(&report.state));
+        report_label.set_text(format_report(&report, distro).trim_end());
 
         if let Some(remedy) = remedy(&report.state, distro).filter(|r| !r.commands.is_empty()) {
             let commands = remedy.commands.join("\n");
-            dialog.add_response("copy", &gettext("Copy commands"));
-            dialog.set_response_appearance("copy", adw::ResponseAppearance::Suggested);
-            dialog.connect_response(Some("copy"), move |d, _| {
-                d.clipboard().set_text(&commands);
+            copy.connect_clicked(move |button| {
+                button.clipboard().set_text(&commands);
             });
+            copy.set_visible(true);
         }
     });
 }

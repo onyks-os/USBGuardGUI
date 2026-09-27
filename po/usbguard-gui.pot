@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-26 13:04+0200\n"
+"POT-Creation-Date: 2026-09-27 22:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -162,20 +162,16 @@ msgstr ""
 msgid "Written to the policy; survives a restart"
 msgstr ""
 
-#: src/ui/diagnostic_dialog.rs:18
-msgid "USBGuard access"
+#: src/ui/diagnostic_dialog.rs:21
+msgid "Copy commands"
 msgstr ""
 
-#: src/ui/diagnostic_dialog.rs:19 src/ui/window.rs:44
+#: src/ui/diagnostic_dialog.rs:29 src/ui/window.rs:44
 msgid "Checking…"
 msgstr ""
 
-#: src/ui/diagnostic_dialog.rs:21
-msgid "Close"
-msgstr ""
-
-#: src/ui/diagnostic_dialog.rs:49
-msgid "Copy commands"
+#: src/ui/diagnostic_dialog.rs:76
+msgid "USBGuard access"
 msgstr ""
 
 #: src/ui/i18n.rs:60 src/ui/window.rs:45
@@ -914,27 +910,47 @@ msgstr ""
 msgid "security"
 msgstr ""
 
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:67
+msgid "Every connected device and whether it is authorized"
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:71
+msgid "Allow, block, or reject a device, for this session or permanently"
+msgstr ""
+
 #: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:75
+msgid "The policy rules in the order USBGuard evaluates them"
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:79
+msgid "A guided editor for new rules"
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:83
+msgid "Diagnostics that name the exact cause of an access problem"
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:98
 msgid "First release."
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:77
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:100
 msgid ""
 "Live device list; allow, block, or reject a device for this session or "
 "permanently"
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:78
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:101
 msgid ""
 "Policy view in evaluation order, with a guided rule editor and safe rule "
 "removal"
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:79
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:102
 msgid "Notifications for newly inserted devices that are not authorized"
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:80
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:103
 msgid ""
 "Diagnostics that name the exact cause of an access problem, and usbguard-gui "
 "--diagnose"

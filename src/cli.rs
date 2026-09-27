@@ -173,11 +173,7 @@ fn yes_no(value: Option<bool>, yes: &str, no: &str) -> String {
 #[must_use]
 pub fn format_report(report: &ProbeReport, distro: Distro) -> String {
     let mut out = String::new();
-    let _ = writeln!(
-        out,
-        "USBGuard GUI {} — access diagnostics\n",
-        crate::VERSION
-    );
+    let _ = writeln!(out, "USBGuardGUI {} — access diagnostics\n", crate::VERSION);
     let line = |out: &mut String, label: &str, value: &str| {
         let _ = writeln!(out, "  {label:<28}{value}");
     };

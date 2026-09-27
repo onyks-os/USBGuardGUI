@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 <h1 align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
-    <img src="assets/logo-light.svg" alt="USBGuard GUI" width="460">
+    <img src="assets/logo-light.svg" alt="USBGuardGUI" width="460">
   </picture>
 </h1>
 
@@ -37,6 +37,10 @@ SPDX-License-Identifier: MIT
 
 Plug in a device, see it appear as **blocked**, allow it for this session with one click — and when
 something does not work, be told *exactly* which layer refused and what to run to fix it.
+
+<p align="center">
+  <img src="data/screenshots/01-devices.png" alt="The device list: every connected device, its state, and Allow, Block, and Reject buttons" width="760">
+</p>
 
 > [!NOTE]
 > USBGuardGUI is a front end. The protection comes from the **USBGuard daemon**, which decides what

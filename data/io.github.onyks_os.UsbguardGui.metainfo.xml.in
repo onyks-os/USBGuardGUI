@@ -62,6 +62,29 @@
     <control>touch</control>
   </supports>
 
+  <screenshots>
+    <screenshot type="default">
+      <caption>Every connected device and whether it is authorized</caption>
+      <image>https://raw.githubusercontent.com/onyks-os/USBGuardGUI/v0.1.0/data/screenshots/01-devices.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Allow, block, or reject a device, for this session or permanently</caption>
+      <image>https://raw.githubusercontent.com/onyks-os/USBGuardGUI/v0.1.0/data/screenshots/02-device-action.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>The policy rules in the order USBGuard evaluates them</caption>
+      <image>https://raw.githubusercontent.com/onyks-os/USBGuardGUI/v0.1.0/data/screenshots/03-policy.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>A guided editor for new rules</caption>
+      <image>https://raw.githubusercontent.com/onyks-os/USBGuardGUI/v0.1.0/data/screenshots/04-new-rule.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Diagnostics that name the exact cause of an access problem</caption>
+      <image>https://raw.githubusercontent.com/onyks-os/USBGuardGUI/v0.1.0/data/screenshots/05-diagnostics.png</image>
+    </screenshot>
+  </screenshots>
+
   <branding>
     <color type="primary" scheme_preference="light">#8ff0a4</color>
     <color type="primary" scheme_preference="dark">#26a269</color>
@@ -70,7 +93,7 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
-    <release version="0.1.0" date="2026-09-23" type="stable">
+    <release version="0.1.0" date="2026-09-28" type="stable">
       <description>
         <p>First release.</p>
         <ul>
