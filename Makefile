@@ -31,7 +31,7 @@ GITHUB_OWNER  := onyks-os
 # Falls back to the scaffolded literal, so profiles without a TOML manifest
 # (node, generic) keep working.
 _MANIFEST_VERSION := $(shell grep -h -m1 '^version = ' pyproject.toml Cargo.toml 2>/dev/null | head -1 | cut -d '"' -f2)
-VERSION       := $(or $(_MANIFEST_VERSION),0.1.0)
+VERSION       := $(or $(_MANIFEST_VERSION),0.1.1)
 
 # Directories that hold first-party source, tests, and shell scripts.
 SRC_DIRS     := usbguard-gui

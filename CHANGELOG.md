@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-29
+
+### Fixed
+
+- Flatpak: the status icon now appears inside the sandbox. The tray asked for a D-Bus name a
+  sandbox may not own and failed to start; it now registers with its unique name, and the Flatpak
+  may talk to `org.kde.StatusNotifierWatcher`.
+
 ## [0.1.0] - 2026-09-27
 
 The first release.
@@ -65,5 +73,6 @@ The first release.
 - `docs/architecture.md`: `listRules` takes a label filter, not a query — `""` lists every rule,
   `"match"` would have listed none. Found by introspection before any code depended on it.
 
-[Unreleased]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/onyks-os/USBGuardGUI/releases/tag/v0.1.0

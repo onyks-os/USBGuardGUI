@@ -8,7 +8,7 @@
 # Build from a clone:  makepkg -si   (in this directory)
 
 pkgname=usbguard-gui
-pkgver=0.1.0
+pkgver=0.1.1
 pkgrel=1
 pkgdesc='Desktop interface for USBGuard: see and control which USB devices may connect'
 arch=('x86_64' 'aarch64')

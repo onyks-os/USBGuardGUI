@@ -99,11 +99,11 @@ case.
 Download the package for your distribution from the
 [latest release](https://github.com/onyks-os/USBGuardGUI/releases/latest) and install it:
 
-* **Debian / Ubuntu**: `sudo apt install ./usbguard-gui_0.1.0-1_amd64.deb`
-* **Fedora / RHEL**: `sudo dnf install ./usbguard-gui-0.1.0-1.x86_64.rpm`
-* **Arch Linux**: `sudo pacman -U ./usbguard-gui-0.1.0-1-x86_64.pkg.tar.zst`, or from a clone,
+* **Debian / Ubuntu**: `sudo apt install ./usbguard-gui_0.1.1-1_amd64.deb`
+* **Fedora / RHEL**: `sudo dnf install ./usbguard-gui-0.1.1-1.x86_64.rpm`
+* **Arch Linux**: `sudo pacman -U ./usbguard-gui-0.1.1-1-x86_64.pkg.tar.zst`, or from a clone,
   `cd packaging/arch && makepkg -si`
-* **Any distribution, as a Flatpak**: `flatpak install --user ./usbguard-gui-0.1.0.flatpak`. USBGuard
+* **Any distribution, as a Flatpak**: `flatpak install --user ./usbguard-gui-0.1.1.flatpak`. USBGuard
   itself must still come from your distribution: the Flatpak only talks to it over D-Bus.
 * **With Cargo**: `cargo install usbguard-gui` (needs the GTK development packages listed under
   [From source](#2-from-source)).

@@ -109,7 +109,7 @@ make USBGuardGUI safer. For valid, in-scope reports that are confirmed and resol
 
 | Version   | Support status      | End of life                    |
 | --------- | ------------------- | ------------------------------ |
-| 0.1.0   | ✅ Security fixes   | When the next minor is released |
+| 0.1.x   | ✅ Security fixes   | When the next minor is released |
 | < 0.1.0 | ❌ Unsupported      |                                |
 
 - Security fixes are provided only for the latest minor version.
