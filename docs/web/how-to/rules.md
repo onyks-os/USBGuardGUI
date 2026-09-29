@@ -3,9 +3,13 @@
 The **Policy** page lists the rules in the order USBGuard evaluates them. The first rule that
 matches a device decides, which is why the list is numbered and cannot be re-sorted.
 
+![The Policy page: runtime parameters above, the numbered rules below](../assets/screenshots/03-policy.png)
+
 ## Add a rule
 
 Click **Add Rule…**.
+
+![The New Rule dialog in guided mode](../assets/screenshots/04-new-rule.png)
 
 - **Guided** mode: choose the target (allow, block, reject), then add attributes one at a time —
   `id` (`vendor:product`, e.g. `1234:5678`), `name`, `serial`, `via-port`, `with-interface`

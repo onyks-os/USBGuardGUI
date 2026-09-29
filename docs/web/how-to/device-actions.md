@@ -3,6 +3,8 @@
 Every row in the device list has three actions: **Allow**, **Block**, and **Reject**. Each asks how
 long the decision should last.
 
+![A device row with its Allow, Block, and Reject buttons](../assets/screenshots/02-device-action.png)
+
 | Choice | What USBGuard does | After USBGuard restarts |
 | :----- | :----------------- | :---------------------- |
 | **This session only** | Changes the device's state in memory. | The policy applies again. |
