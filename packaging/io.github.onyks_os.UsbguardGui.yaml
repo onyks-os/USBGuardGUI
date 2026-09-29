@@ -29,8 +29,9 @@ finish-args:
   - --system-talk-name=org.usbguard1
   # --diagnose asks systemd whether usbguard.service is active (read-only).
   - --system-talk-name=org.freedesktop.systemd1
-  # Notifications and the tray are not implemented yet; their permissions
-  # (§14.1) are added together with the features.
+  # The status icon (StatusNotifierItem). Notifications need no permission:
+  # GApplication sends them through the portal inside a sandbox.
+  - --talk-name=org.kde.StatusNotifierWatcher
 
 modules:
   - name: usbguard-gui
