@@ -5,6 +5,8 @@ these states. A request to USBGuard crosses three independent checkpoints, each 
 different component: the **D-Bus bus policy**, then **Polkit**, then **USBGuard's own IPC access
 control**. The states say which one refused.
 
+![The diagnostics dialog: each check and its result](../assets/screenshots/05-diagnostics.png)
+
 | Result | Exit code | Meaning | Remedy |
 | :----- | :-------- | :------ | :----- |
 | `connected` | 0 | Everything works. Writes are not tested in advance — the only test of a write is a write. | — |

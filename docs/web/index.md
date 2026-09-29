@@ -1,4 +1,4 @@
-# USBGuard GUI
+# USBGuardGUI
 
 A desktop interface for [USBGuard](https://usbguard.github.io/): see which USB devices are
 connected, **allow or block them**, and edit the policy — without root.
@@ -6,6 +6,8 @@ connected, **allow or block them**, and edit the policy — without root.
 [Quickstart Guide](tutorials/quickstart.md){ .md-button .md-button--primary }
 [How-To Guides](how-to/index.md){ .md-button }
 [GitHub Repository](https://github.com/onyks-os/USBGuardGUI){ .md-button }
+
+![The device list: each connected device with its state, and Allow, Block, and Reject buttons](assets/screenshots/01-devices.png)
 
 ---
 

@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing is released yet. See
-[ROADMAP.md](https://github.com/onyks-os/USBGuardGUI/blob/main/ROADMAP.md) for the phase order.
+## [0.1.0] - 2026-09-27
+
+The first release.
 
 ### Added
 
@@ -28,8 +29,15 @@ Nothing is released yet. See
 - Notifications for newly inserted, unauthorized devices, with an "Allow for this session" quick
   action that re-checks the device's identity before acting; background mode; a status icon
   (`ksni`) where the desktop supports one; "Start at login".
+- Italian translation, and the gettext pipeline for more (`po/`, `make i18n`, `docs/translating.md`).
+  The command-line output stays in English for bug reports.
+- `cargo run --example demo-bridge`: a stand-in for USBGuard with invented devices, for screenshots
+  and development; development builds reach it with `USBGUARD_GUI_BUS=session`.
 - Packages: `.deb` and `.rpm` (`make package-deb`, `make package-rpm`), an Arch `PKGBUILD`, and a
   Flatpak manifest. No post-install scripts.
+- Release pipeline: a `v*` tag builds the `.deb`, `.rpm`, Arch package, and Flatpak bundle, signs
+  every asset with Sigstore, publishes the GitHub Release, and publishes the crate to crates.io
+  (`docs/releasing.md`). Tags with a suffix are rehearsals: pre-releases, not published to crates.io.
 - Read-only GTK 4 / libadwaita window: device list with filter, policy list in evaluation order,
   connection indicator, diagnostic dialog with per-distribution remedies.
 - Phase 0 introspection results (`docs/dbus-introspection/`, `docs/architecture.md` §13.4) and an
@@ -52,12 +60,5 @@ Nothing is released yet. See
 - `docs/architecture.md`: `listRules` takes a label filter, not a query — `""` lists every rule,
   `"match"` would have listed none. Found by introspection before any code depended on it.
 
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-
-[Unreleased]: https://github.com/onyks-os/USBGuardGUI/commits/main
+[Unreleased]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/onyks-os/USBGuardGUI/releases/tag/v0.1.0
