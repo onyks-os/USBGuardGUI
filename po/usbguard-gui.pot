@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 22:21+0200\n"
+"POT-Creation-Date: 2026-09-29 10:13+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -931,26 +931,30 @@ msgid "Diagnostics that name the exact cause of an access problem"
 msgstr ""
 
 #: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:98
+msgid "The status icon now appears when the application runs as a Flatpak."
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:103
 msgid "First release."
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:100
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:105
 msgid ""
 "Live device list; allow, block, or reject a device for this session or "
 "permanently"
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:101
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:106
 msgid ""
 "Policy view in evaluation order, with a guided rule editor and safe rule "
 "removal"
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:102
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:107
 msgid "Notifications for newly inserted devices that are not authorized"
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:103
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:108
 msgid ""
 "Diagnostics that name the exact cause of an access problem, and usbguard-gui "
 "--diagnose"

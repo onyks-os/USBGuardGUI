@@ -17,7 +17,7 @@ Rust; treat elapsed time as an output of the work, not an input to it.
 
 ---
 
-## Current Status (v0.1.0 — unreleased)
+## Current Status (v0.1.1)
 
 Delivered:
 

@@ -1,6 +1,6 @@
 # Support Policy
 
-- **Current version** (`0.1.0`): active support — security fixes and critical bug fixes
+- **Current version** (`0.1.1`): active support — security fixes and critical bug fixes
   until the next major release.
 - **Previous versions**: end of support. Upgrading is strongly recommended.
 - **Support channels**: open a [GitHub issue](https://github.com/onyks-os/USBGuardGUI/issues)
