@@ -100,7 +100,13 @@ pub(super) fn start(commands: Sender<TrayCommand>, reply: Sender<TrayResult>) {
             total: 0,
             blocked: 0,
         };
-        let result = tray.spawn().await.map_err(|e| e.to_string());
+        // A sandbox cannot own the StatusNotifierItem-PID-N name the
+        // specification asks for; the watcher accepts the unique name.
+        let result = tray
+            .disable_dbus_name(super::autostart::sandboxed())
+            .spawn()
+            .await
+            .map_err(|e| e.to_string());
         let _ = reply.send(result).await;
     });
 }
