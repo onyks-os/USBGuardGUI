@@ -22,10 +22,10 @@ procedures live in [`SECURITY.md`](../SECURITY.md).
 
 ## 1. Security Objectives
 
-> **Status of this document.** The program is specified but not yet implemented. Every mitigation
-> below is marked **Specified** rather than **Implemented** until the corresponding code exists and
-> the test that proves it passes. This document is written first on purpose: the threat model is an
-> input to the design, not a report on it.
+> **Status of this document.** Written before the code, on purpose: the threat model was an input
+> to the design, not a report on it. It was checked against the code of 0.1.1 (2026-09-30), and
+> each mitigation now carries the status that check found — including where the code does less
+> than, or something different from, what was specified.
 
 USBGuardGUI is an unprivileged client that asks a root daemon to change USB device authorization.
 It holds no privilege of its own and enforces no policy. Its security value is therefore narrow and
@@ -88,19 +88,22 @@ boundaries it crosses as a supplicant.
 For each component, enumerate threats under **S**poofing, **T**ampering, **R**epudiation,
 **I**nformation disclosure, **D**enial of service, and **E**levation of privilege.
 
-Severity is the impact on the objectives in §1, not a CVSS score. **Status** is `Specified` while
-the mitigation exists only in `architecture.md`, and becomes `Implemented` when the code and the
-test that proves it both exist.
+Severity is the impact on the objectives in §1, not a CVSS score. **Status** is one of:
+
+- `Implemented` — the code exists, and a named test proves it;
+- `Implemented, untested` — the code exists, but no automated test covers it yet;
+- `Partial` — part of the mitigation exists; the row says which part does not;
+- `Specified` — the mitigation exists only in `architecture.md`.
 
 ### 3.1 D-Bus client and proxy layer (`src/dbus/`)
 
 | STRIDE | Threat | Severity | Mitigation | Status |
 | :----- | :----- | :------- | :--------- | :----- |
 | S | A process other than the real bridge owns `org.usbguard1` and feeds the program a fabricated device list. | Medium | The system bus arbitrates well-known name ownership, and the bus policy governs who may own `org.usbguard1`. A local process that can take that name has already won at a lower layer. The program does not attempt to re-authenticate the daemon. | Accepted (see §4) |
-| T | Device attributes or rule text crafted to break the display or the rule generator. | High | Every field is parsed into a domain type; the canonical renderer quotes and escapes everything; round-trip tests and a fuzz target cover the parser. | Specified |
+| T | Device attributes or rule text crafted to break the display or the rule generator. | High | Every field is parsed into a domain type; the canonical renderer quotes and escapes everything; round-trip tests and a fuzz target cover the parser. | Implemented — `render_then_parse_is_identity` (proptest), fuzz targets `parse_rule` and `round_trip`, T6 |
 | R | A change made through the GUI cannot be distinguished afterwards from one made through the CLI. | Low | The daemon is the audit point and logs its own changes; this program adds no audit surface and claims none. | Accepted |
-| I | Error strings returned by the daemon are surfaced verbatim and may contain device identifiers. | Medium | Diagnostic text shown to the user is the program's own; daemon detail is attached only in the diagnostic panel, and never written to a default-level log. | Specified |
-| D | An insertion burst from a hub with 40+ ports floods the event stream. | Medium | The event worker coalesces within a bounded latency window and resynchronizes rather than replaying per-event; T3 of the resilience matrix is the test. | Specified |
+| I | Error strings returned by the daemon are surfaced verbatim and may contain device identifiers. | Medium | Diagnostic text shown to the user is the program's own; daemon detail is attached only in the diagnostic panel, and never written to a default-level log. | Partial — never logged at the default level; but when USBGuard rejects a request, its reply text is shown in that operation's toast (“USBGuard refused the request: …”), not only in the diagnostic panel |
+| D | An insertion burst from a hub with 40+ ports floods the event stream. | Medium | The event worker coalesces within a bounded latency window and resynchronizes rather than replaying per-event; T3 of the resilience matrix is the test. | Implemented — T3 |
 | E | — | — | The layer holds no privilege to elevate. Every privileged effect is the daemon's, behind three checkpoints this program does not control. | N/A |
 
 ### 3.2 Rule language parser and generator (`src/rules/`)
@@ -110,20 +113,20 @@ the program, and the component with the smallest blast radius, because it touche
 
 | STRIDE | Threat | Severity | Mitigation | Status |
 | :----- | :----- | :------- | :--------- | :----- |
-| T | Rule injection: a device name containing a quote, a backslash, or a newline is interpolated into a generated rule and changes its meaning. | **Critical** | Rules are never produced by string concatenation. A rule is built as a typed structure and rendered by the canonical quoter; a round-trip check on the rendered output is a required test. | Specified |
-| D | A pathological input causes a panic, an infinite loop, or unbounded allocation. | High | No `unwrap` and no panic in the parser, enforced by a Clippy `disallowed-methods` lint that fails CI; `cargo fuzz` over the parser with a target of zero panics in 10⁶ inputs; input length is bounded. | Specified |
-| T | Non-UTF-8 bytes in a device name corrupt the displayed text or the generated rule. | Medium | Lossy decoding at the boundary, with the row shown with partial fields rather than dropped or panicking; T6 of the resilience matrix. | Specified |
+| T | Rule injection: a device name containing a quote, a backslash, or a newline is interpolated into a generated rule and changes its meaning. | **Critical** | Rules are never produced by string concatenation. A rule is built as a typed structure and rendered by the canonical quoter; a round-trip check on the rendered output is a required test. | Implemented — `hostile_device_name_cannot_inject`, `render_then_parse_is_identity`, fuzz target `round_trip` |
+| D | A pathological input causes a panic, an infinite loop, or unbounded allocation. | High | No `unwrap` and no panic in the parser, enforced by `#![deny(clippy::unwrap_used, clippy::expect_used, clippy::indexing_slicing, clippy::panic)]` on `src/rules/`, which fails CI; `cargo fuzz` over the parser with a target of zero panics in 10⁶ inputs; input length is bounded (`MAX_INPUT_LEN`). | Implemented — 10⁶ inputs per fuzz target without a finding; `TooLong` test; weekly fuzzing workflow |
+| T | Non-UTF-8 bytes in a device name corrupt the displayed text or the generated rule. | Medium | Lossy decoding at the boundary, with the row shown with partial fields rather than dropped or panicking; T6 of the resilience matrix. | Implemented — T6 |
 | I | — | — | The parser holds no secret. | N/A |
 
 ### 3.3 Action path — device actions and rule modification (`src/ui/`, `src/dbus/commands.rs`)
 
 | STRIDE | Threat | Severity | Mitigation | Status |
 | :----- | :----- | :------- | :--------- | :----- |
-| E | A Polkit authorization obtained for one action is used to perform a different one. | **Critical** | One authorization per method call, checked by the bridge, not by this program. The program issues exactly the call the user confirmed, with no batching and no deferred replay of a pending operation. | Specified |
-| T | Rule-ID volatility: the ruleset shifts between reading and removing, and the wrong rule is removed. | **Critical** | Rules are held by canonical text, not by ID; the ruleset is re-read immediately before removal and the text re-matched; a mismatch yields `AlreadyGone` and aborts. Two textually identical rules produce a disambiguation dialog listing evaluation positions, never a guess. T4 and T5 are the tests. | Specified |
-| T | An optimistic UI update makes the user believe a change took effect that the daemon rejected. | High | No optimistic updates. The view changes only on a daemon signal or a confirmed reply; an operation interrupted by a daemon restart is reported inconclusive and the state is re-read (T2). | Specified |
-| S | A crafted notification reply causes an action on a device other than the one the notification was about. | High | Notification actions carry an opaque token resolved against the program's own live device map; a token that no longer resolves opens the window instead of acting. | Specified |
-| D | A Polkit prompt the user leaves open for ten minutes causes the operation to time out and the UI to hang. | Medium | Operations are cancellable and have no client-side timeout shorter than the Polkit interaction; the target is zero timeouts on waits up to ten minutes (T13). | Specified |
+| E | A Polkit authorization obtained for one action is used to perform a different one. | **Critical** | One authorization per method call, checked by the bridge, not by this program. The program issues exactly the call the user confirmed, with no batching and no deferred replay of a pending operation. | Implemented, untested — by construction: each user action is one method call |
+| T | Rule-ID volatility: the ruleset shifts between reading and removing, and the wrong rule is removed. | **Critical** | Rules are held by canonical text, not by ID; the ruleset is re-read immediately before removal and the text re-matched; a mismatch yields `AlreadyGone` and aborts. Two textually identical rules produce a disambiguation dialog listing evaluation positions, never a guess. T4 and T5 are the tests. | Implemented — T4, T5 |
+| T | An optimistic UI update makes the user believe a change took effect that the daemon rejected. | High | No optimistic updates. The view changes only on a daemon signal or a confirmed reply; an operation interrupted by a daemon restart is reported inconclusive and the state is re-read (T2). | Partial — no optimistic updates: a reply only clears the row's pending state, and the new state arrives with the daemon's signal. An operation interrupted by a daemon restart is reported as failed, not inconclusive, and the state is re-read on reconnection. T2 is not automated |
+| S | A crafted notification reply causes an action on a device other than the one the notification was about. | High | Notification actions carry an opaque token resolved against the program's own live device map; a token that no longer resolves opens the window instead of acting. | Implemented, untested — the token is the device id, checked against the device's descriptor hash (or rule text) recorded when the notification was sent; a mismatch opens the window and says nothing was changed |
+| D | A Polkit prompt the user leaves open for ten minutes causes the operation to time out and the UI to hang. | Medium | Operations are cancellable and have no client-side timeout shorter than the Polkit interaction; the target is zero timeouts on waits up to ten minutes (T13). | Implemented, untested — no client-side method timeout is set, and each pending operation has a Cancel button; T13 is not automated |
 | R | — | Low | The daemon records the change. | Accepted |
 
 ### 3.4 Session-bus integrations — notifications and tray (`src/notify.rs`, `src/tray.rs`)
@@ -131,16 +134,16 @@ the program, and the component with the smallest blast radius, because it touche
 | STRIDE | Threat | Severity | Mitigation | Status |
 | :----- | :----- | :------- | :--------- | :----- |
 | S | A hostile process registers as the `StatusNotifierWatcher` or the notification server and impersonates the program's UI. | Medium | Any process in the user's session can already do this to any application; it is a session-bus property, not a flaw here. The consequence is bounded: neither integration can cause an action, because the action path re-resolves every token against live state and every privileged effect still passes Polkit. | Accepted |
-| I | A notification body displays a device name on a lock screen or a shared display. | Medium | Notification bodies carry the device's presentation name only, never its serial number or hash, and the notification can be disabled entirely with `notify-inserted`. | Specified |
-| D | The tray's D-Bus name registration fails under Flatpak because it depends on the in-sandbox pid. | Low | Failure degrades to background mode, which remains fully functional, with a one-time visible notice rather than silence. | Specified |
+| I | A notification body displays a device name on a lock screen or a shared display. | Medium | Notification bodies carry the device's presentation name only, never its serial number or hash, and the notification can be disabled entirely with `notify-inserted`. | Implemented, untested — a device without a name is shown as “USB device <id>” |
+| D | The tray's D-Bus name registration fails under Flatpak, where the sandbox may not own `org.kde.StatusNotifierItem-<pid>-<n>`. | Low | Inside a sandbox the tray registers with its unique bus name instead (0.1.1). Where no tray can be shown, background mode remains fully functional, with a one-time visible notice rather than silence. | Implemented — checked manually in the Flatpak against a StatusNotifierWatcher; not automated |
 
 ### 3.5 Configuration, logging, and diagnostics (`src/config.rs`, `src/dbus/diagnostics.rs`)
 
 | STRIDE | Threat | Severity | Mitigation | Status |
 | :----- | :----- | :------- | :--------- | :----- |
-| I | A log or a `--diagnose` output pasted into a public bug report reveals the user's hardware. | High | Device names, serial numbers, and hashes are never logged above `debug`, and the `debug` level says so in its own output. `--diagnose` reports access state and remedies, never a device list. | Specified |
-| T | A tampered GSettings value changes what the program sends to the daemon. | Low | GSettings holds presentation state only. No key affects which request is sent or whether it is confirmed — a claim that is checkable by reading §2 of `interfaces.md` against the request path. | Specified |
-| E | The diagnostic probe triggers a Polkit prompt during startup that the user cannot attribute to anything. | Medium | The probe sequence runs **after** the window is presented, never during startup, so any prompt it causes belongs to a window the user can see. The write-access probe is deliberately empty: the only honest test of write access is a write, and a test write would change the system's USB policy to find out whether it may. | Specified |
+| I | A log or a `--diagnose` output pasted into a public bug report reveals the user's hardware. | High | Device names, serial numbers, and hashes are never logged above `debug`, and the `debug` level says so in its own output. `--diagnose` reports access state and remedies, never a device list. | Partial — the default level is `warn`, and no `warn` or `info` message carries a device identifier; `--diagnose` lists no device. `--help` states that the `debug` level records device names and serial numbers. Missing: the `debug` output itself does not say so |
+| T | A tampered GSettings value changes what the program sends to the daemon. | Low | GSettings holds presentation state only. No key affects which request is sent or whether it is confirmed — a claim that is checkable by reading §2 of `interfaces.md` against the request path. | Implemented, untested — `default-persistence` only preselects the choice in the dialog; the user still confirms it |
+| E | The diagnostic probe triggers a Polkit prompt during startup that the user cannot attribute to anything. | Medium | The probe sequence runs **after** the window is presented, never during startup, so any prompt it causes belongs to a window the user can see. The write-access probe is deliberately empty: the only honest test of write access is a write, and a test write would change the system's USB policy to find out whether it may. | Implemented, untested — the probe starts on the window's first map; `--background` runs no probe |
 
 ---
 
@@ -158,7 +161,7 @@ property that matters: the program fails in a way it can explain.
 | **Rule text as identity assumes stable canonicalization.** If a future daemon normalizes rule text differently, held handles stop matching. | Medium | Text is the only stable identity the API exposes; IDs are positional. | Handles are re-read immediately before use, so the failure mode is `AlreadyGone` on a rule that still exists — confusing, but never destructive. |
 | **Any process in the user's session can impersonate the session-bus services** the program uses. | Medium | This is a property of the session bus, shared by every desktop application. Defending it is out of this program's reach. | The action path never trusts a session-bus reply as sufficient authority: tokens are re-resolved against live state, and every privileged effect still passes Polkit. |
 | **The program cannot verify that its D-Bus peer is the genuine bridge.** | Medium | Well-known name ownership is arbitrated by the bus, under the bus policy. A local process able to take `org.usbguard1` has already defeated a lower layer. | Bus policy (checkpoint A) is treated as a distinct diagnostic state rather than folded into "permission denied", so a hardened or altered policy is visible rather than silent. |
-| **The tray's D-Bus name under Flatpak depends on the in-sandbox pid.** | Low | The workaround is empirical, not guaranteed. | Failure degrades to background mode with a visible notice. |
+| **The tray under Flatpak registers without the well-known name the StatusNotifierItem specification asks for.** | Low | Watchers in current use accept the unique name, but the specification does not promise it. | Failure degrades to background mode with a visible notice. |
 | **The bridge is optional packaging on every reference distribution.** | Low (security) / High (usability) | Not this project's decision to make. | `BridgeNotInstalled` is a first-class diagnostic state with a per-distribution install command — the single message most likely to determine whether a user ever sees the program work. |
 
 ---
@@ -183,7 +186,8 @@ property that matters: the program fails in a way it can explain.
 - All GitHub Actions are pinned to full commit SHAs.
 - `GITHUB_TOKEN` permissions are declared read-only at workflow level and elevated per job only when
   required.
-- Branch protection requires review and passing status checks before merge.
+- A repository ruleset on `main` requires passing status checks and a linear history, and forbids
+  force pushes and deletion. Review is not required: the project has one maintainer.
 
 ---
 
@@ -191,11 +195,11 @@ property that matters: the program fails in a way it can explain.
 
 | Control | Type | Where implemented | Verified by |
 | :------ | :--- | :---------------- | :---------- |
-| Input validation | Preventive | `src/rules/` — parser, lexer, canonical renderer; `src/dbus/client.rs` — every field parsed into a domain type at the boundary | Round-trip property tests, `cargo fuzz`, resilience tests T5 and T6 |
-| Least privilege | Preventive | The whole design: no setuid, no capabilities, no helper daemon, no access to `/etc`, `/var`, or `/sys` | `strace` filtered on those three prefixes must report zero accesses (§13.2) |
-| Fail-closed defaults | Preventive | `default-persistence` defaults to runtime-only; no optimistic UI updates; `AlreadyGone` aborts rather than guessing; `DeniedUnattributed` shows both remedies rather than the likelier one | Resilience tests T2, T4, T5 |
-| No-panic discipline | Preventive | `clippy.toml` `disallowed-methods` lint over the parser and the runtime boundary | `cargo clippy --all-targets -- -D warnings` in CI |
-| Identifier redaction | Preventive | `src/` logging policy: device names, serials, and hashes never above `debug` | Review, plus a test asserting a default-level log contains no identifier |
+| Input validation | Preventive | `src/rules/` — parser, lexer, canonical renderer; `src/dbus/client.rs` — every field parsed into a domain type at the boundary | Round-trip property tests, `cargo fuzz`, resilience tests T3, T5, and T6 |
+| Least privilege | Preventive | The whole design: no setuid, no capabilities, no helper daemon; the program's own code reads nothing under `/etc`, `/var`, or `/sys` (it reads `/usr/lib/os-release` rather than `/etc/os-release`) and writes only its autostart entry in the user's home | Review. The libraries it links, such as fontconfig, read system configuration as in any GTK application, so a `strace` of the process is not expected to show zero; the §13.2 `strace` measurement has not been taken |
+| Fail-closed defaults | Preventive | `default-persistence` defaults to runtime-only; no optimistic UI updates; `AlreadyGone` aborts rather than guessing; `DeniedUnattributed` shows both remedies rather than the likelier one | Resilience tests T4 and T5 (T2 is not automated) |
+| No-panic discipline | Preventive | `#![deny(...)]` panic lints on `src/rules/`, the same lints as warnings crate-wide, and `clippy.toml` `disallowed-methods` against a bare `tokio::spawn` | `cargo clippy --all-targets -- -D warnings` in CI |
+| Identifier redaction | Preventive | `src/` logging policy: device names, serials, and hashes never above `debug` | Review only: the planned test asserting that a default-level log contains no identifier does not exist yet |
 | Static analysis | Detective | CodeQL, linter | CI |
 | Dependency scanning | Detective | Dependabot, `make audit` | CI |
 | Fuzzing | Detective | `make fuzz` | CI (weekly) |

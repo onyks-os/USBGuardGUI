@@ -10,36 +10,55 @@ prompts), a USB stick you can plug and unplug freely, and about 15 minutes.
 
 ## 1. Install
 
-No release has been published yet, so build from source.
+Download the package for your distribution from the
+[latest release](https://github.com/onyks-os/USBGuardGUI/releases/latest) and install it. The
+package pulls in USBGuard and its D-Bus bridge.
 
 === "Fedora / RHEL"
 
     ```bash
-    sudo dnf install usbguard usbguard-dbus gtk4-devel libadwaita-devel gcc
+    sudo dnf install ./usbguard-gui-0.1.1-1.x86_64.rpm
     ```
 
 === "Debian / Ubuntu"
 
     ```bash
-    sudo apt install usbguard libgtk-4-dev libadwaita-1-dev build-essential
+    sudo apt install ./usbguard-gui_0.1.1-1_amd64.deb
     ```
 
 === "Arch"
 
     ```bash
-    sudo pacman -S usbguard gtk4 libadwaita base-devel
+    sudo pacman -U ./usbguard-gui-0.1.1-1-x86_64.pkg.tar.zst
     ```
 
-Then, with a [Rust toolchain](https://rustup.rs/) (1.85 or newer):
+=== "Flatpak"
 
-```bash
-git clone https://github.com/onyks-os/USBGuardGUI.git
-cd USBGuardGUI
-cargo build --release
-```
+    ```bash
+    flatpak install --user ./usbguard-gui-0.1.1.flatpak
+    ```
 
-The program is `target/release/usbguard-gui`. To install it as a package instead, run
-`make package-deb` or `make package-rpm` and install the file from `dist/`.
+    The Flatpak does not contain USBGuard: install `usbguard` (and, on Fedora, `usbguard-dbus`)
+    from your distribution as well.
+
+To check a download before installing it, see the
+[verification guide](https://github.com/onyks-os/USBGuardGUI/blob/main/docs/verification.md).
+
+??? note "Building from source instead"
+
+    With a [Rust toolchain](https://rustup.rs/) (1.85 or newer) and the build dependencies:
+
+    ```bash
+    sudo dnf install usbguard usbguard-dbus gtk4-devel libadwaita-devel gcc gettext   # Fedora
+    sudo apt install usbguard libgtk-4-dev libadwaita-1-dev build-essential gettext   # Debian / Ubuntu
+    sudo pacman -S usbguard gtk4 libadwaita base-devel gettext                        # Arch
+
+    git clone https://github.com/onyks-os/USBGuardGUI.git
+    cd USBGuardGUI
+    cargo build --release
+    ```
+
+    The program is `target/release/usbguard-gui`. `cargo install usbguard-gui` works too.
 
 ## 2. Start USBGuard safely
 
@@ -60,8 +79,11 @@ The `umask 077` matters: the daemon refuses a rule file that other users can rea
 ## 3. Check that you can reach the daemon
 
 ```bash
-target/release/usbguard-gui --diagnose
+usbguard-gui --diagnose
 ```
+
+(From a source build: `target/release/usbguard-gui --diagnose`. From the Flatpak:
+`flatpak run io.github.onyks_os.UsbguardGui --diagnose`.)
 
 **What just happened:** the program checked, in order, that there is a system bus, that USBGuard's
 D-Bus bridge is installed and running, and that you are allowed to read from the daemon. The last
@@ -76,9 +98,7 @@ If it is anything else, the lines below it name the cause and the command that f
 
 ## 4. Open the window
 
-```bash
-target/release/usbguard-gui
-```
+Start **USBGuardGUI** from your application menu, or run `usbguard-gui`.
 
 You should see your USB devices, each with its state — *Allowed* or *Blocked* — shown by an icon
 **and** a word, never by colour alone.

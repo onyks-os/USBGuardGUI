@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Documentation checked against 0.1.1. The security assessment now gives each mitigation the status
+  the code actually supports, including four that are only partial; the roadmap, the site's
+  quickstart, the dependency inventory, and the verification guide describe the released packages
+  instead of a release still to come.
+
 ## [0.1.1] - 2026-09-29
 
 ### Fixed

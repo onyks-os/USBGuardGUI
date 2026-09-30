@@ -156,12 +156,12 @@ That is the complete list. In particular:
 | `/usr/share/metainfo/io.github.onyks_os.UsbguardGui.metainfo.xml` | AppStream metadata. | Package lifetime |
 | `/usr/share/glib-2.0/schemas/io.github.onyks_os.UsbguardGui.gschema.xml` | GSettings schema. | Package lifetime |
 | `/usr/share/icons/hicolor/…/io.github.onyks_os.UsbguardGui.svg` | Application icon. | Package lifetime |
-| `/usr/share/locale/…/usbguard-gui.mo` | Translation catalogues. | Package lifetime |
 | `/usr/share/locale/<lang>/LC_MESSAGES/usbguard-gui.mo` | Translation catalogues. | Package lifetime |
 | `/usr/share/doc/usbguard-gui/70-usbguard-gui.rules.example` | Example Polkit rule — **shipped inert, never installed into `/etc/polkit-1/rules.d/`.** | Package lifetime |
 
-The post-install script modifies no system configuration. Its only action is the GSettings schema
-recompilation that packaging conventions require.
+The packages have no post-install script and modify no system configuration. The GSettings schema
+is compiled by the distribution's own GLib package, through the trigger it registers for
+`/usr/share/glib-2.0/schemas/`.
 
 ### D-Bus interfaces consumed
 

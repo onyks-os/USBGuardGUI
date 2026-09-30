@@ -9,7 +9,7 @@ To keep announcing after the window is closed: **Main menu → Preferences**, an
 
 - **Keep running in the background** — closing the window hides it instead of quitting;
 - **Start at login** — start hidden when you log in, so the first device of the session is
-  announced too.
+  announced too. Not offered in the Flatpak.
 
 ## With and without a status icon
 
@@ -19,5 +19,5 @@ to quit.
 
 **Stock GNOME has no status icon area** — it needs the *AppIndicator and KStatusNotifierItem
 Support* extension. Without it, the program still runs and still announces devices; the first time
-you close the window it tells you so. To reopen the window, launch USBGuard again from the
+you close the window it tells you so. To reopen the window, launch USBGuardGUI again from the
 application menu; to quit, use **Main menu → Quit** (or <kbd>Ctrl</kbd>+<kbd>Q</kbd>).

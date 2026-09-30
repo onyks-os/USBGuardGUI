@@ -1,6 +1,6 @@
 # USBGuardGUI Development Roadmap
 
-This document outlines the **realistic, near-term** development plan for USBGuard GUI. Items
+This document outlines the **realistic, near-term** development plan for USBGuardGUI. Items
 beyond this scope are tracked as ideas in
 [GitHub Issues](https://github.com/onyks-os/USBGuardGUI/issues) rather than as committed
 release dates.
@@ -36,13 +36,14 @@ Delivered:
 - **v0.2.0**, code complete: device actions with the runtime/permanent choice, the policy view
   with safe removal and the disambiguation dialog, the new-rule dialog (guided and text modes),
   cancellable operations with the 20 s / 180 s notices, runtime parameters, preferences.
-- **Later, done**: notifications with a quick action (§9.5), background mode and the tray icon
-  (§9.6), start at login. Still to do: localization (§9.7) and Flathub submission.
-- **Packaging**: `.deb` (built on Ubuntu 24.04, installs on Debian and Ubuntu), `.rpm` (installs
-  on Fedora, pulling in `usbguard-dbus`), an Arch `PKGBUILD`, and a Flatpak manifest.
+- **Beyond the plan**: notifications with a quick action (§9.5), background mode and the tray
+  icon (§9.6), start at login, and localization (§9.7) with an Italian translation.
+- **Packaging and release**: `.deb` (built on Ubuntu 24.04, installs on Debian and Ubuntu), `.rpm`
+  (installs on Fedora, pulling in `usbguard-dbus`), an Arch package, and a Flatpak bundle, built
+  and signed by one release workflow; the crate on crates.io.
 
-No release exists yet. Before tagging: the open Phase 0 items below, a manual pass over the
-v0.2 actions on a real system, and screenshots for the AppStream metadata.
+Released: **0.1.0** (2026-09-27), with everything above, and **0.1.1** (2026-09-29), which fixes the
+status icon in the Flatpak. The v0.2.0 scope below shipped in 0.1.0.
 
 ---
 
@@ -153,7 +154,7 @@ non-UTF-8 bytes) — and idles under the memory target of §13.2.
 
 ---
 
-## Next — v0.2.0: acting on policy
+## v0.2.0 scope: acting on policy (shipped in 0.1.0)
 
 **Goal:** the window can change what it displays, with the runtime/persistent distinction made
 explicit at every step.
@@ -169,14 +170,27 @@ explicit at every step.
 
 ---
 
-## Later
+## Next
 
-Not committed, and in no particular order: localization (§9.7) and Flathub submission (§14.1).
-Notifications, the tray, background mode, the Flatpak manifest, and native packages are done.
+Not committed, and in no particular order. Most come from checking
+[`docs/security-assessment.md`](docs/security-assessment.md) against the 0.1.1 code: they are the
+mitigations it marks `Partial` or untested.
+
+| Item | Description |
+| :--- | :---------- |
+| **Automate T2 and T13** | A daemon restart during an operation (reported as inconclusive rather than failed), and a Polkit prompt left open for ten minutes, as mock tests. |
+| **Identifier-free logs, tested** | A test asserting that a default-level log contains no device identifier, and a notice in the `debug` output itself that it contains them (today only `--help` says so). |
+| **Measure filesystem access** | The §13.2 `strace` measurement, with the program's own accesses told apart from those of the libraries it links. |
+| **Translations** | Open issues invite French, Spanish, Russian, Chinese, German, Brazilian Portuguese, and Japanese; [docs/translating.md](docs/translating.md) explains how. |
+| **Arch User Repository** | A `usbguard-gui` package, when AUR registrations reopen. |
+| **Reproducible builds** | See [docs/verification.md](docs/verification.md) §5. |
 
 One upstream contribution is worth more than any of them: proposing
 `removeRuleIfMatches(id, expected_text)` to USBGuard would eliminate the rule-removal race at its
 root rather than narrowing it client-side.
+
+Flathub is not planned for now. The Flatpak bundle attached to each release installs on any
+distribution.
 
 ---
 

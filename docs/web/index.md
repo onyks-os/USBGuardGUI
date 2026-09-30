@@ -91,8 +91,9 @@ This site follows the [Diátaxis](https://diataxis.fr/) framework:
 
 ## Project Status
 
-The program is implemented and tested, and **no version has been released yet**; the first will be
-`0.1.0`. Until then, build it [from source](tutorials/quickstart.md#1-install). See the
+The current version is **0.1.1**. Packages for Debian and Ubuntu, Fedora, and Arch, and a Flatpak
+bundle, are on the [releases page](https://github.com/onyks-os/USBGuardGUI/releases/latest); the
+[quickstart](tutorials/quickstart.md#1-install) shows how to install them. See the
 [changelog](release-notes/changelog.md) and the
 [roadmap](https://github.com/onyks-os/USBGuardGUI/blob/main/ROADMAP.md).
 
