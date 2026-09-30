@@ -129,9 +129,9 @@ For verifying release assets, see the [Release Verification Guide](docs/verifica
 
 ```bash
 # Build dependencies
-sudo dnf install gtk4-devel libadwaita-devel gcc                    # Fedora
-sudo apt install libgtk-4-dev libadwaita-1-dev build-essential       # Debian / Ubuntu
-sudo pacman -S gtk4 libadwaita base-devel                            # Arch
+sudo dnf install gtk4-devel libadwaita-devel gcc gettext                    # Fedora
+sudo apt install libgtk-4-dev libadwaita-1-dev build-essential gettext       # Debian / Ubuntu
+sudo pacman -S gtk4 libadwaita base-devel gettext                            # Arch
 
 git clone https://github.com/onyks-os/USBGuardGUI.git
 cd USBGuardGUI
@@ -287,7 +287,7 @@ Contributions are welcome. The areas where help matters most:
 1. **USBGuard on other distributions** — behaviour of the D-Bus bridge and its Polkit defaults on
    systems other than the ones already checked.
 2. **GTK 4 / libadwaita** — accessibility, keyboard navigation, and adaptive layouts.
-3. **Packaging** — Flathub submission, and distribution packages.
+3. **Packaging** — packages in the distributions' own repositories.
 4. **Translations** — the interface is in English and Italian; [docs/translating.md](docs/translating.md)
    explains how to add a language, no Rust needed.
 

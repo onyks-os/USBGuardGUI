@@ -1,6 +1,6 @@
 # Maintainers
 
-This document lists the maintainers of USBGuard GUI (USBGuardGUI) and defines the processes
+This document lists the maintainers of USBGuardGUI and defines the processes
 governing maintainership responsibilities, access, and lifecycle.
 
 ---
@@ -45,9 +45,9 @@ the case for a solo-maintained project.
 | Resource                   | Access Holder | Notes                                                    |
 | :------------------------- | :------------ | :------------------------------------------------------- |
 | GitHub Repository (Admin)  | `onyks` | Full admin access                                        |
-| Package Registry           | `onyks` | Owner of the published package                           |
-| GitHub Actions Secrets     | `onyks` | Manages CI/CD credentials                                |
-| Release Signing            | `onyks` | Signs release artifacts (Sigstore keyless / GPG)         |
+| Package Registry           | `onyks` | Owner of `usbguard-gui` on crates.io, published by the release workflow through Trusted Publishing |
+| GitHub Actions Secrets     | `onyks` | Manages CI/CD credentials; the `crates-io` environment holds none since Trusted Publishing |
+| Release Signing            | `onyks` | Sigstore keyless signing by the release workflow; no signing key exists ([docs/releasing.md](docs/releasing.md)) |
 | Security Reporting Inbox   | `onyks` | `github.tgwp7@aleeas.com` — see [SECURITY.md](SECURITY.md)        |
 
 ---

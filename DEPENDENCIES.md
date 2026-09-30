@@ -12,13 +12,12 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 
 ## 1. Dependency Directory
 
-> Every runtime crate except `notify-rust`, `ksni`, and `gettext-rs` has been added. The tables
+> Every runtime crate below is in use; `notify-rust` was considered and not added. The tables
 > record the *choice* of dependency and the reason for it; exact versions are pinned by the
 > committed `Cargo.lock` — major versions are noted where they matter (`gtk4` 0.10 and
-> `libadwaita` 0.8 must move together). The **License** column states the
-> license the crate is expected to carry; it is confirmed against the crate's own metadata by
-> `cargo deny check licenses` in CI at the moment the crate is added, and corrected here if it
-> differs.
+> `libadwaita` 0.8 must move together). The **License** column was checked against each crate's
+> own metadata (`cargo metadata`) for 0.1.1. No license check runs in CI yet; `cargo deny` is the
+> intended tool.
 
 ### 1.1 Runtime Dependencies
 
@@ -35,7 +34,7 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 | `tracing` | 0.1 | MIT | Structured logging and the spans that measure the latency targets. | Span-based rather than line-based, which is what makes the identifier-redaction policy enforceable per target instead of per call site. |
 | `tracing-subscriber` | 0.3, feature `env-filter` | MIT | `EnvFilter`, driven by `USBGUARD_GUI_LOG`. | Same. |
 | `thiserror` | 2 | MIT OR Apache-2.0 | Derives the error taxonomy that crosses layers. | Compile-time only in effect; adds no runtime behaviour to get wrong. |
-| `gettext-rs` | Resolved at add time | MIT | Translation catalogue lookup. | The platform's own i18n mechanism, so translations integrate with the distribution's tooling rather than a bespoke format. |
+| `gettext-rs` | 0.8, default features off, feature `gettext-system`; optional, behind `gui` | MIT | Translation catalogue lookup. | The platform's own i18n mechanism, so translations integrate with the distribution's tooling rather than a bespoke format. |
 
 ### 1.2 Development Dependencies
 
@@ -45,8 +44,8 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 | `cargo-fuzz` / `libfuzzer-sys` | Toolchain, not a manifest entry | MIT OR Apache-2.0 | Fuzzing the parser; target of zero panics over 10⁶ inputs. |
 | `cargo-llvm-cov` | Toolchain | MIT OR Apache-2.0 | Coverage measurement against the >90% parser target. |
 | `cargo-audit` | Toolchain | MIT OR Apache-2.0 | `make audit` — RustSec advisory scanning. |
-| `cargo-deny` | Toolchain | MIT OR Apache-2.0 | License and duplicate-dependency checks; the authority for the License columns here. |
-| Clippy, rustfmt | Toolchain component | MIT OR Apache-2.0 | `make lint`; Clippy carries the `disallowed-methods` lint that enforces the no-panic and runtime-boundary rules. |
+| `cargo-deny` | Toolchain | MIT OR Apache-2.0 | License and duplicate-dependency checks. Not yet run in CI. |
+| Clippy, rustfmt | Toolchain component | MIT OR Apache-2.0 | `make lint`; Clippy enforces the no-panic rules (lint levels in `Cargo.toml`, denied outright on `src/rules/`) and, through `disallowed-methods`, the runtime-boundary rule. |
 | `cargo-deb`, `cargo-generate-rpm` | Toolchain | MIT | Native package building. |
 
 ### 1.3 System-Level Dependencies
@@ -58,6 +57,7 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 | GTK | 4.14 | Distribution | Runtime and build-time (`gtk4-devel`). |
 | libadwaita | 1.5 | Distribution | Runtime and build-time (`libadwaita-devel`). |
 | GLib | Matching GTK | Distribution | Main loop, GSettings, GResource (`glib2-devel`). |
+| GNU gettext | any | Distribution | Build time only: `msgfmt` compiles the translations. Without it the build succeeds in English only, with a warning. |
 | `pkg-config` | any | Distribution | Build-time discovery of the above. |
 | A C toolchain | any | Distribution | Required by the `-sys` crates underlying the GTK bindings. |
 | D-Bus (system bus) | any | Distribution | The only transport to the daemon. |

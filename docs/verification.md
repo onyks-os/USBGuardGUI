@@ -3,6 +3,16 @@
 Every USBGuardGUI release is published with checksums, a Sigstore signature, and a CycloneDX
 SBOM. This guide shows how to verify an artifact before installing it.
 
+Each release carries the `.deb`, the `.rpm`, the Arch package (`.pkg.tar.zst`), the `.flatpak`
+bundle, the bare binary, the `.crate`, and `sbom.json`; next to each one, its Sigstore bundle
+(`<artifact>.sigstore.json`), and a `SHA256SUMS` file covering them all. The examples below use
+version 0.1.1:
+
+```bash
+VERSION=0.1.1
+gh release download "v$VERSION" --repo onyks-os/USBGuardGUI   # or download from the web page
+```
+
 ## 1. Verify the Checksums
 
 Download the artifact and `SHA256SUMS` from the
@@ -23,10 +33,12 @@ key to steal. Install [`sigstore`](https://pypi.org/project/sigstore/) and verif
 python -m pip install sigstore
 
 sigstore verify identity \
-  --cert-identity "https://github.com/onyks-os/USBGuardGUI/.github/workflows/release.yml@refs/tags/v0.1.0" \
+  --cert-identity "https://github.com/onyks-os/USBGuardGUI/.github/workflows/release.yml@refs/tags/v$VERSION" \
   --cert-oidc-issuer "https://token.actions.githubusercontent.com" \
   <artifact>
 ```
+
+`sigstore` finds the bundle `<artifact>.sigstore.json` next to the artifact by itself.
 
 ## 3. Verifying Signer Identity
 
@@ -46,7 +58,7 @@ the SBOM but absent from that file should be reported as an issue.
 ## 5. Reproducing the Build
 
 ```bash
-git clone --branch v0.1.0 https://github.com/onyks-os/USBGuardGUI.git
+git clone --branch "v$VERSION" https://github.com/onyks-os/USBGuardGUI.git
 cd USBGuardGUI
 make build
 sha256sum dist/*

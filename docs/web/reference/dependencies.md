@@ -22,10 +22,10 @@ versions are pinned by the committed `Cargo.lock`.
 | `futures-util` | 0.3 | MIT OR Apache-2.0 | Stream combinators for event coalescing. |
 | `tracing`, `tracing-subscriber` | 0.1, 0.3 | MIT | Structured logging, driven by `USBGUARD_GUI_LOG`. |
 | `thiserror` | 2 | MIT OR Apache-2.0 | The error taxonomy that crosses layers. |
+| `gettext-rs` | 0.8, feature `gettext-system` | MIT | Translation catalogue lookup. Optional: `gui`. |
 
 Desktop notifications use GIO's own `GNotification`, which already speaks both the session-bus
-protocol and the Flatpak notification portal, so no notification crate is needed. Translations
-(`gettext-rs`) are planned.
+protocol and the Flatpak notification portal, so no notification crate is needed.
 
 `cargo build --no-default-features` builds the headless commands (`--diagnose`, `--list-devices`,
 `--list-rules`) without GTK.
@@ -50,6 +50,7 @@ protocol and the Flatpak notification portal, so no notification crate is needed
 | GTK | 4.14 | Widgets. Build: `gtk4-devel` / `libgtk-4-dev` / `gtk4`. |
 | libadwaita | 1.5 | Adwaita widgets. Build: `libadwaita-devel` / `libadwaita-1-dev` / `libadwaita`. |
 | GLib | Matching GTK | Main loop, GSettings. `glib-compile-schemas` compiles the settings schema at build time. |
+| GNU gettext | any | Build time only: `msgfmt` compiles the translations. Without it the build is English only. |
 | A C toolchain, `pkg-config` | any | Required by the `-sys` crates under the GTK bindings. |
 | D-Bus (system bus) | any | The only transport to the daemon. |
 
