@@ -75,6 +75,7 @@ impl Client {
     }
 
     /// The underlying connection.
+    #[must_use]
     pub const fn connection(&self) -> &Connection {
         &self.connection
     }

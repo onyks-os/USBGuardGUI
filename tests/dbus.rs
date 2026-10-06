@@ -111,7 +111,7 @@ async fn invalid_rules_never_reach_the_daemon() {
         .await
         .unwrap_err();
     assert!(matches!(err, AppError::Parse(_)));
-    assert!(mock.calls().is_empty());
+    assert_eq!(mock.calls(), Vec::<String>::new(), "nothing may be sent");
 }
 
 #[tokio::test]
