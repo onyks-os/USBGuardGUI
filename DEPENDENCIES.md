@@ -38,11 +38,28 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 
 ### 1.2 Development Dependencies
 
+Reproducibility tooling additionally uses Python 3.11+ and rootless Podman (or
+Docker). Its compiler and native build inputs are pinned by
+[`packaging/reproducible/Containerfile`](packaging/reproducible/Containerfile),
+[`rust-toolchain.toml`](packaging/reproducible/rust-toolchain.toml), and the Rust
+archive checksum: Ubuntu 24.04 digest, snapshot `20261001T000000Z`, Rust 1.88.0.
+The snapshot also pins native packaging tools: RPM, dpkg, makepkg/pacman,
+fakeroot, libarchive, zstd, Flatpak, OSTree, SVG validation, gettext, cpio and Python.
+The reproducibility unit suite additionally requires PyYAML.
+The compiler archive and bootstrap Ubuntu CA package are SHA-256 checked. This
+recipe pin does not change runtime package requirements or the developer/MSRV
+matrix. See [verification](docs/verification.md#5-reproducing-the-build).
+
+Private-bus integration tests require `dbus-daemon`. The separate graphical
+regression test requires a display; CI provides it with `xvfb` and `xauth`.
+These are test tools, not additional package/runtime dependencies.
+
 | Package | Version constraint | License | Purpose |
 | :------ | :----------------- | :------ | :------ |
+| `tokio` (test features) | 1.53, adds `net`, `rt-multi-thread`, `macros`, `time`, `test-util` | MIT | Private mock D-Bus sockets and virtual time for ten-minute authentication waits. `test-util` is development-only; production builds do not enable it. |
 | `proptest` | 1 | MIT OR Apache-2.0 | Property-based round-trip tests for the rule parser and renderer. |
 | `cargo-fuzz` / `libfuzzer-sys` | Toolchain, not a manifest entry | MIT OR Apache-2.0 | Fuzzing the parser; target of zero panics over 10⁶ inputs. |
-| `cargo-llvm-cov` | Toolchain | MIT OR Apache-2.0 | Coverage measurement against the >90% parser target. |
+| `cargo-llvm-cov` | Toolchain; CI pins 0.9.1 | MIT OR Apache-2.0 | `make coverage-core` enforces >90% line coverage per rule-language/operation-core file; `make coverage` produces an all-feature HTML report. |
 | `cargo-audit` | Toolchain | MIT OR Apache-2.0 | `make audit` — RustSec advisory scanning. |
 | `cargo-deny` | Toolchain | MIT OR Apache-2.0 | License and duplicate-dependency checks. Not yet run in CI. |
 | Clippy, rustfmt | Toolchain component | MIT OR Apache-2.0 | `make lint`; Clippy enforces the no-panic rules (lint levels in `Cargo.toml`, denied outright on `src/rules/`) and, through `disallowed-methods`, the runtime-boundary rule. |

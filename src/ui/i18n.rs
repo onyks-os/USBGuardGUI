@@ -80,6 +80,9 @@ pub(super) fn app_error(err: &AppError) -> String {
             &gettext("USBGuard cannot be reached: {detail}"),
             &[("detail", detail)],
         ),
+        AppError::Inconclusive(_) => gettext(
+            "The operation could not be confirmed. USBGuard may already have acted; its state is being re-read. Check the result before trying again.",
+        ),
         // The detail comes from the daemon, in English.
         AppError::Rejected(detail) => fill(
             &gettext("USBGuard refused the request: {detail}"),
@@ -153,5 +156,14 @@ mod tests {
     fn placeholders_are_filled_wherever_they_are() {
         assert_eq!(fill("{b} then {a}", &[("a", "1"), ("b", "2")]), "2 then 1");
         assert_eq!(fill("no placeholders", &[("a", "1")]), "no placeholders");
+    }
+    #[test]
+    fn uncertain_write_explains_possible_effect_without_daemon_details() {
+        let message = super::app_error(&crate::model::AppError::Inconclusive(
+            "PRIVATE_SERIAL_9281".into(),
+        ));
+        assert!(message.contains("may already have acted"));
+        assert!(message.contains("before trying again"));
+        assert!(!message.contains("PRIVATE_SERIAL_9281"));
     }
 }

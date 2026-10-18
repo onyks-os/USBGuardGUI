@@ -60,3 +60,16 @@ coverage: ## Run the test suite with a coverage report (cargo-llvm-cov)
 
 doc: ## Build and open the rustdoc API documentation
 	@$(CARGO) doc --no-deps --all-features --open
+
+.PHONY: coverage-core
+coverage-core: ## Measure headless coverage and require >90% per rule/operation-core file
+	@$(CARGO) llvm-cov --locked --no-default-features --json --output-path target/coverage-headless.json
+	@python3 scripts/check-coverage.py target/coverage-headless.json
+
+.PHONY: reproducible test-reproducible
+REPRO_ARGS ?=
+reproducible: ## Compare two clean offline GUI binaries, RPMs, DEBs, Arch packages and Flatpak bundles in the pinned container (REPRO_ARGS=--worktree for local changes)
+	@python3 scripts/reproducible-build.py $(REPRO_ARGS)
+
+test-reproducible: ## Test source normalization and the reproducibility checker's failure paths
+	@python3 -m unittest discover -s tests -p 'test_reproducible*.py' -v

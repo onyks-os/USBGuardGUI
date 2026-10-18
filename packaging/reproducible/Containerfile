@@ -1,0 +1,47 @@
+# linux/amd64; the base filesystem, Ubuntu archive, and Rust archive are pinned.
+FROM docker.io/library/ubuntu@sha256:008173c23f95b170204355c12626cb5a965d779a7e1283b09e9cffbb1bf33ca3
+
+# The minimal Ubuntu image has no CA bundle. The engine downloads this archive
+# over HTTPS; verify it before extracting the bootstrap certificates. APT then
+# authenticates the fixed snapshot with Ubuntu's built-in archive keyring.
+ADD https://archive.ubuntu.com/ubuntu/pool/main/c/ca-certificates/ca-certificates_20240203_all.deb /tmp/bootstrap-ca.deb
+RUN echo '641de77d8f142cfd62a1a6f964ba67b20754d3337c480efb529d086075a06c9a  /tmp/bootstrap-ca.deb' | sha256sum -c - \
+    && dpkg-deb -x /tmp/bootstrap-ca.deb /tmp/bootstrap-ca \
+    && mkdir -p /etc/ssl/certs \
+    && cat /tmp/bootstrap-ca/usr/share/ca-certificates/mozilla/*.crt > /etc/ssl/certs/ca-certificates.crt \
+    && rm -rf /tmp/bootstrap-ca /tmp/bootstrap-ca.deb
+
+RUN printf 'Types: deb\nURIs: https://snapshot.ubuntu.com/ubuntu/20261001T000000Z/\nSuites: noble noble-updates noble-security\nComponents: main universe\nSigned-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\nCheck-Valid-Until: no\n' > /etc/apt/sources.list.d/ubuntu.sources \
+    && apt-get -o APT::Update::Error-Mode=any update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        build-essential ca-certificates curl gettext libadwaita-1-dev libgtk-4-dev pkg-config xz-utils rpm python3 cpio \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY rust-toolchain.toml rust.sha256 /opt/reproducible/
+RUN set -eu; \
+    version=$(sed -n 's/^channel = "\([^"]*\)"/\1/p' /opt/reproducible/rust-toolchain.toml); \
+    archive="rust-${version}-x86_64-unknown-linux-gnu"; \
+    cd /tmp; \
+    curl --retry 3 -fsSLO "https://static.rust-lang.org/dist/${archive}.tar.xz"; \
+    sha256sum -c /opt/reproducible/rust.sha256; \
+    tar -xf "${archive}.tar.xz"; \
+    "${archive}/install.sh" --prefix=/opt/rust --components=rustc,cargo,rust-std-x86_64-unknown-linux-gnu --disable-ldconfig; \
+    rm -rf "${archive}" "${archive}.tar.xz"
+
+# Packaging tools are installed after Rust so extending formats preserves its cache.
+RUN apt-get -o APT::Update::Error-Mode=any update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        makepkg pacman-package-manager fakeroot libarchive-tools zstd \
+        flatpak ostree python3-yaml librsvg2-common libfaketime \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/opt/rust/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    LC_ALL=C.UTF-8 TZ=UTC CARGO_INCREMENTAL=0
+COPY rpm.py deb.py flatpak.py /opt/reproducible/
+COPY arch.sh /opt/reproducible/arch.sh
+COPY worker.sh /opt/reproducible/worker.sh
+RUN chmod 0755 /opt/reproducible/worker.sh /opt/reproducible/arch.sh && chmod 0644 /opt/reproducible/rpm.py /opt/reproducible/deb.py /opt/reproducible/flatpak.py \
+    && mkdir -p /var/lib/pacman/local \
+    && printf '9\n' > /var/lib/pacman/local/ALPM_DB_VERSION
+WORKDIR /tmp
+ENTRYPOINT ["bash", "/opt/reproducible/worker.sh"]

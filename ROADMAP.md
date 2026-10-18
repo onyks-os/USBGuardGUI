@@ -170,20 +170,51 @@ explicit at every step.
 
 ---
 
+## Reliability follow-up (implemented, unreleased)
+
+- **Real-world regression fixes**: cancelling authentication no longer leaves focus pointing
+  at a detached device-table row. The reproducing graphical test runs separately in CI. An
+  already-owned but failing bridge observes capped exponential backoff; reconnection is only
+  announced after the first successful snapshot. A private-bus test covers actual name changes.
+
+- **T2 and T13 automated**: lost write replies are explicitly inconclusive, with mock tests
+  before and after execution; a ten-minute authentication wait uses virtual time. Cancellation
+  is also tested while a real mock D-Bus request is pending. The window requests fresh state
+  after an inconclusive result and never retries the write automatically.
+- **Log privacy tested**: default/info logs exclude device identifiers even when a daemon error
+  contains them. Detailed connection/decoding errors are debug-only; enabling debug or trace
+  prints a privacy notice, including with a dependency-specific filter.
+- **Filesystem access measured**: GUI background startup and headless diagnostics traced on a
+  private demo bus. System libraries access system configuration; no direct first-party accesses
+  or system-path writes were observed. See [validation notes](docs/testing.md) for scope and reproduction.
+- **Coverage enforced**: `make coverage-core` and a CI job require more than 90% line coverage
+  in every rule-language file and the commands/error-classification modules.
+
+## Reproducible Linux binary and all package formats (implemented, unreleased)
+
+- A pinned Ubuntu digest, archive snapshot, and Rust 1.88.0 toolchain build the
+  GUI binary twice, offline and in different paths, without shared target caches.
+- `make reproducible` enforces byte equality, rejects temporary build paths,
+  checks GUI dependencies, and writes a report identifying the exact source and recipe.
+- CI runs the gate; releases take the bare binary, RPM, DEB, Arch package and Flatpak bundle only from its successful result.
+  Published 0.1.0/0.1.1 artifacts and other package formats are not covered retroactively.
+- Flatpak bundles and their dedicated /app executables must also match; a private
+  runtime test enforces a pinned GNOME commit and checks installed CLI/schema/assets.
+- Development asset paths are excluded from release builds. The normal developer
+  toolchain and the stable/beta/MSRV matrix are unchanged.
+- Local validation on 2026-10-18 passed for the archived modified worktree: both
+  GUI binaries were byte-identical. See [recorded evidence](docs/verification.md#local-validation-2026-10-18);
+  the first remote CI/release run remains to be performed after committing/pushing.
+
 ## Next
 
-Not committed, and in no particular order. Most come from checking
-[`docs/security-assessment.md`](docs/security-assessment.md) against the 0.1.1 code: they are the
-mitigations it marks `Partial` or untested.
+Not committed, and in no particular order. Real-daemon/Polkit checks on clean installations
+remain complementary to the new mock tests; those tests do not exercise a real authentication agent.
 
 | Item | Description |
 | :--- | :---------- |
-| **Automate T2 and T13** | A daemon restart during an operation (reported as inconclusive rather than failed), and a Polkit prompt left open for ten minutes, as mock tests. |
-| **Identifier-free logs, tested** | A test asserting that a default-level log contains no device identifier, and a notice in the `debug` output itself that it contains them (today only `--help` says so). |
-| **Measure filesystem access** | The §13.2 `strace` measurement, with the program's own accesses told apart from those of the libraries it links. |
 | **Translations** | Open issues invite French, Spanish, Russian, Chinese, German, Brazilian Portuguese, and Japanese; [docs/translating.md](docs/translating.md) explains how. |
 | **Arch User Repository** | A `usbguard-gui` package, when AUR registrations reopen. |
-| **Reproducible builds** | See [docs/verification.md](docs/verification.md) §5. |
 
 One upstream contribution is worth more than any of them: proposing
 `removeRuleIfMatches(id, expected_text)` to USBGuard would eliminate the rule-removal race at its

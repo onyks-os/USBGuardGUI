@@ -155,6 +155,14 @@ pub(crate) fn app_error(err: &zbus::Error) -> AppError {
     to_app_error(&ErrorShape::from(err), None)
 }
 
+/// A transport failure during a write cannot prove the daemon did not act.
+pub(crate) fn mutation_error(err: &zbus::Error) -> AppError {
+    match app_error(err) {
+        AppError::Unreachable(detail) => AppError::Inconclusive(detail),
+        other => other,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{ErrorShape, classify, to_app_error};
@@ -260,5 +268,35 @@ mod tests {
             "getParameter: Bogus: unknown parameter",
         );
         assert!(matches!(to_app_error(&e, None), AppError::Rejected(_)));
+    }
+    #[test]
+    fn lost_write_replies_are_uncertain_but_explicit_refusals_are_not() {
+        for error in [
+            zbus::fdo::Error::ServiceUnknown("gone".into()),
+            zbus::fdo::Error::NameHasNoOwner("gone".into()),
+            zbus::fdo::Error::NoReply("gone".into()),
+            zbus::fdo::Error::Disconnected("gone".into()),
+            zbus::fdo::Error::SpawnChildExited("gone".into()),
+        ] {
+            assert!(matches!(
+                super::mutation_error(&error.into()),
+                AppError::Inconclusive(_)
+            ));
+        }
+        let denied = zbus::Error::from(zbus::fdo::Error::AccessDenied("Not authorized.".into()));
+        assert!(matches!(
+            super::mutation_error(&denied),
+            AppError::Denied(_)
+        ));
+        let rejected = zbus::Error::from(zbus::fdo::Error::Failed("invalid policy".into()));
+        assert!(matches!(
+            super::mutation_error(&rejected),
+            AppError::Rejected(_)
+        ));
+        let local = zbus::Error::from(std::io::Error::from(std::io::ErrorKind::BrokenPipe));
+        assert!(matches!(
+            super::mutation_error(&local),
+            AppError::Inconclusive(_)
+        ));
     }
 }

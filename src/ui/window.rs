@@ -853,6 +853,12 @@ impl MainWindow {
         let Some((_, kind)) = self.0.state.borrow_mut().ops.remove(&op) else {
             return;
         };
+        if matches!(&result, Err(AppError::Inconclusive(_))) {
+            // A missing reply is no evidence that the write failed. Refresh
+            // from the daemon, and never replay the user's request.
+            reload_devices(self.0.ui_tx.clone());
+            self.mark_rules_stale();
+        }
         match (kind, result) {
             (
                 OpKind::Device {

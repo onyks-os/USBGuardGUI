@@ -25,7 +25,8 @@ procedures live in [`SECURITY.md`](../SECURITY.md).
 > **Status of this document.** Written before the code, on purpose: the threat model was an input
 > to the design, not a report on it. It was checked against the code of 0.1.1 (2026-09-30), and
 > each mitigation now carries the status that check found — including where the code does less
-> than, or something different from, what was specified.
+> than, or something different from, what was specified. The unreleased reliability
+> follow-up was checked on 2026-10-18; evidence and limits are in [testing.md](testing.md).
 
 USBGuardGUI is an unprivileged client that asks a root daemon to change USB device authorization.
 It holds no privilege of its own and enforces no policy. Its security value is therefore narrow and
@@ -36,7 +37,7 @@ broken.
 | # | Objective | Rationale |
 | :- | :-------- | :-------- |
 | O1 | The process acquires no privilege: no setuid bit, no file capabilities, no helper daemon, no privileged code path. | The entire design rests on this. If the program needs privilege, it is the wrong design. |
-| O2 | The process reads and writes nothing under `/etc`, `/var`, or `/sys`. | A falsifiable restatement of O1 that a tool can check: `strace` filtered on those prefixes must report zero accesses. |
+| O2 | First-party code performs no direct filesystem reads or writes under `/etc`, `/var`, or `/sys`. | Inspect `strace -f -k` and attribute calls to first-party code or libraries. GTK, the dynamic loader, and other libraries legitimately read system configuration; zero accesses by the whole process is not the objective. |
 | O3 | No authorization change reaches the daemon that the user did not initiate and confirm for that specific device or rule. | The program's only dangerous capability is relaying a request. Relaying one nobody made is the worst outcome it can produce. |
 | O4 | A rule removal removes the rule the user selected, or nothing. | Rule IDs are positional and shift under concurrent modification. "Nothing, with an error" is an acceptable outcome; "a different rule" is not. |
 | O5 | No input reachable from the daemon causes a panic, a hang, or unbounded allocation. | Every byte of device and rule text originates outside the program's control. |
@@ -124,9 +125,10 @@ the program, and the component with the smallest blast radius, because it touche
 | :----- | :----- | :------- | :--------- | :----- |
 | E | A Polkit authorization obtained for one action is used to perform a different one. | **Critical** | One authorization per method call, checked by the bridge, not by this program. The program issues exactly the call the user confirmed, with no batching and no deferred replay of a pending operation. | Implemented, untested — by construction: each user action is one method call |
 | T | Rule-ID volatility: the ruleset shifts between reading and removing, and the wrong rule is removed. | **Critical** | Rules are held by canonical text, not by ID; the ruleset is re-read immediately before removal and the text re-matched; a mismatch yields `AlreadyGone` and aborts. Two textually identical rules produce a disambiguation dialog listing evaluation positions, never a guess. T4 and T5 are the tests. | Implemented — T4, T5 |
-| T | An optimistic UI update makes the user believe a change took effect that the daemon rejected. | High | No optimistic updates. The view changes only on a daemon signal or a confirmed reply; an operation interrupted by a daemon restart is reported inconclusive and the state is re-read (T2). | Partial — no optimistic updates: a reply only clears the row's pending state, and the new state arrives with the daemon's signal. An operation interrupted by a daemon restart is reported as failed, not inconclusive, and the state is re-read on reconnection. T2 is not automated |
+| T | An optimistic UI update makes the user believe a change took effect that the daemon rejected. | High | No optimistic updates. The view changes only on a daemon signal or a confirmed reply; an operation interrupted by a daemon restart is reported inconclusive and the state is re-read (T2). | Implemented — T2 exercises lost write replies before and after execution against the mock; writes become `Inconclusive` and the window requests fresh state. T1/T15 verifies supervisor resynchronization; private-bus tests cover real name-owner replacement and capped retry backoff without false reconnections. Real-agent/daemon checks remain manual |
 | S | A crafted notification reply causes an action on a device other than the one the notification was about. | High | Notification actions carry an opaque token resolved against the program's own live device map; a token that no longer resolves opens the window instead of acting. | Implemented, untested — the token is the device id, checked against the device's descriptor hash (or rule text) recorded when the notification was sent; a mismatch opens the window and says nothing was changed |
-| D | A Polkit prompt the user leaves open for ten minutes causes the operation to time out and the UI to hang. | Medium | Operations are cancellable and have no client-side timeout shorter than the Polkit interaction; the target is zero timeouts on waits up to ten minutes (T13). | Implemented, untested — no client-side method timeout is set, and each pending operation has a Cancel button; T13 is not automated |
+| D | A Polkit prompt the user leaves open for ten minutes causes the operation to time out and the UI to hang. | Medium | Operations are cancellable and have no client-side timeout shorter than the Polkit interaction; the target is zero timeouts on waits up to ten minutes (T13). | Implemented — T13 advances the D-Bus client's clock by ten minutes before allowing a successful reply; a separate mock test verifies cancellation does not withdraw the write. Notice stages at 20/180 s are unit-tested; actual GTK timer rendering and real Polkit remain manual |
+| D | Returning focus from authentication after device rows are replaced crashes GTK. | Medium | Clear focus belonging to old device rows before model replacement/reset, preserving toolbar/search focus. | Implemented — `gui_device_actions_survive_denied_authentication_and_refresh` reproduced the GTK 4.22.5 segfault before the fix and passes afterwards; CI runs it separately with a display |
 | R | — | Low | The daemon records the change. | Accepted |
 
 ### 3.4 Session-bus integrations — notifications and tray (`src/notify.rs`, `src/tray.rs`)
@@ -141,7 +143,7 @@ the program, and the component with the smallest blast radius, because it touche
 
 | STRIDE | Threat | Severity | Mitigation | Status |
 | :----- | :----- | :------- | :--------- | :----- |
-| I | A log or a `--diagnose` output pasted into a public bug report reveals the user's hardware. | High | Device names, serial numbers, and hashes are never logged above `debug`, and the `debug` level says so in its own output. `--diagnose` reports access state and remedies, never a device list. | Partial — the default level is `warn`, and no `warn` or `info` message carries a device identifier; `--diagnose` lists no device. `--help` states that the `debug` level records device names and serial numbers. Missing: the `debug` output itself does not say so |
+| I | A log or a `--diagnose` output pasted into a public bug report reveals the user's hardware. | High | Device names, serial numbers, and hashes are never logged above `debug`, and the `debug` level says so in its own output. `--diagnose` reports access state and remedies, never a device list. | Implemented — `tests/logging.rs` asserts that warn/info logs omit identifiers present in daemon errors, while debug retains the detail. Subprocess tests verify the privacy notice at debug/trace, including module-specific filters. `--diagnose` lists no device |
 | T | A tampered GSettings value changes what the program sends to the daemon. | Low | GSettings holds presentation state only. No key affects which request is sent or whether it is confirmed — a claim that is checkable by reading §2 of `interfaces.md` against the request path. | Implemented, untested — `default-persistence` only preselects the choice in the dialog; the user still confirms it |
 | E | The diagnostic probe triggers a Polkit prompt during startup that the user cannot attribute to anything. | Medium | The probe sequence runs **after** the window is presented, never during startup, so any prompt it causes belongs to a window the user can see. The write-access probe is deliberately empty: the only honest test of write access is a write, and a test write would change the system's USB policy to find out whether it may. | Implemented, untested — the probe starts on the window's first map; `--background` runs no probe |
 
@@ -173,6 +175,11 @@ property that matters: the program fails in a way it can explain.
 - Every release ships a `SHA256SUMS` file covering all artifacts.
 - Artifacts are signed with Sigstore keyless signing via the release workflow.
 - A CycloneDX SBOM is attached to each release.
+- New release workflows additionally gate the bare Linux x86_64 GUI binary, unsigned RPM, DEB, Arch package and Flatpak bundle on byte equality
+  between two independent offline builds in a pinned container recipe. Source/recipe digests,
+  package/compiler inventories, and the comparison report accompany it. Earlier releases,
+  runtime libraries, the crate/SBOM and signatures remain outside that claim. The recipe's Rust archive and CA bootstrap package
+  are SHA-256 verified, and APT verifies the fixed Ubuntu snapshot using the archive keyring.
 - Verification instructions: [`docs/verification.md`](verification.md).
 
 ### 5.2 Dependency Monitoring
@@ -196,10 +203,10 @@ property that matters: the program fails in a way it can explain.
 | Control | Type | Where implemented | Verified by |
 | :------ | :--- | :---------------- | :---------- |
 | Input validation | Preventive | `src/rules/` — parser, lexer, canonical renderer; `src/dbus/client.rs` — every field parsed into a domain type at the boundary | Round-trip property tests, `cargo fuzz`, resilience tests T3, T5, and T6 |
-| Least privilege | Preventive | The whole design: no setuid, no capabilities, no helper daemon; the program's own code reads nothing under `/etc`, `/var`, or `/sys` (it reads `/usr/lib/os-release` rather than `/etc/os-release`) and writes only its autostart entry in the user's home | Review. The libraries it links, such as fontconfig, read system configuration as in any GTK application, so a `strace` of the process is not expected to show zero; the §13.2 `strace` measurement has not been taken |
-| Fail-closed defaults | Preventive | `default-persistence` defaults to runtime-only; no optimistic UI updates; `AlreadyGone` aborts rather than guessing; `DeniedUnattributed` shows both remedies rather than the likelier one | Resilience tests T4 and T5 (T2 is not automated) |
+| Least privilege | Preventive | The whole design: no setuid, no capabilities, no helper daemon; the program's own code reads nothing under `/etc`, `/var`, or `/sys` (it reads `/usr/lib/os-release` rather than `/etc/os-release`) and writes only its autostart entry in the user's home | Review plus a scoped `strace -f -k` measurement: 414 GUI / 8 diagnostic system-path calls attributed to system libraries, no observed writes or direct first-party operations. See [testing.md](testing.md); other workflows remain to be measured |
+| Fail-closed defaults | Preventive | `default-persistence` defaults to runtime-only; no optimistic UI updates; `AlreadyGone` aborts rather than guessing; `DeniedUnattributed` shows both remedies rather than the likelier one | Resilience tests T2, T4, T5, T13; GUI reconciliation reviewed, real-agent scenarios manual |
 | No-panic discipline | Preventive | `#![deny(...)]` panic lints on `src/rules/`, the same lints as warnings crate-wide, and `clippy.toml` `disallowed-methods` against a bare `tokio::spawn` | `cargo clippy --all-targets -- -D warnings` in CI |
-| Identifier redaction | Preventive | `src/` logging policy: device names, serials, and hashes never above `debug` | Review only: the planned test asserting that a default-level log contains no identifier does not exist yet |
+| Identifier redaction | Preventive | `src/` logging policy: device names, serials, and hashes never above `debug` | `tests/logging.rs`: warn/info output with identifier-bearing errors, debug detail, and startup privacy notices |
 | Static analysis | Detective | CodeQL, linter | CI |
 | Dependency scanning | Detective | Dependabot, `make audit` | CI |
 | Fuzzing | Detective | `make fuzz` | CI (weekly) |

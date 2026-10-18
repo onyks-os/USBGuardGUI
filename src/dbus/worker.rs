@@ -81,7 +81,18 @@ async fn flush(coalescer: &mut Coalescer, ui_tx: &Sender<UiEvent>) -> Result<(),
 /// Runs until the daemon is lost or the interface goes away. Always returns
 /// the reason; the supervisor decides what happens next.
 pub async fn event_loop(client: &Client, ui_tx: &Sender<UiEvent>) -> WorkerExit {
-    match run(client, ui_tx).await {
+    event_loop_with_ready(client, ui_tx, false, || {}).await
+}
+
+/// Supervision declares reconnection only after subscriptions and the first
+/// device read succeed, rather than after constructing local proxies.
+pub(crate) async fn event_loop_with_ready(
+    client: &Client,
+    ui_tx: &Sender<UiEvent>,
+    reconnected: bool,
+    ready: impl FnOnce(),
+) -> WorkerExit {
+    match run(client, ui_tx, reconnected, ready).await {
         Ok(never) => match never {},
         Err(exit) => exit,
     }
@@ -91,10 +102,16 @@ pub async fn event_loop(client: &Client, ui_tx: &Sender<UiEvent>) -> WorkerExit 
 async fn run(
     client: &Client,
     ui_tx: &Sender<UiEvent>,
+    reconnected: bool,
+    ready: impl FnOnce(),
 ) -> Result<std::convert::Infallible, WorkerExit> {
     let mut events = subscribe(client).await?;
-
-    snapshot(client, ui_tx).await?;
+    let devices = client.list_devices().await?;
+    ready();
+    if reconnected {
+        send(ui_tx, UiEvent::Reconnected).await?;
+    }
+    send(ui_tx, UiEvent::DeviceSnapshot(devices)).await?;
     // The ruleset may have changed while nobody was listening (§5.5).
     send(ui_tx, UiEvent::InvalidateRuleCache).await?;
 
@@ -176,7 +193,10 @@ async fn subscribe(client: &Client) -> Result<IncomingStream, WorkerExit> {
         .filter_map(|s| async move {
             let a = s
                 .args()
-                .map_err(|e| warn!("malformed DevicePresenceChanged: {e}"))
+                .map_err(|e| {
+                    warn!("malformed DevicePresenceChanged");
+                    debug!("signal decoding detail: {e}");
+                })
                 .ok()?;
             Some(Incoming::Device {
                 signal: DeviceSignal::Presence {
@@ -197,7 +217,10 @@ async fn subscribe(client: &Client) -> Result<IncomingStream, WorkerExit> {
         .filter_map(|s| async move {
             let a = s
                 .args()
-                .map_err(|e| warn!("malformed DevicePolicyChanged: {e}"))
+                .map_err(|e| {
+                    warn!("malformed DevicePolicyChanged");
+                    debug!("signal decoding detail: {e}");
+                })
                 .ok()?;
             Some(Incoming::Device {
                 signal: DeviceSignal::Policy {
@@ -217,7 +240,10 @@ async fn subscribe(client: &Client) -> Result<IncomingStream, WorkerExit> {
         .filter_map(|s| async move {
             let a = s
                 .args()
-                .map_err(|e| warn!("malformed DevicePolicyApplied: {e}"))
+                .map_err(|e| {
+                    warn!("malformed DevicePolicyApplied");
+                    debug!("signal decoding detail: {e}");
+                })
                 .ok()?;
             Some(Incoming::Device {
                 signal: DeviceSignal::Policy {

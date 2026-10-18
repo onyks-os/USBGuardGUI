@@ -17,6 +17,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
 
 use tokio::net::UnixStream;
+use tokio::sync::Notify;
 use usbguard_gui::dbus::Client;
 use zbus::message::Header;
 use zbus::object_server::SignalEmitter;
@@ -36,9 +37,27 @@ pub struct State {
     /// For each call, in order: the method name and whether the message
     /// carried ALLOW_INTERACTIVE_AUTHORIZATION.
     pub interactive: Vec<(&'static str, bool)>,
+    /// Hold applyDevicePolicy before execution or after execution but before its reply.
+    pub apply_gate: Option<Arc<WriteGate>>,
+    /// Arbitrary daemon failures, including device identifiers for privacy tests.
+    pub failures: HashMap<&'static str, String>,
 }
 
 pub type Shared = Arc<Mutex<State>>;
+
+#[derive(Debug, Default)]
+pub struct WriteGate {
+    pub entered: Notify,
+    pub resume: Notify,
+    pub after_apply: bool,
+}
+
+impl WriteGate {
+    async fn wait(&self) {
+        self.entered.notify_one();
+        self.resume.notified().await;
+    }
+}
 
 fn not_authorized() -> fdo::Error {
     fdo::Error::AccessDenied("Not authorized.".into())
@@ -57,6 +76,9 @@ fn check(
         .flags()
         .contains(zbus::message::Flags::AllowInteractiveAuth);
     s.interactive.push((method, interactive));
+    if let Some(detail) = s.failures.get(method) {
+        return Err(fdo::Error::Failed(detail.clone()));
+    }
     if s.denied.contains(method) {
         Err(not_authorized())
     } else {
@@ -163,6 +185,12 @@ impl Devices {
             "applyDevicePolicy",
             format!("applyDevicePolicy {id} {target} {permanent}"),
         )?;
+        let gate = self.0.lock().unwrap().apply_gate.clone();
+        if let Some(gate) = &gate {
+            if !gate.after_apply {
+                gate.wait().await;
+            }
+        }
         let (old, text, rule_id) = {
             let mut s = self.0.lock().unwrap();
             let keyword = match target {
@@ -200,6 +228,11 @@ impl Devices {
                 .await;
         if target == 2 {
             let _ = Self::device_presence_changed(&emitter, id, 3, 2, &text, HashMap::new()).await;
+        }
+        if let Some(gate) = &gate {
+            if gate.after_apply {
+                gate.wait().await;
+            }
         }
         Ok(rule_id)
     }
@@ -413,4 +446,73 @@ pub fn device_rule(target: &str, n: u32) -> String {
         "{target} id 1234:{n:04x} serial \"S{n}\" name \"Device {n}\" hash \"h{n}=\" \
          parent-hash \"p=\" via-port \"1-{n}\" with-interface 08:06:50 with-connect-type \"hotplug\""
     )
+}
+
+/// A real, isolated bus daemon, exercising name ownership as well as peer I/O.
+pub struct PrivateBus {
+    child: std::process::Child,
+    pub address: String,
+}
+
+impl PrivateBus {
+    pub fn start() -> Self {
+        use std::io::BufRead as _;
+        let mut child = std::process::Command::new("dbus-daemon")
+            .args([
+                "--session",
+                "--nofork",
+                "--print-address=1",
+                "--address=unix:tmpdir=/tmp",
+            ])
+            .stdout(std::process::Stdio::piped())
+            .spawn()
+            .expect("dbus-daemon is required for private-bus tests");
+        let mut address = String::new();
+        std::io::BufReader::new(child.stdout.take().unwrap())
+            .read_line(&mut address)
+            .unwrap();
+        assert_ne!(address.trim(), "");
+        Self {
+            child,
+            address: address.trim().to_owned(),
+        }
+    }
+
+    pub async fn connect(&self) -> Connection {
+        zbus::connection::Builder::address(self.address.as_str())
+            .unwrap()
+            .build()
+            .await
+            .unwrap()
+    }
+}
+
+impl Drop for PrivateBus {
+    fn drop(&mut self) {
+        let _ = self.child.kill();
+        let _ = self.child.wait();
+    }
+}
+
+impl Mock {
+    pub async fn serve_on_bus(bus: &PrivateBus, state: Shared) -> Self {
+        let server = zbus::connection::Builder::address(bus.address.as_str())
+            .unwrap()
+            .name("org.usbguard1")
+            .unwrap()
+            .serve_at("/org/usbguard1", Root(state.clone()))
+            .unwrap()
+            .serve_at("/org/usbguard1/Devices", Devices(state.clone()))
+            .unwrap()
+            .serve_at("/org/usbguard1/Policy", Policy(state.clone()))
+            .unwrap()
+            .build()
+            .await
+            .unwrap();
+        Self {
+            state,
+            server,
+            client_connection: bus.connect().await,
+        }
+    }
 }

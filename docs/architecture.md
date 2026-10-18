@@ -999,35 +999,25 @@ A worker that exits on its first error leaves the interface silently frozen
 showing stale state — the worst failure mode for a security tool, since the
 displayed authorization no longer describes the system. The worker is wrapped:
 
-```rust
-pub fn start(ui_tx: async_channel::Sender<UiEvent>) {
-    runtime().spawn(async move {
-        let mut backoff = Duration::from_millis(500);
-        const BACKOFF_MAX: Duration = Duration::from_secs(30);
+`supervisor::start` runs the worker on the shared Tokio runtime. A failed
+attempt reports `ConnectionLost`, then waits for bridge ownership with an
+exponential retry interval: 500 ms, 1 s, 2 s, up to 30 s.
 
-        loop {
-            match run_once(&ui_tx).await {
-                Ok(()) => break, // the interface closed the channel
-                Err(err) => {
-                    let _ = ui_tx.send(UiEvent::ConnectionLost(err.to_string())).await;
-                    if ui_tx.is_closed() { break; }
-                }
-            }
+`wait_for_bridge` subscribes to `NameOwnerChanged` on `org.freedesktop.DBus`,
+filtered to `org.usbguard1`, before checking the current owner. It distinguishes
+an already-owned name (`ServiceWait::Present`) from a name that gains an owner
+while waiting (`Appeared`). An owned name does not prove the bridge can serve
+requests: repeated failures in that state still consume the full retry interval.
+A genuine appearance wakes retries after at least the 500 ms minimum. Closing
+the interface interrupts either wait immediately.
 
-            // Wait for the service to come back rather than polling blindly.
-            match wait_for_service(backoff).await {
-                ServiceWait::Appeared => backoff = Duration::from_millis(500),
-                ServiceWait::TimedOut => backoff = (backoff * 2).min(BACKOFF_MAX),
-            }
-        }
-    });
-}
-```
-
-`wait_for_service` subscribes to `NameOwnerChanged` on `org.freedesktop.DBus`,
-filtered to `org.usbguard1`, capped at the current backoff. A service that comes
-back is picked up almost immediately; a service that is absent for an hour
-generates no traffic at all.
+The backoff resets only after subscriptions and the initial device read succeed.
+Constructing proxies involves no round trip and is insufficient evidence of a
+connection. The worker emits `Reconnected` immediately before the first fresh
+snapshot, only if an earlier attempt had actually reached its first snapshot.
+This prevents false reconnections and repeated cache clearing during a failure.
+Regression tests cover capped backoff using virtual time, unreadable initial
+snapshots, and bridge name replacement on a private `dbus-daemon`.
 
 On every reconnection **both caches are discarded unconditionally**. The
 ruleset may have changed while the program was disconnected, rule ids may have
@@ -1169,6 +1159,8 @@ pub enum AppError {
     Denied(AccessState),
     #[error("the daemon is unreachable: {0}")]
     Unreachable(String),
+    #[error("the operation could not be confirmed; USBGuard may already have acted: {0}")]
+    Inconclusive(String),
     #[error("the daemon rejected the request: {0}")]
     Rejected(String),
     #[error("could not parse the rule language: {0}")]
@@ -1183,6 +1175,11 @@ pub enum AppError {
 `Denied` reopens the diagnostic panel at the relevant remedy. `Stale` triggers a
 re-read and a re-presentation of the choice rather than a retry, because a retry
 would act on an assumption the program has just been told is false.
+
+`Inconclusive` distinguishes a lost write reply from a read/connection failure:
+the daemon may already have acted. The window requests fresh device and policy
+state and explains the uncertainty; it never retries a write automatically.
+Explicit daemon refusals remain `Denied` or `Rejected`.
 
 ### 6.4 Rule Identity and Safe Removal
 
@@ -1586,9 +1583,11 @@ security policy.
 which is also how the latency metrics of §13.2 are measured.
 
 **Device names, serial numbers, and hashes are never logged above `debug`**, and
-the `debug` level states in its own documentation that it records device
-identifiers. A default-level log file from a bug report must not be a list of
-the hardware the user owns.
+enabling debug or trace prints a privacy notice to stderr, even when only a
+dependency's target is enabled. Connection and signal-decoding error details
+are kept at debug level. Regression tests in `tests/logging.rs` exercise daemon
+errors containing identifiers. A default-level log file from a bug report must
+not be a list of the hardware the user owns.
 
 ### 10.3 Command Line
 
@@ -1716,14 +1715,42 @@ Build-time system dependencies: `gtk4` and `libadwaita` development packages,
 `glib` development files, `pkg-config`, a C toolchain. On Fedora:
 `gtk4-devel libadwaita-devel glib2-devel pkgconf-pkg-config gcc`.
 
-`build.rs` compiles the GResource bundle, the GSettings schema, and the
-translation catalogues.
+For debug builds, `build.rs` stages the GSettings schema and translation
+catalogues for development runs. Release builds use installed system assets
+and do not emit `OUT_DIR` fallback paths into the program.
 
 **Continuous integration** runs, on every push: `cargo fmt --check`,
 `cargo clippy --all-targets -- -D warnings` (which is what enforces §5.2 and
 §7.2), `cargo test`, `cargo llvm-cov` for the coverage target of §13.2, and a
 short `cargo fuzz run` over the parser. The D-Bus-dependent tests run against
 the mock daemon of §13.1, never against a live system daemon.
+
+### 12.1 Reproducible Linux GUI binary, RPM, DEB, Arch package and Flatpak bundle
+
+`make reproducible` uses `packaging/reproducible/` and the Python driver in
+`scripts/reproducible-build.py`. The base OCI digest, Ubuntu archive timestamp,
+Rust archive/version/checksum, and Cargo lockfile fix the build inputs. Native
+system packages and compiler versions are recorded with the result.
+
+The driver freezes normalized source and recipe archives, vendors crates in a
+preparation container, then compiles the GUI twice in independent containers
+with networking disabled and different build roots. Both use identical remap
+flags and no target cache. Whole-binary equality, absence of temporary paths,
+GTK/libadwaita linkage, `--help`, complete RPM/DEB/Arch equality and extracted ELF equality must pass before it writes a success report.
+
+The recipe-local compiler pin does not alter normal development or the
+stable/beta/MSRV matrix. CI runs the comparison, and the release workflow
+publishes the bare binary, unsigned RPM, DEB, Arch package and Flatpak bundle only from its successful result.
+RPM assets and dependencies come from Cargo metadata; pinned rpmbuild normalizes
+headers and payload without rewriting the ELF. DEB uses pinned dpkg tools,
+calculated library dependencies and normalized metadata with the same ELF.
+Arch uses pinned makepkg and the original PKGBUILD packaging function with a fixed
+packaging path, epoch and compressor; its full archive must also match. Flatpak
+uses a separate executable with the /app locale prefix and the same pinned compiler,
+then exports fresh OSTree bundles with fixed commit timestamps. Bundle bytes and
+the Flatpak executable must match; a private installed-runtime test gates release.
+See [verification.md](verification.md#5-reproducing-the-build) for commands,
+exact pins, metadata, and the explicit dirty-worktree mode.
 
 ---
 
@@ -1749,7 +1776,7 @@ manual, on the reference distributions, before a release.
 | T10 | Polkit left at `auth_admin` defaults | No prompt before the window is on screen; prompt only on explicit action |
 | T11 | IPC ACL granting `Policy=list` without `modify` | Read-only mode; write controls insensitive, not failing |
 | T12 | No Polkit agent in the session | `NoPolkitAgent`, with the cause named |
-| T13 | Polkit prompt left open for 5 minutes | No timeout, no spurious error, informative notice after 180 s |
+| T13 | Polkit prompt left open for 10 minutes | No timeout, no spurious error, informative notice after 180 s |
 | T14 | Bus policy denying the name | `DeniedByBusPolicy`, distinguished from a Polkit denial |
 | T15 | Daemon restarted while the window is idle | Both caches discarded, full resynchronization, no stale rows |
 
@@ -1761,6 +1788,18 @@ A further manual scenario, not automatable: run the daemon with
 the supported upstream way to exercise device handling without physical
 hardware.
 
+T2 and T13 now have mock tests in `tests/dbus.rs`: interrupted writes before
+and after execution, a ten-minute wait using Tokio virtual time, and cancellation
+while authentication is pending. The notice-stage boundaries at 20 and 180 s
+are unit-tested in `src/dbus/commands.rs`. These tests simulate the transport
+and authentication wait; real USBGuard/Polkit checks remain manual.
+
+The graphical focus regression is run separately from the display-free suite.
+When Polkit gives focus back to the application, a detached ColumnView row
+must not remain in the window's focus chain. `DeviceView` clears row focus
+before replacement/reset while preserving search/toolbar focus. The test
+reproduced the native GTK 4.22.5 crash and now passes; see [testing.md](testing.md).
+
 ### 13.2 Targets
 
 | Property | Target | How measured |
@@ -1770,9 +1809,18 @@ hardware.
 | Event loss under burst | zero | T3: final displayed state compared against `usbguard list-devices` |
 | Polkit resilience | zero timeouts on waits ≤ 10 min | T13 |
 | Idle memory | RSS < 110 MB, PSS < 70 MB | `smem`, after 10 minutes in background with 20 devices |
-| System filesystem access | zero | `strace` filtered on `/etc`, `/var`, `/sys` |
+| Direct first-party system filesystem access | zero | `strace -f -k` on `/etc`, `/var`, `/sys`, with library accesses attributed separately |
 | Parser robustness | zero panics over 10⁶ fuzz inputs | `cargo-fuzz` |
 | Parser coverage | > 90% of lines | `cargo-llvm-cov` |
+
+**Filesystem measurement (2026-10-18):** the background GUI reached its device
+snapshot on a private demo bus; `--diagnose` reported connected. The GUI made
+414 file-related calls naming `/etc`, `/var`, or `/sys`, and diagnostics made
+8. Stack inspection attributed them to system libraries, not direct
+first-party filesystem operations; no system-path mutations or opens for
+writing were observed. This is a scoped observation, not a claim that an
+entire GTK process makes zero system accesses. See [testing.md](testing.md)
+for environment, limitations, and reproduction.
 
 **Measured (2026-09-23, release build, 7 devices, idle after 90 s, GNOME 50 on
 Wayland with GTK's default GPU renderer):** PSS 65.8 MB — within target; RSS
@@ -1874,6 +1922,10 @@ observed.
 ## 14. Packaging
 
 ### 14.1 Flatpak
+
+The manifest below remains the SDK-based development build. Reproducible release
+bundles use the pinned compiler/export recipe in §12.1 and reuse this manifest's
+assets and permissions; release publication also requires a private runtime test.
 
 ```yaml
 # packaging/io.github.onyks_os.UsbguardGui.yaml

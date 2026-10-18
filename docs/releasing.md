@@ -12,15 +12,15 @@ signs everything, publishes the GitHub Release, and publishes the crate to crate
 | Job | Produces |
 | :-- | :------- |
 | `version` | Fails unless the tag's version equals `version` in `Cargo.toml`. |
-| `native` | `.deb`, `.rpm`, the bare binary, and the `.crate` — built on Ubuntu 24.04, whose glibc is older than Fedora's, so one binary serves both. |
-| `arch` | `.pkg.tar.zst`, built by `makepkg` in an Arch container from the tag's own tree. |
-| `flatpak` | `.flatpak`, a single-file bundle for any distribution. |
+| `native` | The `.crate` archive. |
+| `reproducible` | The bare GUI binary, unsigned RPM, DEB, Arch package and Flatpak bundle after two independent offline builds match, plus reproduction archives, report, and environment inventory; see [verification](verification.md#5-reproducing-the-build). |
+| `flatpak` | Installs the verified bundle in a private installation with a pinned GNOME runtime and publishes its validation report. |
 | `release` | SBOM, `SHA256SUMS`, a Sigstore signature for every file, and the GitHub Release. |
 | `crates-io` | `cargo publish`. Never for a pre-release. |
 
 ## Before tagging
 
-1. `make verify` is green on `main`, and so is CI.
+1. `make verify` is green on `main`, and so are CI and its reproducibility job.
 2. `version` in `Cargo.toml` is the version to release.
 3. In `CHANGELOG.md`, the `[Unreleased]` section becomes `[<version>] - <date>`.
 4. In `data/io.github.onyks_os.UsbguardGui.metainfo.xml.in`, a `<release>` entry for the version, then
@@ -98,7 +98,7 @@ and revoked when the job ends.
 
 ## If a job fails
 
-Nothing is published before every package has been built: the `release` job needs all of them. If
+Nothing is published before every package has been built and both the reproducible binary/native-package/Flatpak comparison and installed Flatpak validation have passed: the `release` job needs all of them. If
 `crates-io` fails after the GitHub Release exists, fix the cause and re-run only that job from the
 workflow run page. A failed release otherwise: delete the tag
 (`gh release delete v0.1.0 --yes --cleanup-tag`, or `git push origin --delete v0.1.0`), fix, tag again.

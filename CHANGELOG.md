@@ -12,6 +12,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `make reproducible`: two clean offline Linux x86_64 GUI builds with a pinned Ubuntu
+  image/snapshot and Rust 1.88.0. Byte comparison, temporary-path checks, GUI dependency
+  inspection, source/recipe archives, and an environment report run locally and in CI.
+- Reproduction inputs accompany new releases; the published bare binary comes only from the
+  successful comparison job. Complete RPM, DEB, Arch and Flatpak archives are compared as well.
+- Flatpak bundles use a dedicated /app-locale executable and fixed OSTree export clock;
+  private runtime validation enforces a pinned GNOME commit and checks installed CLI/schema/assets.
+- Unit tests for deterministic source archives, excluded credentials, recipe freezing,
+  checker failure paths, and refusing stale outputs or unacknowledged local changes.
+- Mock D-Bus resilience tests for interrupted writes before/after execution (T2), ten-minute
+  authentication waits with virtual time (T13), and cancellation while authentication is pending.
+- Regression tests for log privacy and startup notices when debug/trace is enabled.
+- `make coverage-core` and a CI gate requiring >90% line coverage per rule-language,
+  cancellable-operation, and error-classification file.
+- A private-demo-bus filesystem tracing script and scoped measurement notes in `docs/testing.md`.
+
+### Fixed
+
+- Release builds no longer embed build-machine paths for development-only schemas/catalogues;
+  installed system assets and debug builds retain their respective behavior.
+- Device-table refreshes and reconnection resets clear the old row's keyboard focus before
+  removing it. This avoids a GTK crash when focus returns from an authentication window after
+  cancelling Polkit. A graphical regression test reproduces the original crash and runs in CI.
+- Reconnection no longer spins when the bridge owns its bus name but cannot serve requests:
+  retries observe exponential backoff, and reconnection is announced only after subscriptions
+  and the first device read succeed. Tests now include a real private bus and name replacement.
+- Writes whose replies are lost now report an inconclusive outcome and request fresh device/policy
+  state without retrying automatically. The message is also translated into Italian.
+- Connection and malformed-signal errors no longer include raw detail at default log levels;
+  debug/trace logging prints a privacy notice, including with dependency-specific filters.
+
 ### Changed
 
 - Documentation checked against 0.1.1. The security assessment now gives each mitigation the status

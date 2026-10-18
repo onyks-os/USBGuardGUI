@@ -44,10 +44,9 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-  # Built on Ubuntu 24.04: its glibc is older than Fedora's, so the same
-  # binary runs from both the .deb and the .rpm.
+  # Native packages and the bare binary are checked below; this job builds the crate.
   native:
-    name: .deb, .rpm, binary, .crate
+    name: .crate
     needs: version
     runs-on: ubuntu-latest
     steps:
@@ -62,59 +61,48 @@ jobs:
           toolchain: stable
       - name: Build the binary and the .crate
         run: make build
-      - name: Build the .deb and the .rpm
-        run: |
-          cargo install cargo-deb cargo-generate-rpm --locked
-          make package-deb package-rpm
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: native
-          path: dist/*
+          # Binary and packages come exclusively from the verified job below.
+          path: dist/*.crate
           if-no-files-found: error
 
-  arch:
-    name: Arch package
+  reproducible:
+    name: Verify and stage the reproducible GUI binary and all package formats
     needs: version
-    runs-on: ubuntu-latest
-    container: archlinux:latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CONTAINER_ENGINE: docker
     steps:
-      # Retried: an Arch mirror that stalls fails the whole transaction.
-      - name: Install the build dependencies
-        run: |
-          for attempt in 1 2 3; do
-            pacman -Syu --noconfirm --needed base-devel cargo gettext gtk4 libadwaita git && exit 0
-            echo "pacman failed (attempt $attempt), retrying"; sleep 20
-          done
-          exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # makepkg builds from the tag's own tree rather than downloading the
-      # GitHub archive, so a pre-release is built exactly like a release. The
-      # file name matches the PKGBUILD's source=, so makepkg uses it as is.
-      - name: Build with makepkg
-        env:
-          VERSION: ${{ needs.version.outputs.version }}
+      - name: Install manifest parser for unit tests
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends python3-yaml
+      - name: Verify two clean offline builds
+        run: make test-reproducible reproducible
+      - name: Stage the verified binary and its reproduction inputs
         run: |
-          git config --global --add safe.directory "$PWD"
-          git archive --prefix="USBGuardGUI-${VERSION}/" -o "packaging/arch/usbguard-gui-${VERSION}.tar.gz" HEAD
-          useradd -m builder
-          chown -R builder packaging/arch
-          su builder -c "cd packaging/arch && makepkg -f --nodeps --noconfirm"
+          mkdir -p dist
+          cp target/reproducible/first/usbguard-gui dist/usbguard-gui
+          cp target/reproducible/first/*.rpm target/reproducible/first/*.deb target/reproducible/first/*.pkg.tar.zst target/reproducible/first/*.flatpak dist/
+          cp target/reproducible/report.json dist/reproducible-build.json
+          cp target/reproducible/inputs/source.tar dist/reproducible-source.tar
+          cp target/reproducible/inputs/recipe.tar dist/reproducible-recipe.tar
+          cp target/reproducible/packages.txt dist/reproducible-packages.txt
+          cp target/reproducible/toolchain.txt dist/reproducible-toolchain.txt
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: arch
-          # makepkg also splits out a -debug package with the symbols.
-          path: |
-            packaging/arch/*.pkg.tar.zst
-            !packaging/arch/*-debug-*.pkg.tar.zst
+          name: reproducible
+          path: dist/*
           if-no-files-found: error
 
-  # Built in Flathub's own CI image: it carries the GNOME runtime and SDK and
-  # an AppStream recent enough for the metainfo (Ubuntu's rejects it).
+  # Exercise the verified bundle in a sandbox; compilation/export happen above.
   flatpak:
-    name: Flatpak bundle
-    needs: version
+    name: Verify the installed Flatpak bundle
+    needs: [version, reproducible]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-50@sha256:1de59efef01a946d9f28f1ec3458bf6f61dcee3507d7fecdd473f8134da4ec77
@@ -123,34 +111,28 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # The sandboxed build has no network: every crate is listed with its
-      # checksum in cargo-sources.json, generated here from Cargo.lock by a
-      # pinned revision of flatpak-builder-tools.
-      - name: Generate cargo-sources.json
-        env:
-          GENERATOR: https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/41c20aa10819cdb2a4f3ca171758a96d1955c018/cargo/flatpak-cargo-generator.py
-        run: |
-          python3 -m venv /tmp/fcg && /tmp/fcg/bin/pip install --quiet aiohttp tomlkit
-          curl -sSfL -o /tmp/flatpak-cargo-generator.py "$GENERATOR"
-          /tmp/fcg/bin/python /tmp/flatpak-cargo-generator.py Cargo.lock -o packaging/cargo-sources.json
-      # The bundle names Flathub as its runtime repository, so installing it
-      # fetches the GNOME runtime.
-      - name: Build the bundle
-        uses: flathub-infra/flatpak-github-actions/flatpak-builder@933e9e8ca36e85046ebca8e211f0785c6becac40 # master
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          manifest-path: packaging/io.github.onyks_os.UsbguardGui.yaml
-          bundle: usbguard-gui-${{ needs.version.outputs.version }}.flatpak
-          cache: false
-          upload-artifact: false
+          name: reproducible
+          path: dist
+      - name: Install and exercise the verified bundle with the pinned runtime
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          if ! dbus-run-session -- python3 scripts/verify-flatpak-runtime.py "dist/usbguard-gui-${VERSION}.flatpak" --output target/flatpak-runtime; then
+            cat target/flatpak-runtime/commands.log
+            exit 1
+          fi
+          cp target/flatpak-runtime/report.json dist/reproducible-flatpak-runtime.json
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: flatpak
-          path: usbguard-gui-*.flatpak
+          name: flatpak-runtime
+          path: dist/reproducible-flatpak-runtime.json
           if-no-files-found: error
 
   release:
     name: Sign and publish the GitHub Release
-    needs: [native, arch, flatpak]
+    needs: [native, flatpak, reproducible]
     runs-on: ubuntu-latest
     permissions:
       contents: write   # create the GitHub Release and upload assets

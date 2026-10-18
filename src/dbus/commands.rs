@@ -165,13 +165,20 @@ mod tests {
         let t0 = op.started;
         assert_eq!(op.stage(t0), PendingStage::Started);
         assert_eq!(
+            op.stage(t0 + WAITING_NOTICE_AFTER.saturating_sub(Duration::from_millis(1))),
+            PendingStage::Started
+        );
+        assert_eq!(
             op.stage(t0 + WAITING_NOTICE_AFTER),
             PendingStage::WaitingForAuthentication
         );
         assert_eq!(
-            op.stage(t0 + NO_AGENT_HINT_AFTER * 3),
-            PendingStage::PossiblyNoAgent
+            op.stage(t0 + NO_AGENT_HINT_AFTER.saturating_sub(Duration::from_millis(1))),
+            PendingStage::WaitingForAuthentication
         );
+        for elapsed in [NO_AGENT_HINT_AFTER, Duration::from_secs(600)] {
+            assert_eq!(op.stage(t0 + elapsed), PendingStage::PossiblyNoAgent);
+        }
         assert!(!op.is_finished());
         let _ = Instant::now();
         op.cancel();

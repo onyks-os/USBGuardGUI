@@ -83,13 +83,19 @@ and startup behaviour only.
 | `LANGUAGE`, `LANG` | locale | system | Interface language (gettext). The command-line output stays in English, so it can be pasted into bug reports. |
 | `USBGUARD_GUI_BUS` | `session` | unset | **Development builds only**: talk to the session bus instead of the system bus, for the demo bridge (`cargo run --example demo-bridge`). Release builds ignore it, so an installed program cannot be redirected to a stand-in for USBGuard. |
 
+A mutating request whose reply is lost returns `AppError::Inconclusive` in the Rust
+API. The window explains that USBGuard may already have acted and requests fresh
+state; it never retries the write automatically. Read/connection failures remain
+`AppError::Unreachable`, and explicit refusals remain denials/rejections.
+
 ### Logging
 
 `tracing` with an `EnvFilter`. Spans wrap each D-Bus call and each event-coalescing window, which is
 also how the latency figures in [`architecture.md`](architecture.md) §13.2 are measured.
 
 **Device names, serial numbers, and hashes are never logged above `debug`.** The `debug` level
-documents, in its own output, that it records device identifiers. A default-level log attached to a
+prints a privacy notice to stderr when enabled, including through a filter such as
+`zbus=trace`. Connection failures and malformed-signal details are debug-only. A default-level log attached to a
 bug report must not be an inventory of the hardware the reporter owns.
 
 Precedence: command-line flags override environment variables, which override GSettings, which

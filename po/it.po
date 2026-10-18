@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: USBGuard GUI\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-29 10:13+0200\n"
+"POT-Creation-Date: 2026-10-18 20:09+0200\n"
 "PO-Revision-Date: 2026-09-25 19:39+0200\n"
 "Last-Translator: onyks-os\n"
 "Language-Team: Italian\n"
@@ -212,7 +212,7 @@ msgstr "Nessun agente di autenticazione Polkit in esecuzione"
 msgid "Access denied"
 msgstr "Accesso negato"
 
-#: src/ui/i18n.rs:76 src/ui/window.rs:962
+#: src/ui/i18n.rs:76 src/ui/window.rs:968
 #, rust-format
 msgid "Not permitted: {reason}"
 msgstr "Non consentito: {reason}"
@@ -222,115 +222,123 @@ msgstr "Non consentito: {reason}"
 msgid "USBGuard cannot be reached: {detail}"
 msgstr "Impossibile raggiungere USBGuard: {detail}"
 
-#: src/ui/i18n.rs:85
+#: src/ui/i18n.rs:84
+msgid ""
+"The operation could not be confirmed. USBGuard may already have acted; its "
+"state is being re-read. Check the result before trying again."
+msgstr ""
+"Impossibile confermare l’operazione. USBGuard potrebbe averla già eseguita; "
+"lo stato viene riletto. Controlla il risultato prima di riprovare."
+
+#: src/ui/i18n.rs:88
 #, rust-format
 msgid "USBGuard refused the request: {detail}"
 msgstr "USBGuard ha rifiutato la richiesta: {detail}"
 
-#: src/ui/i18n.rs:89
+#: src/ui/i18n.rs:92
 msgid "The operation was cancelled"
 msgstr "L’operazione è stata annullata"
 
-#: src/ui/i18n.rs:90
+#: src/ui/i18n.rs:93
 msgid "The ruleset changed in the meantime"
 msgstr "Le regole sono cambiate nel frattempo"
 
-#: src/ui/i18n.rs:97
+#: src/ui/i18n.rs:100
 msgid "The rule is too long"
 msgstr "La regola è troppo lunga"
 
-#: src/ui/i18n.rs:98
+#: src/ui/i18n.rs:101
 msgid "Parentheses are nested too deeply"
 msgstr "Troppi livelli di parentesi annidate"
 
-#: src/ui/i18n.rs:99
+#: src/ui/i18n.rs:102
 msgid "The rule is empty"
 msgstr "La regola è vuota"
 
-#: src/ui/i18n.rs:100
+#: src/ui/i18n.rs:103
 msgid "A quoted text is not closed"
 msgstr "Un testo tra virgolette non è chiuso"
 
-#: src/ui/i18n.rs:101
+#: src/ui/i18n.rs:104
 msgid "Invalid escape sequence in a quoted text"
 msgstr "Sequenza di escape non valida in un testo tra virgolette"
 
-#: src/ui/i18n.rs:102
+#: src/ui/i18n.rs:105
 msgid "A parenthesis is not closed"
 msgstr "Una parentesi non è chiusa"
 
-#: src/ui/i18n.rs:103
+#: src/ui/i18n.rs:106
 msgid "The rule ends too early"
 msgstr "La regola finisce troppo presto"
 
-#: src/ui/i18n.rs:104
+#: src/ui/i18n.rs:107
 msgid "Unexpected text"
 msgstr "Testo inatteso"
 
 #. Translators: allow, block, and reject are rule keywords: do not translate them.
-#: src/ui/i18n.rs:106
+#: src/ui/i18n.rs:109
 msgid "Expected allow, block, or reject"
 msgstr "Atteso allow, block o reject"
 
-#: src/ui/i18n.rs:107
+#: src/ui/i18n.rs:110
 msgid "Unknown attribute"
 msgstr "Attributo sconosciuto"
 
-#: src/ui/i18n.rs:108
+#: src/ui/i18n.rs:111
 msgid "The same attribute appears twice"
 msgstr "Lo stesso attributo compare due volte"
 
-#: src/ui/i18n.rs:109
+#: src/ui/i18n.rs:112
 msgid "Invalid value for this attribute"
 msgstr "Valore non valido per questo attributo"
 
-#: src/ui/i18n.rs:110
+#: src/ui/i18n.rs:113
 msgid "Unknown condition"
 msgstr "Condizione sconosciuta"
 
-#: src/ui/i18n.rs:111
+#: src/ui/i18n.rs:114
 msgid "Invalid condition parameter"
 msgstr "Parametro della condizione non valido"
 
-#: src/ui/i18n.rs:112
+#: src/ui/i18n.rs:115
 msgid "Too many values in one set"
 msgstr "Troppi valori in un insieme"
 
-#: src/ui/i18n.rs:119
+#: src/ui/i18n.rs:122
 msgid "vendor:product, e.g. 1234:5678 or 1234:*"
 msgstr "produttore:prodotto, es. 1234:5678 o 1234:*"
 
-#: src/ui/i18n.rs:120
+#: src/ui/i18n.rs:123
 msgid "class:subclass:protocol, e.g. 08:06:50 or 03:*:*"
 msgstr "classe:sottoclasse:protocollo, es. 08:06:50 o 03:*:*"
 
-#: src/ui/i18n.rs:121
+#: src/ui/i18n.rs:124
 msgid "port, e.g. 1-2 or 1-2.3"
 msgstr "porta, es. 1-2 o 1-2.3"
 
-#: src/ui/i18n.rs:122
+#: src/ui/i18n.rs:125
 msgid "hash as shown by usbguard"
 msgstr "hash come lo mostra usbguard"
 
-#: src/ui/i18n.rs:126
+#: src/ui/i18n.rs:129
 msgid "text"
 msgstr "testo"
 
-#: src/ui/i18n.rs:134
+#: src/ui/i18n.rs:137
 #, rust-format
 msgid "“{attribute}” is already used above"
 msgstr "“{attribute}” è già usato sopra"
 
-#: src/ui/i18n.rs:138
+#: src/ui/i18n.rs:141
 #, rust-format
 msgid "“{value}” is not valid here: expected {shape}"
 msgstr "“{value}” non è valido qui: atteso {shape}"
 
-#: src/ui/i18n.rs:141
+#: src/ui/i18n.rs:144
 msgid "Enter at least one value"
 msgstr "Inserisci almeno un valore"
 
-#: src/ui/i18n.rs:143
+#: src/ui/i18n.rs:146
 msgid ""
 "A set of text values needs the text mode, where each value is quoted "
 "separately"
@@ -770,57 +778,57 @@ msgstr ""
 msgid "Rule {position}"
 msgstr "Regola {position}"
 
-#: src/ui/window.rs:874
+#: src/ui/window.rs:880
 #, rust-format
 msgid "Allowed “{device}” for this session"
 msgstr "“{device}” consentito per questa sessione"
 
-#: src/ui/window.rs:877
+#: src/ui/window.rs:883
 #, rust-format
 msgid "Allowed “{device}” permanently"
 msgstr "“{device}” consentito permanentemente"
 
-#: src/ui/window.rs:880
+#: src/ui/window.rs:886
 #, rust-format
 msgid "Blocked “{device}” for this session"
 msgstr "“{device}” bloccato per questa sessione"
 
-#: src/ui/window.rs:883
+#: src/ui/window.rs:889
 #, rust-format
 msgid "Blocked “{device}” permanently"
 msgstr "“{device}” bloccato permanentemente"
 
-#: src/ui/window.rs:886
+#: src/ui/window.rs:892
 #, rust-format
 msgid "Rejected “{device}” for this session"
 msgstr "“{device}” rifiutato per questa sessione"
 
-#: src/ui/window.rs:889
+#: src/ui/window.rs:895
 #, rust-format
 msgid "Rejected “{device}” permanently"
 msgstr "“{device}” rifiutato permanentemente"
 
-#: src/ui/window.rs:904
+#: src/ui/window.rs:910
 msgid "Rule removed"
 msgstr "Regola rimossa"
 
-#: src/ui/window.rs:908
+#: src/ui/window.rs:914
 msgid ""
 "That rule no longer exists — it was removed elsewhere. Nothing was changed."
 msgstr ""
 "Quella regola non esiste più: è stata rimossa altrove. Non è stato "
 "modificato nulla."
 
-#: src/ui/window.rs:922
+#: src/ui/window.rs:928
 msgid "Rule added"
 msgstr "Regola aggiunta"
 
-#: src/ui/window.rs:930
+#: src/ui/window.rs:936
 #, rust-format
 msgid "{parameter} is now “{value}”"
 msgstr "{parameter} ora vale “{value}”"
 
-#: src/ui/window.rs:967
+#: src/ui/window.rs:973
 msgid ""
 "Not authorized, and no Polkit agent seems to be running to ask for a "
 "password. See the diagnostics."
@@ -828,7 +836,7 @@ msgstr ""
 "Non autorizzato, e non sembra esserci un agente Polkit in esecuzione per "
 "chiedere la password. Consulta la diagnostica."
 
-#: src/ui/window.rs:971
+#: src/ui/window.rs:977
 msgid ""
 "Not authorized. If the password prompt was cancelled, try again; otherwise "
 "the diagnostics explain how to grant access."
@@ -836,14 +844,14 @@ msgstr ""
 "Non autorizzato. Se la richiesta della password è stata annullata, riprova; "
 "altrimenti la diagnostica spiega come concedere l’accesso."
 
-#: src/ui/window.rs:975
+#: src/ui/window.rs:981
 msgid ""
 "Cancelled. USBGuard may already have acted; what is shown is what it reports."
 msgstr ""
 "Annullato. USBGuard potrebbe aver già agito: ciò che vedi è quello che "
 "riporta."
 
-#: src/ui/window.rs:979
+#: src/ui/window.rs:985
 msgid ""
 "The ruleset changed in the meantime, so nothing was done. It has been re-"
 "read; please choose again."
@@ -851,33 +859,33 @@ msgstr ""
 "Le regole sono cambiate nel frattempo, quindi non è stato fatto nulla. Sono "
 "state rilette: scegli di nuovo."
 
-#: src/ui/window.rs:1037
+#: src/ui/window.rs:1043
 #, rust-format
 msgid "USBGuard reported an error: {reason}"
 msgstr "USBGuard ha segnalato un errore: {reason}"
 
-#: src/ui/window.rs:1050
+#: src/ui/window.rs:1056
 msgid ""
 "Connection to USBGuard lost. Retrying… The list below may be out of date."
 msgstr ""
 "Connessione a USBGuard persa. Nuovo tentativo in corso… L’elenco qui sotto "
 "potrebbe non essere aggiornato."
 
-#: src/ui/window.rs:1053
+#: src/ui/window.rs:1059
 msgid "Details"
 msgstr "Dettagli"
 
-#: src/ui/window.rs:1087
+#: src/ui/window.rs:1093
 #, rust-format
 msgid "{parameter} was changed to “{value}”"
 msgstr "{parameter} è stato impostato a “{value}”"
 
-#: src/ui/window.rs:1132
+#: src/ui/window.rs:1138
 #, rust-format
 msgid "USBGuard: {problem}"
 msgstr "USBGuard: {problem}"
 
-#: src/ui/window.rs:1135
+#: src/ui/window.rs:1141
 msgid "How to fix"
 msgstr "Come risolvere"
 
@@ -995,7 +1003,8 @@ msgstr "Una diagnostica che indica la causa esatta di un problema di accesso"
 
 #: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:98
 msgid "The status icon now appears when the application runs as a Flatpak."
-msgstr "L’icona di stato ora compare quando l’applicazione è eseguita come Flatpak."
+msgstr ""
+"L’icona di stato ora compare quando l’applicazione è eseguita come Flatpak."
 
 #: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:103
 msgid "First release."

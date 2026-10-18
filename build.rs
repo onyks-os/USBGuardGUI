@@ -18,7 +18,12 @@ use std::process::Command;
 fn main() {
     println!("cargo:rerun-if-changed=data/io.github.onyks_os.UsbguardGui.gschema.xml");
     println!("cargo:rerun-if-changed=po");
-    if std::env::var_os("CARGO_FEATURE_GUI").is_none() {
+    // Installed release builds use system schemas/catalogues. A development
+    // fallback would embed OUT_DIR as an ordinary string, which rustc's source
+    // path remapping cannot normalize across independent release builds.
+    if std::env::var_os("CARGO_FEATURE_GUI").is_none()
+        || std::env::var("PROFILE").as_deref() != Ok("debug")
+    {
         return;
     }
     let Some(out_dir) = std::env::var_os("OUT_DIR").map(PathBuf::from) else {

@@ -192,10 +192,24 @@ impl DeviceView {
         let empty = devices.is_empty();
         let objects: Vec<glib::BoxedAnyObject> =
             devices.into_iter().map(glib::BoxedAnyObject::new).collect();
+        self.clear_row_focus();
         self.store.splice(0, self.store.n_items(), &objects);
         self.filter.changed(gtk::FilterChange::Different);
         self.content
             .set_visible_child_name(if empty { "empty" } else { "list" });
+    }
+
+    fn clear_row_focus(&self) {
+        // GTK may restore keyboard focus when Polkit closes, after the old
+        // ColumnView row has already been detached. Clear that focus chain
+        // before replacing rows; leave toolbar/search focus untouched.
+        if let Some(window) = self.root.root().and_downcast::<gtk::Window>() {
+            if gtk::prelude::GtkWindowExt::focus(&window)
+                .is_some_and(|focus| focus.ancestor(gtk::ColumnView::static_type()).is_some())
+            {
+                gtk::prelude::GtkWindowExt::set_focus(&window, None::<&gtk::Widget>);
+            }
+        }
     }
 
     /// While disconnected the rows no longer describe the system: they are
@@ -207,6 +221,7 @@ impl DeviceView {
     /// Back to "Connecting…", with no rows: used after a reconnection, until
     /// the fresh snapshot arrives.
     pub(super) fn reset(&self) {
+        self.clear_row_focus();
         self.store.remove_all();
         self.content.set_visible_child_name("loading");
     }
@@ -476,4 +491,144 @@ fn action_button(
         .popover(&popover)
         .always_show_arrow(false)
         .build()
+}
+
+#[cfg(test)]
+mod tests {
+    use std::cell::OnceCell;
+    use std::time::{Duration, Instant};
+
+    use super::*;
+    use crate::rules::parse_device;
+
+    fn pump_for(duration: Duration) {
+        let context = glib::MainContext::default();
+        let deadline = Instant::now() + duration;
+        while Instant::now() < deadline {
+            while context.pending() {
+                context.iteration(false);
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+    }
+
+    fn find_widget<T: IsA<gtk::Widget> + glib::object::ObjectType>(
+        root: &gtk::Widget,
+        predicate: &impl Fn(&T) -> bool,
+    ) -> Option<T> {
+        if let Ok(widget) = root.clone().downcast::<T>() {
+            if predicate(&widget) {
+                return Some(widget);
+            }
+        }
+        let mut child = root.first_child();
+        while let Some(widget) = child {
+            if let Some(found) = find_widget(&widget, predicate) {
+                return Some(found);
+            }
+            child = widget.next_sibling();
+        }
+        None
+    }
+
+    #[test]
+    #[ignore = "requires a display; run on a private session bus with GSETTINGS_BACKEND=memory"]
+    #[allow(clippy::unwrap_used)]
+    fn gui_device_actions_survive_denied_authentication_and_refresh() {
+        gtk::init().unwrap();
+        let slot: Rc<OnceCell<std::rc::Weak<DeviceView>>> = Rc::default();
+        let device = parse_device(
+            DeviceId::new(3),
+            "allow id 1234:5678 name \"Test device\"".into(),
+        );
+        let view = Rc::new(DeviceView::new(
+            &Config::load(),
+            Rc::new({
+                let (slot, device) = (slot.clone(), device.clone());
+                move |action| {
+                    assert_eq!(
+                        action,
+                        DeviceAction::Apply(
+                            device.id,
+                            DevicePolicy::Block,
+                            Persistence::RuntimeOnly
+                        )
+                    );
+                    let mut pending = device.clone();
+                    pending.pending = Some(PendingKind::Started);
+                    slot.get()
+                        .unwrap()
+                        .upgrade()
+                        .unwrap()
+                        .set_devices(vec![pending]);
+                }
+            }),
+            Rc::default(),
+        ));
+        slot.set(Rc::downgrade(&view)).unwrap();
+        let window = gtk::Window::builder()
+            .default_width(1000)
+            .default_height(400)
+            .child(&view.root)
+            .build();
+        view.set_devices(vec![device.clone()]);
+        window.present();
+        pump_for(Duration::from_millis(150));
+        for _ in 0..20 {
+            let block = find_widget::<gtk::MenuButton>(view.root.upcast_ref(), &|b| {
+                b.label().as_deref() == Some("Block")
+            })
+            .unwrap();
+            let popover = block.popover().unwrap();
+            block.grab_focus();
+            block.popup();
+            pump_for(Duration::from_millis(100));
+            let session = find_widget::<gtk::Button>(popover.upcast_ref(), &|b| {
+                b.label().as_deref() == Some("This session only")
+            })
+            .unwrap();
+            session.grab_focus();
+            session.emit_clicked();
+            drop(session);
+            drop(popover);
+            drop(block);
+            let authentication = gtk::Window::builder()
+                .title("Test authentication")
+                .transient_for(&window)
+                .build();
+            authentication.present();
+            pump_for(Duration::from_millis(150));
+            // Polkit cancellation returns a refusal and clears the pending row.
+            view.set_devices(vec![device.clone()]);
+            authentication.close();
+            pump_for(Duration::from_millis(150));
+        }
+        // Reconnection also removes the old rows, including while focus is
+        // held by another window. It must clear the same stale focus chain.
+        let block = find_widget::<gtk::MenuButton>(view.root.upcast_ref(), &|b| {
+            b.label().as_deref() == Some("Block")
+        })
+        .unwrap();
+        block.grab_focus();
+        drop(block);
+        let authentication = gtk::Window::builder().transient_for(&window).build();
+        authentication.present();
+        pump_for(Duration::from_millis(100));
+        view.reset();
+        authentication.close();
+        pump_for(Duration::from_millis(100));
+        view.set_devices(vec![device.clone()]);
+        pump_for(Duration::from_millis(100));
+        // Refreshes must not interrupt someone typing in the toolbar.
+        let search = find_widget::<gtk::SearchEntry>(view.root.upcast_ref(), &|_| true).unwrap();
+        search.grab_focus();
+        let focused = gtk::prelude::GtkWindowExt::focus(&window).unwrap();
+        view.set_devices(vec![device]);
+        assert_eq!(
+            gtk::prelude::GtkWindowExt::focus(&window).as_ref(),
+            Some(&focused)
+        );
+        window.close();
+        pump_for(Duration::from_millis(100));
+    }
 }

@@ -77,10 +77,66 @@ jobs:
 
       - run: cargo test --all-features
 
+      - name: GTK focus regression (private bus and display)
+        if: matrix.toolchain == 'stable'
+        env:
+          GSETTINGS_BACKEND: memory
+          GTK_A11Y: none
+          GSK_RENDERER: cairo
+        run: |
+          sudo apt-get install -y --no-install-recommends dbus-daemon xvfb xauth
+          dbus-run-session -- xvfb-run -a cargo test --all-features --lib gui_device_actions -- --ignored --test-threads=1
+
       # The headless commands must keep building without GTK (Cargo feature
       # `gui` off), which is also what the fuzz crate links against.
       - name: Headless build
         run: cargo build --no-default-features
+
+  coverage:
+    name: Core coverage (>90% per file)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # master
+        with:
+          toolchain: stable
+          components: llvm-tools-preview
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - name: Install coverage tool
+        run: cargo install cargo-llvm-cov --version 0.9.1 --locked
+      - name: Test and enforce core coverage
+        run: make coverage-core
+
+  reproducible:
+    name: Reproducible Linux GUI binary and all package formats
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CONTAINER_ENGINE: docker
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install manifest parser for unit tests
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends python3-yaml
+      - name: Test the reproducibility checker
+        run: make test-reproducible
+      - name: Compare two clean offline builds
+        run: make reproducible
+      - name: Upload comparison and build logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: reproducibility
+          path: |
+            target/reproducible/report.json
+            target/reproducible/SHA256SUMS
+            target/reproducible/*.log
+            target/reproducible/toolchain.txt
+            target/reproducible/packages.txt
+          if-no-files-found: warn
 
   audit:
     name: Dependency audit

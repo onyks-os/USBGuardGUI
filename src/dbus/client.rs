@@ -8,7 +8,7 @@
 use tracing::{debug, instrument};
 use zbus::Connection;
 
-use super::errors::app_error;
+use super::errors::{app_error, mutation_error};
 use super::proxies::{UsbGuardDevicesProxy, UsbGuardPolicyProxy, UsbGuardProxy};
 use crate::model::{
     AppError, Device, DeviceId, DevicePolicy, Parameter, Persistence, RemoveOutcome, Rule,
@@ -160,7 +160,7 @@ impl Client {
         self.root
             .set_parameter(parameter.name(), value)
             .await
-            .map_err(|e| app_error(&e))
+            .map_err(|e| mutation_error(&e))
     }
 
     /// Allows, blocks, or rejects a device.
@@ -170,7 +170,7 @@ impl Client {
     ///
     /// # Errors
     ///
-    /// Any D-Bus failure, classified per §6.3.
+    /// A lost reply is [`AppError::Inconclusive`]; otherwise classified per §6.3.
     #[instrument(skip(self), level = "debug")]
     pub async fn apply_device_policy(
         &self,
@@ -182,7 +182,7 @@ impl Client {
             .devices
             .apply_device_policy(device.get(), policy.wire(), persistence.as_permanent())
             .await
-            .map_err(|e| app_error(&e))?;
+            .map_err(|e| mutation_error(&e))?;
         Ok(persistence.as_permanent().then_some(RuleId::new(rule_id)))
     }
 
@@ -212,7 +212,7 @@ impl Client {
             .policy
             .append_rule(&text, parent.get(), persistence.as_temporary())
             .await
-            .map_err(|e| app_error(&e))?;
+            .map_err(|e| mutation_error(&e))?;
         Ok(RuleId::new(id))
     }
 
@@ -263,7 +263,7 @@ impl Client {
                 self.policy
                     .remove_rule(id.get())
                     .await
-                    .map_err(|e| app_error(&e))?;
+                    .map_err(|e| mutation_error(&e))?;
                 Ok(RemoveOutcome::Removed)
             }
             Resolution::Ambiguous(candidates) => Ok(RemoveOutcome::Ambiguous { candidates }),
@@ -289,7 +289,7 @@ impl Client {
         self.policy
             .remove_rule(target.id.get())
             .await
-            .map_err(|e| app_error(&e))?;
+            .map_err(|e| mutation_error(&e))?;
         Ok(RemoveOutcome::Removed)
     }
 }

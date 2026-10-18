@@ -101,6 +101,9 @@ pub enum AppError {
     /// The bus or the bridge cannot be reached.
     #[error("the daemon is unreachable: {0}")]
     Unreachable(String),
+    /// A write lost its reply. The daemon may have acted: re-read, never retry automatically.
+    #[error("the operation could not be confirmed; USBGuard may already have acted: {0}")]
+    Inconclusive(String),
     /// The daemon understood the request and refused it.
     #[error("the daemon rejected the request: {0}")]
     Rejected(String),

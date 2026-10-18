@@ -1,0 +1,6 @@
+{
+  "ref": "runtime/org.gnome.Platform/x86_64/50",
+  "commit": "7e410fa0d429fcc34f2ddd0d9b6224f1435d8640fb9759801db4f02700542353",
+  "repository": "https://dl.flathub.org/repo/",
+  "repository_file": "https://flathub.org/repo/flathub.flatpakrepo"
+}

@@ -97,7 +97,7 @@ gui = ["dep:gtk", "dep:adw", "dep:ksni", "dep:gettextrs"]
 
 [dev-dependencies]
 proptest = "1"
-tokio = { version = "1.53.1", features = ["net", "rt-multi-thread", "macros", "time"] }
+tokio = { version = "1.53.1", features = ["net", "rt-multi-thread", "macros", "time", "test-util"] }
 zbus = { version = "5.13.2", default-features = false, features = ["tokio", "p2p"] }
 
 [profile.release]

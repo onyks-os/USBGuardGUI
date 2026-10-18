@@ -415,3 +415,308 @@ async fn writes_may_prompt_for_a_password_reads_may_not() {
         assert_eq!(interactive, is_write, "{method}");
     }
 }
+
+// ---------------------------------------------------------------------------
+// Writes interrupted by a restart, and long authentication waits
+// ---------------------------------------------------------------------------
+
+#[tokio::test]
+async fn t2_lost_write_reply_is_inconclusive_and_restart_reads_actual_state() {
+    use support::WriteGate;
+    use usbguard_gui::dbus::commands;
+    use usbguard_gui::model::OperationOutcome;
+
+    // Both sides of the uncertainty: the bridge can disappear before applying
+    // the request, or after applying it but before delivering its reply.
+    for after_apply in [false, true] {
+        let mock = Mock::start(vec![(3, device_rule("block", 3))], vec![]).await;
+        let gate = Arc::new(WriteGate {
+            after_apply,
+            ..WriteGate::default()
+        });
+        mock.state.lock().unwrap().apply_gate = Some(gate.clone());
+        let client = mock.client().await;
+        let (tx, rx) = async_channel::bounded(64);
+        let operation = commands::spawn("Allow", tx, async move {
+            let rule = client
+                .apply_device_policy(
+                    DeviceId::new(3),
+                    DevicePolicy::Allow,
+                    Persistence::Permanent,
+                )
+                .await?;
+            Ok(OperationOutcome::DevicePolicyApplied { rule })
+        });
+        tokio::time::timeout(RECV_TIMEOUT, gate.entered.notified())
+            .await
+            .unwrap();
+        assert!(!operation.is_finished());
+        mock.server.clone().close().await.unwrap();
+        assert!(matches!(
+            recv(&rx).await,
+            UiEvent::OperationFinished { op, result: Err(AppError::Inconclusive(_)) }
+                if op == operation.id
+        ));
+        assert!(rx.try_recv().is_err(), "no optimistic success event");
+
+        // A fresh bridge reads the daemon's actual state. Never resend a write
+        // because its reply was lost, even if the requested result is absent.
+        let state = mock.state.clone();
+        state.lock().unwrap().apply_gate = None;
+        let restarted = Mock::serve(state).await;
+        let refreshed = start_worker(&restarted).await;
+        let devices = restarted.client().await.list_devices().await.unwrap();
+        assert_eq!(
+            devices[0].target,
+            if after_apply {
+                Target::Allow
+            } else {
+                Target::Block
+            }
+        );
+        assert_eq!(
+            restarted.client().await.list_rules().await.unwrap().len(),
+            usize::from(after_apply)
+        );
+        assert_eq!(
+            restarted
+                .calls()
+                .iter()
+                .filter(|c| c.starts_with("applyDevicePolicy"))
+                .count(),
+            1
+        );
+        drop(refreshed);
+    }
+}
+
+#[tokio::test]
+async fn t13_authentication_can_wait_ten_minutes_then_succeed() {
+    use support::WriteGate;
+
+    let mock = Mock::start(vec![(3, device_rule("block", 3))], vec![]).await;
+    let gate = Arc::new(WriteGate::default());
+    mock.state.lock().unwrap().apply_gate = Some(gate.clone());
+    let client = mock.client().await;
+    assert_eq!(client.connection().method_timeout(), None);
+    let operation = tokio::spawn(async move {
+        client
+            .apply_device_policy(
+                DeviceId::new(3),
+                DevicePolicy::Allow,
+                Persistence::RuntimeOnly,
+            )
+            .await
+    });
+    tokio::time::timeout(RECV_TIMEOUT, gate.entered.notified())
+        .await
+        .unwrap();
+
+    // Advance the same clock used by zbus, without spending ten real minutes.
+    tokio::time::pause();
+    tokio::time::advance(Duration::from_secs(600)).await;
+    assert!(!operation.is_finished(), "authentication must not time out");
+    tokio::time::resume();
+    // An outstanding write must not hold up reads or update the device early.
+    let devices = tokio::time::timeout(RECV_TIMEOUT, mock.client().await.list_devices())
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(devices[0].target, Target::Block);
+    gate.resume.notify_one();
+    assert_eq!(
+        tokio::time::timeout(RECV_TIMEOUT, operation)
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap(),
+        None
+    );
+    assert_eq!(
+        mock.client().await.list_devices().await.unwrap()[0].target,
+        Target::Allow
+    );
+}
+
+#[tokio::test]
+async fn cancelling_authentication_does_not_claim_to_withdraw_the_write() {
+    use support::WriteGate;
+    use usbguard_gui::dbus::commands;
+    use usbguard_gui::model::OperationOutcome;
+
+    let mock = Mock::start(vec![(3, device_rule("block", 3))], vec![]).await;
+    let gate = Arc::new(WriteGate::default());
+    mock.state.lock().unwrap().apply_gate = Some(gate.clone());
+    let client = mock.client().await;
+    let (tx, rx) = async_channel::bounded(64);
+    let operation = commands::spawn("Allow", tx, async move {
+        let rule = client
+            .apply_device_policy(
+                DeviceId::new(3),
+                DevicePolicy::Allow,
+                Persistence::RuntimeOnly,
+            )
+            .await?;
+        Ok(OperationOutcome::DevicePolicyApplied { rule })
+    });
+    tokio::time::timeout(RECV_TIMEOUT, gate.entered.notified())
+        .await
+        .unwrap();
+    let id = operation.id;
+    operation.cancel();
+    assert_eq!(
+        recv(&rx).await,
+        UiEvent::OperationFinished {
+            op: id,
+            result: Err(AppError::Cancelled)
+        }
+    );
+    assert_eq!(recv(&rx).await, UiEvent::InvalidateRuleCache);
+    // The server can still act after we stop waiting. Its signal supplies a
+    // barrier proving the handler executed, rather than a timing-based sleep.
+    let events = start_worker(&mock).await;
+    gate.resume.notify_one();
+    assert!(matches!(recv(&events).await, UiEvent::DeviceBatch(_)));
+    assert_eq!(
+        mock.client().await.list_devices().await.unwrap()[0].target,
+        Target::Allow
+    );
+    assert!(
+        rx.try_recv().is_err(),
+        "a cancelled operation cannot later report success"
+    );
+}
+
+#[tokio::test(start_paused = true)]
+async fn an_owned_but_failing_bridge_observes_exponential_backoff() {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use usbguard_gui::dbus::supervisor::{BACKOFF_MAX, BACKOFF_MIN};
+
+    let attempts = Arc::new(AtomicUsize::new(0));
+    let observed_waits = Arc::new(std::sync::Mutex::new(Vec::new()));
+    let (tx, rx) = async_channel::bounded(64);
+    let task = tokio::spawn(supervise(
+        {
+            let attempts = attempts.clone();
+            move || {
+                attempts.fetch_add(1, Ordering::SeqCst);
+                async { Err(AppError::Unreachable("bridge is not ready".into())) }
+            }
+        },
+        {
+            let observed_waits = observed_waits.clone();
+            move |delay| {
+                observed_waits.lock().unwrap().push(delay);
+                async { ServiceWait::Present }
+            }
+        },
+        tx,
+    ));
+    assert!(matches!(recv(&rx).await, UiEvent::ConnectionLost(_)));
+    let mut delay = BACKOFF_MIN;
+    for expected_attempts in 2..=9 {
+        tokio::time::advance(delay.saturating_sub(Duration::from_millis(1))).await;
+        assert_eq!(attempts.load(Ordering::SeqCst), expected_attempts - 1);
+        assert!(
+            rx.try_recv().is_err(),
+            "no false reconnection or retry storm"
+        );
+        tokio::time::advance(Duration::from_millis(1)).await;
+        assert!(matches!(recv(&rx).await, UiEvent::ConnectionLost(_)));
+        assert_eq!(attempts.load(Ordering::SeqCst), expected_attempts);
+        delay = (delay * 2).min(BACKOFF_MAX);
+    }
+    assert_eq!(
+        observed_waits.lock().unwrap()[..8],
+        [
+            BACKOFF_MIN,
+            Duration::from_secs(1),
+            Duration::from_secs(2),
+            Duration::from_secs(4),
+            Duration::from_secs(8),
+            Duration::from_secs(16),
+            BACKOFF_MAX,
+            BACKOFF_MAX,
+        ]
+    );
+    // Closing the UI must interrupt even the maximum retry wait immediately.
+    drop(rx);
+    tokio::task::yield_now().await;
+    assert!(task.is_finished());
+    task.await.unwrap();
+}
+
+#[tokio::test]
+async fn failed_initial_snapshots_do_not_announce_reconnection() {
+    let mock = Mock::start(vec![(3, device_rule("block", 3))], vec![]).await;
+    mock.deny("listDevices");
+    let client = mock.client().await;
+    let (tx, rx) = async_channel::bounded(64);
+    let task = tokio::spawn(supervise(
+        move || {
+            let client = client.clone();
+            async { Ok(client) }
+        },
+        |_| async { ServiceWait::Present },
+        tx,
+    ));
+    for _ in 0..2 {
+        assert!(matches!(recv(&rx).await, UiEvent::ConnectionLost(_)));
+    }
+    mock.state.lock().unwrap().denied.clear();
+    assert!(
+        matches!(recv(&rx).await, UiEvent::DeviceSnapshot(_)),
+        "the first successful read is not a reconnection"
+    );
+    assert_eq!(recv(&rx).await, UiEvent::InvalidateRuleCache);
+    task.abort();
+}
+
+#[tokio::test]
+async fn real_bus_name_replacement_resynchronizes_and_then_stays_connected() {
+    use support::PrivateBus;
+    use usbguard_gui::dbus::supervisor::{BRIDGE_NAME, wait_for_bridge};
+
+    let bus = PrivateBus::start();
+    let peer = Mock::start(vec![(3, device_rule("block", 3))], vec![]).await;
+    let first = Mock::serve_on_bus(&bus, peer.state.clone()).await;
+    let client = first.client().await;
+    assert_eq!(
+        wait_for_bridge(&first.client_connection, RECV_TIMEOUT).await,
+        ServiceWait::Present
+    );
+    let (tx, rx) = async_channel::bounded(64);
+    let task = tokio::spawn(async move { event_loop(&client, &tx).await });
+    assert!(matches!(recv(&rx).await, UiEvent::DeviceSnapshot(_)));
+    assert_eq!(recv(&rx).await, UiEvent::InvalidateRuleCache);
+    assert!(
+        tokio::time::timeout(Duration::from_millis(50), rx.recv())
+            .await
+            .is_err()
+    );
+    // The real name-owner signal must stop the old worker, not leave it
+    // silently pinned to the old bridge's unique bus name.
+    first.server.release_name(BRIDGE_NAME).await.unwrap();
+    assert!(matches!(
+        tokio::time::timeout(RECV_TIMEOUT, task)
+            .await
+            .unwrap()
+            .unwrap(),
+        WorkerExit::Lost(_)
+    ));
+    assert_eq!(
+        wait_for_bridge(&first.client_connection, Duration::from_millis(20)).await,
+        ServiceWait::TimedOut
+    );
+    let restarted = Mock::serve_on_bus(&bus, peer.state.clone()).await;
+    let rx = start_worker(&restarted).await;
+    restarted
+        .presence(4, 1, 1, &device_rule("block", 4), "new device")
+        .await;
+    assert!(matches!(recv(&rx).await, UiEvent::DeviceBatch(_)));
+    assert!(
+        tokio::time::timeout(Duration::from_millis(50), rx.recv())
+            .await
+            .is_err()
+    );
+}

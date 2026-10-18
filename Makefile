@@ -36,7 +36,7 @@ VERSION       := $(or $(_MANIFEST_VERSION),0.1.1)
 # Directories that hold first-party source, tests, and shell scripts.
 SRC_DIRS     := usbguard-gui
 TEST_DIRS    := tests
-SCRIPT_DIRS  := scripts
+SCRIPT_DIRS  := scripts packaging/reproducible
 
 include make/common.mk
 include make/quality.mk

@@ -7,7 +7,7 @@
 
 use std::process::ExitCode;
 
-use tracing_subscriber::EnvFilter;
+use tracing_subscriber::{EnvFilter, filter::LevelFilter};
 use usbguard_gui::cli::{self, Command};
 
 fn main() -> ExitCode {
@@ -33,10 +33,20 @@ fn main() -> ExitCode {
 fn init_logging() {
     let filter =
         EnvFilter::try_from_env("USBGUARD_GUI_LOG").unwrap_or_else(|_| EnvFilter::new("warn"));
+    let verbose = filter
+        .max_level_hint()
+        .is_none_or(|level| level >= LevelFilter::DEBUG);
     tracing_subscriber::fmt()
         .with_env_filter(filter)
         .with_writer(std::io::stderr)
         .init();
+    if verbose {
+        // A module-specific filter (for example zbus=trace) may suppress this
+        // binary's own debug events while enabling sensitive dependency logs.
+        eprintln!(
+            "usbguard-gui: Privacy notice: debug and trace logs may contain device names, serial numbers, hashes, and daemon error details. Review them before sharing."
+        );
+    }
 }
 
 #[cfg(feature = "gui")]
