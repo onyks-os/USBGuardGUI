@@ -359,3 +359,8 @@ msgfmt accepted a renamed Rust-format placeholder that the local tool rejected.
 including every plural form. Both normal and reproducible builds invoke it;
 the reproduction source archive explicitly includes the checker. Negative tests
 cover renamed, removed, extra and plural-only placeholder changes and CLI failure.
+
+The next remote graphical test correctly failed because the matrix runner lacked
+msgfmt before the first Cargo build: build.rs had selected its documented
+English-only fallback. The matrix now installs gettext before compilation, so
+French must actually load for the graphical assertions to pass.

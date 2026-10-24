@@ -67,7 +67,7 @@ jobs:
       # GTK 4.14 and libadwaita 1.5 are the floor of docs/architecture.md §1.4;
       # Ubuntu 24.04 ships exactly those.
       - name: Install GTK development packages
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext
 
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
