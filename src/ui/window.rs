@@ -18,7 +18,7 @@ use super::i18n::{self, fill};
 use super::notify::Notifier;
 use super::policy_view::{PolicyAction, PolicyView};
 use super::rule_dialog::{self, NewRule};
-use super::tray::{self, TrayCommand, TrayResult, UsbguardTray};
+use super::tray::{self, TrayCommand, TrayHandle, TrayResult};
 use super::{diagnostic_dialog, preferences, reload_devices, reload_parameters, reload_rules};
 use crate::dbus::Client;
 use crate::dbus::commands::{self, NO_AGENT_HINT_AFTER, PendingOperation, WAITING_NOTICE_AFTER};
@@ -109,7 +109,7 @@ struct Inner {
     notifier: Notifier,
     /// Keeps the application alive while the window is hidden.
     hold: RefCell<Option<gio::ApplicationHoldGuard>>,
-    tray: RefCell<Option<ksni::Handle<UsbguardTray>>>,
+    tray: RefCell<Option<TrayHandle>>,
     tray_commands: async_channel::Sender<TrayCommand>,
 }
 
@@ -373,10 +373,8 @@ impl MainWindow {
                     Err(reason) => tracing::info!("no status icon: {reason}"),
                 }
             });
-        } else if !wanted {
-            if let Some(handle) = self.0.tray.borrow_mut().take() {
-                tray::stop(&handle);
-            }
+        } else if !wanted && let Some(handle) = self.0.tray.borrow_mut().take() {
+            tray::stop(&handle);
         }
     }
 

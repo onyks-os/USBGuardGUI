@@ -50,7 +50,7 @@ def verify(bundle, output, lockfile, runtime_repository=None, runtime_bundle=Non
     if actual != lock["commit"]:
         raise ValueError("Installed Flatpak runtime does not match the pinned commit")
     run("install", "--user", "--assumeyes", "--no-related", "--no-deps", "--bundle", str(bundle))
-    help_text = run("run", "--user", APP, "--help")
+    help_text = run("run", "--user", "--no-documents-portal", APP, "--help")
     if "Usage: usbguard-gui" not in help_text:
         raise ValueError("Installed Flatpak CLI did not start correctly")
     # Keep this aligned with the catalogue list used by all package builders.
@@ -65,7 +65,7 @@ def verify(bundle, output, lockfile, runtime_repository=None, runtime_bundle=Non
     gsettings list-schemas | grep -Fx io.github.onyks_os.UsbguardGui
     glib-compile-schemas --strict --dry-run /app/share/glib-2.0/schemas
     '''
-    run("run", "--user", "--command=sh", APP, "-c", checks)
+    run("run", "--user", "--no-documents-portal", "--command=sh", APP, "-c", checks)
     report = {"runtime_ref": lock["ref"], "runtime_commit": actual,
               "bundle_sha256": hashlib.sha256(bundle.read_bytes()).hexdigest(),
               "installed_cli": True, "installed_schema": True, "installed_assets": True,

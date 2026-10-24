@@ -203,12 +203,11 @@ impl DeviceView {
         // GTK may restore keyboard focus when Polkit closes, after the old
         // ColumnView row has already been detached. Clear that focus chain
         // before replacing rows; leave toolbar/search focus untouched.
-        if let Some(window) = self.root.root().and_downcast::<gtk::Window>() {
-            if gtk::prelude::GtkWindowExt::focus(&window)
+        if let Some(window) = self.root.root().and_downcast::<gtk::Window>()
+            && gtk::prelude::GtkWindowExt::focus(&window)
                 .is_some_and(|focus| focus.ancestor(gtk::ColumnView::static_type()).is_some())
-            {
-                gtk::prelude::GtkWindowExt::set_focus(&window, None::<&gtk::Widget>);
-            }
+        {
+            gtk::prelude::GtkWindowExt::set_focus(&window, None::<&gtk::Widget>);
         }
     }
 
@@ -516,10 +515,10 @@ mod tests {
         root: &gtk::Widget,
         predicate: &impl Fn(&T) -> bool,
     ) -> Option<T> {
-        if let Ok(widget) = root.clone().downcast::<T>() {
-            if predicate(&widget) {
-                return Some(widget);
-            }
+        if let Ok(widget) = root.clone().downcast::<T>()
+            && predicate(&widget)
+        {
+            return Some(widget);
         }
         let mut child = root.first_child();
         while let Some(widget) = child {

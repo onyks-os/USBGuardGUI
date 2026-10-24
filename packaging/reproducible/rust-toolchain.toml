@@ -1,5 +1,5 @@
 # Applies only to the reproducibility recipe; ordinary development/CI still
 # exercises stable, beta, and the declared MSRV.
 [toolchain]
-channel = "1.88.0"
+channel = "1.89.0"
 profile = "minimal"

@@ -81,3 +81,7 @@ i18n-check: i18n ## Fail when the committed desktop and metainfo files are out o
 
 test-i18n: ## Test translations, format validation and package catalogues
 	python3 -m unittest discover -s tests -p 'test_i18n.py' -v
+
+.PHONY: test-clean-install-driver
+test-clean-install-driver: ## Test disposable VM isolation and input guards (no VM required)
+	python3 -m unittest discover -s tests -p 'test_clean_install.py' -v

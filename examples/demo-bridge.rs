@@ -128,11 +128,11 @@ async fn main() -> zbus::Result<()> {
         ..State::default()
     }));
 
-    let connection = zbus::connection::Builder::session()?
-        .name("org.usbguard1")?
-        .serve_at("/org/usbguard1", Root(state.clone()))?
-        .serve_at("/org/usbguard1/Devices", Devices(state.clone()))?
-        .serve_at("/org/usbguard1/Policy", Policy(state.clone()))?
+    let connection = zbus::connection::Builder::session()
+        .name("org.usbguard1")
+        .serve_at("/org/usbguard1", Root(state.clone()))
+        .serve_at("/org/usbguard1/Devices", Devices(state.clone()))
+        .serve_at("/org/usbguard1/Policy", Policy(state.clone()))
         .build()
         .await?;
     println!("Demo USBGuard bridge running on the session bus. Start the window with:");

@@ -29,8 +29,7 @@ use zbus::proxy;
 #[proxy(
     interface = "org.usbguard1",
     default_service = "org.usbguard1",
-    default_path = "/org/usbguard1",
-    gen_blocking = false
+    default_path = "/org/usbguard1"
 )]
 pub trait UsbGuard {
     /// `name`: `ImplicitPolicyTarget` or `InsertedDevicePolicy`.
@@ -59,8 +58,7 @@ pub trait UsbGuard {
 #[proxy(
     interface = "org.usbguard.Devices1",
     default_service = "org.usbguard1",
-    default_path = "/org/usbguard1/Devices",
-    gen_blocking = false
+    default_path = "/org/usbguard1/Devices"
 )]
 pub trait UsbGuardDevices {
     /// `query` is rule-language syntax: `match` for every device. Result
@@ -113,8 +111,7 @@ pub trait UsbGuardDevices {
 #[proxy(
     interface = "org.usbguard.Policy1",
     default_service = "org.usbguard1",
-    default_path = "/org/usbguard1/Policy",
-    gen_blocking = false
+    default_path = "/org/usbguard1/Policy"
 )]
 pub trait UsbGuardPolicy {
     /// Returns `(rule_id, rule_text)` in evaluation order.

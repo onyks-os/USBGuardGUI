@@ -2,7 +2,7 @@
 name = "usbguard-gui"
 version = "0.1.2"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.89"
 description = "Unprivileged GTK4 desktop client for managing USB device authorization policy through the USBGuard daemon."
 authors = ["onyks"]
 license = "MIT"
@@ -81,26 +81,26 @@ async-channel = "2.5.0"
 futures-util = "0.3.34"
 gettextrs = { version = "0.8.0", package = "gettext-rs", default-features = false, features = ["gettext-system"], optional = true }
 gtk = { version = "0.10", package = "gtk4", features = ["v4_14"], optional = true }
-ksni = { version = "0.3", default-features = false, features = ["tokio"], optional = true }
+serde = { version = "1", features = ["derive"], optional = true }
 thiserror = "2"
 tokio = { version = "1.53.3", features = ["rt-multi-thread", "time", "macros", "sync"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 # The default async-io executor is disabled: everything runs on the one Tokio
 # runtime of docs/architecture.md §5.2.
-zbus = { version = "5.13.2", default-features = false, features = ["tokio"] }
+zbus = { version = "6.1.0", default-features = false, features = ["tokio", "proxy"] }
 
 [features]
 # The GTK interface. Without it the binary still builds and offers the
 # headless commands (--diagnose, --list-devices, …), which is what CI jobs
 # without GTK development packages build.
 default = ["gui"]
-gui = ["dep:gtk", "dep:adw", "dep:ksni", "dep:gettextrs"]
+gui = ["dep:gtk", "dep:adw", "dep:gettextrs", "dep:serde", "zbus/service"]
 
 [dev-dependencies]
 proptest = "1"
 tokio = { version = "1.53.3", features = ["net", "rt-multi-thread", "macros", "time", "test-util"] }
-zbus = { version = "5.13.2", default-features = false, features = ["tokio", "p2p"] }
+zbus = { version = "6.1.0", default-features = false, features = ["tokio", "proxy", "service", "p2p"] }
 
 [profile.release]
 # Fail loudly rather than wrap silently: an integer overflow in release mode is
