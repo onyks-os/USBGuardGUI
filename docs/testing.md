@@ -283,3 +283,9 @@ The updated audit has zero vulnerability entries and no unsoundness warning;
 three informational unmaintained notices remain for the zbus 5 transitive stack.
 The dependency inventory records their scope and the planned coordinated migration.
 Remote CI and release reproduction are required before publishing the stable tag.
+
+The first remote candidate run passed all three Rust toolchains, lint and the
+core-coverage gate. Its dependency-audit action reported zero vulnerabilities
+but failed when trying to create a separate check-run with a read-only token.
+The replacement invokes pinned cargo-audit directly, preserving vulnerability
+failures and informational warning logs without adding token write permissions.

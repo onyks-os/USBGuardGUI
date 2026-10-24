@@ -34,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Dependency-audit CI runs the pinned auditor directly with read-only permissions,
+  avoiding failed check-run publication and keeping fork pull requests supported.
 - Require Tokio 1.53.3 to resolve RUSTSEC-2026-0386 (AsyncFd I/O safety).
 - Release builds no longer embed build-machine paths for development-only schemas/catalogues;
   installed system assets and debug builds retain their respective behavior.
