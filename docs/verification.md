@@ -458,3 +458,40 @@ The deliverable is `dist/usbguard-gui-0.1.1.flatpak`.
 Personal application installations/remotes were not changed. Interactive GUI,
 tray/portal integration and real host USBGuard/Polkit remain manual checks.
 The GitHub workflows have been parsed and checked locally but have not run yet.
+
+### Remote 0.1.2 validation (2026-10-24)
+
+The earlier local reports above describe the archived 0.1.1 development tree.
+The clean 0.1.2 commit `d6d984f08e0342f32a4ef7ec79e0debd4111dcc6` passed
+[main CI](https://github.com/onyks-os/USBGuardGUI/actions/runs/40095494547) and the
+[complete candidate release](https://github.com/onyks-os/USBGuardGUI/actions/runs/40103412714).
+The candidate's downloaded checksums, all Sigstore signatures, source/recipe
+archives and artifact-to-receipt hashes were independently verified.
+
+The [candidate release](https://github.com/onyks-os/USBGuardGUI/releases/tag/v0.1.2-rc.1)
+preserves the signed `reproducible-build.json`, `reproducible-flatpak-runtime.json`,
+source/recipe archives, package/toolchain inventories and actual packages.
+Its receipt records `modified_worktree: false`, `byte_identical: true` and
+`compilation_network: none`. Native binary SHA-256:
+
+```text
+91e7f5ad1b159d72ee27e9c203c33bcb2ebe45e5750c7e36427c98b535054273
+```
+
+Flatpak bundle SHA-256:
+
+```text
+8ae25490dc571803bcb4f641ad92f92151bf4e73da3702538a7c910fa20e9f13
+```
+
+The installed-runtime report identifies that exact bundle and GNOME commit
+`7e410fa0d429fcc34f2ddd0d9b6224f1435d8640fb9759801db4f02700542353`,
+with successful CLI, schema and asset checks. Source and recipe archive digests
+are available in the signed receipt. This evidence covers Linux x86_64; it does
+not extend the claim to host libraries, runtime updates or interactive Polkit/tray behavior.
+
+The stable `v0.1.2` tag targets the same source commit. Its
+[release workflow](https://github.com/onyks-os/USBGuardGUI/actions/runs/40105357687)
+repeats these gates before publishing and then runs the separate crates.io job.
+Stable signatures use `refs/tags/v0.1.2` in the certificate identity; candidate
+signatures use `refs/tags/v0.1.2-rc.1`.
