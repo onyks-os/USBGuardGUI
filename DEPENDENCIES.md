@@ -26,7 +26,7 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 | `gtk4` | 0.10, feature `v4_14`; optional, behind the Cargo feature `gui` | MIT | GTK 4 bindings — every widget in the interface. | The canonical Rust binding, maintained by the GNOME Rust team. A hand-rolled FFI layer to GTK would be a far larger unsafe surface than the binding it replaced. |
 | `libadwaita` | 0.8, feature `v1_5`; optional, behind `gui` | MIT | Adaptive layout, `AdwToastOverlay`, `AdwAlertDialog`, `AdwApplication`. | Same maintainers as `gtk4`; avoids reimplementing the platform's dialog and toast semantics, which is where inconsistent confirmation UX would otherwise creep in. |
 | `zbus` | 5, default features off, feature `tokio` | MIT | D-Bus client, and the `#[proxy]` macro that generates the typed proxies. | Pure Rust, no `libdbus` FFI. The proxy macro keeps raw D-Bus signatures in exactly one file, which is what makes the boundary auditable. |
-| `tokio` | 1.53, features `rt-multi-thread`, `time`, `macros`, `sync` | MIT | The I/O runtime that owns every D-Bus interaction. | This crate enables only the features listed. `zbus`'s `tokio` backend additionally enables `net`, `fs`, and `process` (verified with `cargo tree -e features -i tokio`): it needs `net` for the bus socket, and the others for address discovery and authentication. The earlier claim that the dependency *cannot* open a socket or touch the filesystem was therefore wrong; the guarantee comes from the program's own code, verified by the `strace` target of `docs/architecture.md` §13.2, not from feature flags. |
+| `tokio` | 1.53.3, features `rt-multi-thread`, `time`, `macros`, `sync` | MIT | The I/O runtime that owns every D-Bus interaction. | This crate enables only the features listed. `zbus`'s `tokio` backend additionally enables `net`, `fs`, and `process` (verified with `cargo tree -e features -i tokio`): it needs `net` for the bus socket, and the others for address discovery and authentication. The earlier claim that the dependency *cannot* open a socket or touch the filesystem was therefore wrong; the guarantee comes from the program's own code, verified by the `strace` target of `docs/architecture.md` §13.2, not from feature flags. |
 | `async-channel` | 2 | Apache-2.0 OR MIT | The executor-agnostic bridge between the Tokio runtime and the GLib main loop. | Executor-agnostic by design, which is the whole requirement: a Tokio-specific channel would couple the two loops the architecture keeps apart. |
 | `futures-util` | 0.3 | MIT OR Apache-2.0 | Stream combinators for the event worker's coalescing window. | Ecosystem-standard, minimal transitive tree. |
 | ~~`notify-rust`~~ | not used | — | Replaced by GIO's `GNotification`, already part of the GTK stack. | GIO speaks both the session-bus protocol and the Flatpak notification portal, and routes button presses to application actions. One dependency fewer; capabilities are still queried (`GetCapabilities`) before buttons are offered. |
@@ -135,3 +135,18 @@ The rationale for each accepted dependency is recorded in the tables above.
 A CycloneDX SBOM is generated and attached to every release; see
 [`.github/workflows/release.yml`](.github/workflows/release.yml) and
 [`docs/verification.md`](docs/verification.md).
+
+## Audit follow-up (2026-10-24)
+
+The 0.1.2 release raises Tokio's minimum to 1.53.3 and updates the lockfile to
+resolve [RUSTSEC-2026-0386](https://rustsec.org/advisories/RUSTSEC-2026-0386.html),
+which concerns the I/O-safety contract of AsyncFd constructors. No application
+unsafe code was added.
+
+RustSec also reports informational unmaintained advisories RUSTSEC-2026-0370,
+RUSTSEC-2026-0371 and RUSTSEC-2026-0372 for zvariant, zbus_names and
+zvariant_derive. [Upstream merged these into zbus 6](https://github.com/z-galaxy/zbus/issues/2043).
+They remain transitive dependencies of the tested zbus 5/ksni stack in 0.1.2;
+the advisories are recorded, not globally suppressed. A coordinated zbus/ksni
+migration needs its own D-Bus compatibility, MSRV and tray tests rather than an
+unchecked major dependency change during this patch release.

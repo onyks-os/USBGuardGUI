@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Stage the Flatpak manifest's assets and export a deterministic OSTree bundle."""
 
-from datetime import datetime, timezone
 import os
-from pathlib import Path
 import shlex
 import shutil
 import subprocess
-import tomllib
+from datetime import datetime, timezone
+from pathlib import Path
 
+import tomllib
 import yaml
 
 

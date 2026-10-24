@@ -1,16 +1,16 @@
 """Determinism and failure behavior of the reproducible-build driver (no containers)."""
 
 import contextlib
-import io
 import importlib.util
+import io
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tarfile
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 SPEC = importlib.util.spec_from_file_location(
@@ -221,7 +221,7 @@ polkit = "*"
                 (root / "rpm").mkdir()
                 calls = []
 
-                def fake_run(command, **kwargs):
+                def fake_run(command, *, calls=calls, root=root, package_count=package_count, **kwargs):
                     calls.append(command)
                     if command[0] == "rpmbuild":
                         packages = root / "rpm/RPMS/x86_64"
@@ -378,7 +378,7 @@ polkit = "*"
                         return b"1234\n"
                     return b"Cargo.toml\0Cargo.lock\0build.rs\0src/main.rs\0src/lib.rs\0packaging/70-usbguard-gui.rules.example\0"
 
-                def fake_container(command, log):
+                def fake_container(command, log, *, output=output, recipe=recipe, mismatch=mismatch):
                     log.write_text("container log")
                     if command[1] == "build":
                         # The build context must be the frozen recipe, not the

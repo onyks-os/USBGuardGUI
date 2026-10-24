@@ -2,8 +2,8 @@
 """Enforce line coverage for the rule language and cancellable-operation core."""
 
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 
 def main():

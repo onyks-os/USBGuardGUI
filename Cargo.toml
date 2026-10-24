@@ -1,6 +1,6 @@
 [package]
 name = "usbguard-gui"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 rust-version = "1.85"
 description = "Unprivileged GTK4 desktop client for managing USB device authorization policy through the USBGuard daemon."
@@ -81,7 +81,7 @@ gettextrs = { version = "0.8.0", package = "gettext-rs", default-features = fals
 gtk = { version = "0.10", package = "gtk4", features = ["v4_14"], optional = true }
 ksni = { version = "0.3", default-features = false, features = ["tokio"], optional = true }
 thiserror = "2"
-tokio = { version = "1.53.1", features = ["rt-multi-thread", "time", "macros", "sync"] }
+tokio = { version = "1.53.3", features = ["rt-multi-thread", "time", "macros", "sync"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 # The default async-io executor is disabled: everything runs on the one Tokio
@@ -97,7 +97,7 @@ gui = ["dep:gtk", "dep:adw", "dep:ksni", "dep:gettextrs"]
 
 [dev-dependencies]
 proptest = "1"
-tokio = { version = "1.53.1", features = ["net", "rt-multi-thread", "macros", "time", "test-util"] }
+tokio = { version = "1.53.3", features = ["net", "rt-multi-thread", "macros", "time", "test-util"] }
 zbus = { version = "5.13.2", default-features = false, features = ["tokio", "p2p"] }
 
 [profile.release]

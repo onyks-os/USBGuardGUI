@@ -213,6 +213,7 @@ remain complementary to the new mock tests; those tests do not exercise a real a
 
 | Item | Description |
 | :--- | :---------- |
+| **D-Bus dependency migration** | Move the zbus/ksni stack to maintained zbus 6 APIs, checking the Rust baseline, wire compatibility and tray behavior; see the audit follow-up in DEPENDENCIES.md. |
 | **Translations** | Open issues invite French, Spanish, Russian, Chinese, German, Brazilian Portuguese, and Japanese; [docs/translating.md](docs/translating.md) explains how. |
 | **Arch User Repository** | A `usbguard-gui` package, when AUR registrations reopen. |
 

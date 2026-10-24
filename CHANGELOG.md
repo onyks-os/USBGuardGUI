@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-24
+
 ### Added
 
 - `make reproducible`: two clean offline Linux x86_64 GUI builds with a pinned Ubuntu
@@ -32,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Require Tokio 1.53.3 to resolve RUSTSEC-2026-0386 (AsyncFd I/O safety).
 - Release builds no longer embed build-machine paths for development-only schemas/catalogues;
   installed system assets and debug builds retain their respective behavior.
 - Device-table refreshes and reconnection resets clear the old row's keyboard focus before

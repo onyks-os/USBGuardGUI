@@ -5,8 +5,8 @@ import argparse
 import hashlib
 import json
 import os
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 APP = "io.github.onyks_os.UsbguardGui"

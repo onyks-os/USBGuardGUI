@@ -102,6 +102,16 @@
   </branding>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.1.2" date="2026-10-24" type="stable">
+      <description>
+        <p>Authentication cancellation and USBGuard reconnection are more reliable.</p>
+        <ul>
+          <li>Avoid a device-table crash after cancelling authentication</li>
+          <li>Back off reconnection attempts and refresh state after an inconclusive write</li>
+          <li>Verify reproducible binaries and packages before publication</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.1" date="2026-09-29" type="stable">
       <description>
         <p>The status icon now appears when the application runs as a Flatpak.</p>

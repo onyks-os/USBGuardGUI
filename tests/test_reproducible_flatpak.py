@@ -3,11 +3,11 @@
 import importlib.util
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,7 +56,7 @@ class FlatpakTests(unittest.TestCase):
                 data, _ = flatpak.manifest(ROOT)
                 calls = []
 
-                def run(command, **kwargs):
+                def run(command, *, calls=calls, root=root, corrupt=corrupt, binary=binary, output=output, **kwargs):
                     calls.append(command)
                     build = root / "flatpak/build"
                     if command[0] == "bash":
@@ -103,7 +103,7 @@ class FlatpakTests(unittest.TestCase):
                                                "commit": "pinned", "repository_file": "https://flathub.org/repo/flathub.flatpakrepo"}))
                 calls = []
 
-                def run(command, **kwargs):
+                def run(command, *, calls=calls, output=output, failure=failure, **kwargs):
                     calls.append(command)
                     self.assertEqual(kwargs["env"]["FLATPAK_USER_DIR"], str(output / "installation"))
                     self.assertEqual(kwargs["env"]["HOME"], str(output / "home"))

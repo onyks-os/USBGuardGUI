@@ -267,3 +267,19 @@ and checking actual sandbox CLI/schema/assets. Reports:
 `target/flatpak-runtime-fixed/report.json` and
 `target/flatpak-runtime-network/report.json`. Native hashes remained unchanged.
 Interactive desktop/Polkit and remote GitHub execution were not exercised.
+
+## 0.1.2 candidate validation (2026-10-24)
+
+The local `make verify` gate passed after integrating the remote main updates
+and updating Tokio to 1.53.3. Rust stable passed 108 standard tests; the separate
+GTK authentication/focus regression also passed on the graphical session with a
+private D-Bus and in-memory settings. Rust 1.85 headless tests passed outside the
+execution sandbox, which otherwise denies the private test sockets. Thirty Python
+packaging/reproducibility tests passed, as did Ruff, ShellCheck, rustfmt and Clippy.
+Generated desktop/AppStream files were checked for repeatable regeneration.
+Markdownlint was not installed and the make target reported that check as skipped.
+
+The updated audit has zero vulnerability entries and no unsoundness warning;
+three informational unmaintained notices remain for the zbus 5 transitive stack.
+The dependency inventory records their scope and the planned coordinated migration.
+Remote CI and release reproduction are required before publishing the stable tag.
