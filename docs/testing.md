@@ -282,10 +282,30 @@ Markdownlint was not installed and the make target reported that check as skippe
 The updated audit has zero vulnerability entries and no unsoundness warning;
 three informational unmaintained notices remain for the zbus 5 transitive stack.
 The dependency inventory records their scope and the planned coordinated migration.
-Remote CI and release reproduction are required before publishing the stable tag.
+Remote CI and release reproduction are required before publishing the stable tag;
+the successful runs are recorded below.
 
 The first remote candidate run passed all three Rust toolchains, lint and the
 core-coverage gate. Its dependency-audit action reported zero vulnerabilities
 but failed when trying to create a separate check-run with a read-only token.
 The replacement invokes pinned cargo-audit directly, preserving vulnerability
 failures and informational warning logs without adding token write permissions.
+
+## Remote 0.1.2 validation (2026-10-24)
+
+[Main CI](https://github.com/onyks-os/USBGuardGUI/actions/runs/40095494547) passed
+on clean commit `d6d984f08e0342f32a4ef7ec79e0debd4111dcc6`, including the audit
+replacement, stable/beta/Rust 1.85 tests, the separate graphical regression,
+release compilation and both independent offline builds of every package format.
+CodeQL and documentation also passed. Every enforced core file remained above
+90% line coverage (the lowest measured file was `dbus/commands.rs`, 90.91%).
+
+The [release-candidate pipeline](https://github.com/onyks-os/USBGuardGUI/actions/runs/40103412714)
+passed the same comparison and the installed Flatpak test, then published signed
+artifacts. All downloaded checksums and all 14 Sigstore signatures (including
+`SHA256SUMS`) were verified against the exact release workflow/tag identity.
+Artifact hashes also matched the reproduction receipt and its clean source revision.
+The Flatpak report confirmed the pinned GNOME commit and installed CLI/schema/assets.
+The local Sigstore 3.6.6 verifier emitted an unsupported-root-key warning while
+successfully validating every artifact with its supported trusted keys.
+These checks do not substitute for interactive real-daemon/Polkit validation.

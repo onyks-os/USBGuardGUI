@@ -17,7 +17,7 @@ Rust; treat elapsed time as an output of the work, not an input to it.
 
 ---
 
-## Current Status (v0.1.1)
+## Current Status (v0.1.2)
 
 Delivered:
 
@@ -43,7 +43,9 @@ Delivered:
   and signed by one release workflow; the crate on crates.io.
 
 Released: **0.1.0** (2026-09-27), with everything above, and **0.1.1** (2026-09-29), which fixes the
-status icon in the Flatpak. The v0.2.0 scope below shipped in 0.1.0.
+status icon in the Flatpak. **0.1.2** adds the reliability and reproducible-package
+follow-ups below; [release validation](docs/verification.md#remote-012-validation-2026-10-24)
+records the candidate and stable workflows. The v0.2.0 scope below shipped in 0.1.0.
 
 ---
 
@@ -170,7 +172,7 @@ explicit at every step.
 
 ---
 
-## Reliability follow-up (implemented, unreleased)
+## Reliability follow-up (v0.1.2)
 
 - **Real-world regression fixes**: cancelling authentication no longer leaves focus pointing
   at a detached device-table row. The reproducing graphical test runs separately in CI. An
@@ -190,7 +192,7 @@ explicit at every step.
 - **Coverage enforced**: `make coverage-core` and a CI job require more than 90% line coverage
   in every rule-language file and the commands/error-classification modules.
 
-## Reproducible Linux binary and all package formats (implemented, unreleased)
+## Reproducible Linux binary and all package formats (v0.1.2)
 
 - A pinned Ubuntu digest, archive snapshot, and Rust 1.88.0 toolchain build the
   GUI binary twice, offline and in different paths, without shared target caches.
@@ -204,7 +206,8 @@ explicit at every step.
   toolchain and the stable/beta/MSRV matrix are unchanged.
 - Local validation on 2026-10-18 passed for the archived modified worktree: both
   GUI binaries were byte-identical. See [recorded evidence](docs/verification.md#local-validation-2026-10-18);
-  the first remote CI/release run remains to be performed after committing/pushing.
+  remote CI on the clean 0.1.2 commit and the complete release-candidate pipeline also passed
+  on 2026-10-24. See [published evidence](docs/verification.md#remote-012-validation-2026-10-24).
 
 ## Next
 

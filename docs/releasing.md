@@ -36,7 +36,8 @@ published to crates.io.
 git tag -a v0.1.0-rc.1 -m "v0.1.0-rc.1" && git push origin v0.1.0-rc.1
 ```
 
-Afterwards, delete it: `gh release delete v0.1.0-rc.1 --yes --cleanup-tag`.
+Keep a successful candidate and its artifacts as verification evidence. Tag the
+stable version at the same verified commit; signatures bind each release to its own tag.
 
 ## Release
 
@@ -100,5 +101,7 @@ and revoked when the job ends.
 
 Nothing is published before every package has been built and both the reproducible binary/native-package/Flatpak comparison and installed Flatpak validation have passed: the `release` job needs all of them. If
 `crates-io` fails after the GitHub Release exists, fix the cause and re-run only that job from the
-workflow run page. A failed release otherwise: delete the tag
-(`gh release delete v0.1.0 --yes --cleanup-tag`, or `git push origin --delete v0.1.0`), fix, tag again.
+workflow run page. For a failed candidate, fix through a tested pull request and
+publish a new candidate tag (`-rc.2`, and so on), preserving the previous run for
+diagnosis. Do not move an already published release tag; use a new version for
+changes to published source or artifacts.
