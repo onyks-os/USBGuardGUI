@@ -145,9 +145,19 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: rustsec/audit-check@69366f33c96575abad1ee0dba8212993eecbe998 # v2.0.0
+      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # master
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          toolchain: stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          shared-key: dependency-audit
+          cache-workspace-crates: false
+      - name: Install the pinned auditor
+        run: cargo install cargo-audit --version 0.22.2 --locked
+      # The CLI fails for vulnerabilities and logs informational warnings without
+      # creating check-runs. This also works with a fork PR's read-only token.
+      - name: Audit the committed lockfile
+        run: cargo audit --file Cargo.lock
 
   build:
     name: Release build
