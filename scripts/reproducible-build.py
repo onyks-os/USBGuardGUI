@@ -17,6 +17,7 @@ RECIPE = ROOT / "packaging/reproducible"
 SOURCE_PATHS = (
     "Cargo.toml", "Cargo.lock", "build.rs", "src", "data", "po", "assets",
     "README.md", "LICENSE", ".cargo/config", ".cargo/config.toml", "rust-toolchain.toml",
+    "scripts/check-translations.py",
     "packaging/70-usbguard-gui.rules.example", "packaging/arch/PKGBUILD", "packaging/io.github.onyks_os.UsbguardGui.yaml", "tests/fixtures",
 )
 

@@ -46,7 +46,7 @@ APP_ID      := io.github.onyks_os.UsbguardGui
 LINGUAS     := $(shell grep -v '^\#' po/LINGUAS 2>/dev/null)
 ITS_DIR     ?= /usr/share/gettext/its
 
-.PHONY: i18n-pot i18n-update i18n i18n-check
+.PHONY: i18n-pot i18n-update i18n i18n-check test-i18n
 
 i18n-pot: ## Extract every translatable string into po/usbguard-gui.pot
 	@xgettext --language=Rust --from-code=UTF-8 --keyword=gettext --keyword=ngettext:1,2 \
@@ -69,10 +69,15 @@ i18n: ## Compile the catalogues into target/locale and the translated data files
 		mkdir -p target/locale/$$lang/LC_MESSAGES && \
 		msgfmt --check -o target/locale/$$lang/LC_MESSAGES/$(I18N_DOMAIN).mo po/$$lang.po || exit 1; \
 	done
+	@python3 scripts/check-translations.py $(foreach lang,$(LINGUAS),target/locale/$(lang)/LC_MESSAGES/$(I18N_DOMAIN).mo)
 	@msgfmt --desktop --template data/$(APP_ID).desktop.in -d po -o data/$(APP_ID).desktop
 	@msgfmt --xml --template data/$(APP_ID).metainfo.xml.in -d po \
 		-o data/$(APP_ID).metainfo.xml
 
 i18n-check: i18n ## Fail when the committed desktop and metainfo files are out of date
+	@$(MAKE) test-i18n
 	@git diff --exit-code -- data/$(APP_ID).desktop data/$(APP_ID).metainfo.xml \
 		|| { echo "==> Run 'make i18n' and commit the result."; exit 1; }
+
+test-i18n: ## Test translations, format validation and package catalogues
+	python3 -m unittest discover -s tests -p 'test_i18n.py' -v

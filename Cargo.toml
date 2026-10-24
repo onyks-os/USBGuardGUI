@@ -39,6 +39,7 @@ assets = [
     ["packaging/70-usbguard-gui.rules.example", "usr/share/doc/usbguard-gui/", "644"],
     ["README.md", "usr/share/doc/usbguard-gui/", "644"],
     # Translations, compiled by `make i18n`. One line per language in po/LINGUAS.
+    ["target/locale/fr/LC_MESSAGES/usbguard-gui.mo", "usr/share/locale/fr/LC_MESSAGES/", "644"],
     ["target/locale/it/LC_MESSAGES/usbguard-gui.mo", "usr/share/locale/it/LC_MESSAGES/", "644"],
 ]
 
@@ -54,6 +55,7 @@ assets = [
     { source = "packaging/70-usbguard-gui.rules.example", dest = "/usr/share/doc/usbguard-gui/70-usbguard-gui.rules.example", mode = "644", doc = true },
     { source = "README.md", dest = "/usr/share/doc/usbguard-gui/README.md", mode = "644", doc = true },
     # Translations, compiled by `make i18n`. One line per language in po/LINGUAS.
+    { source = "target/locale/fr/LC_MESSAGES/usbguard-gui.mo", dest = "/usr/share/locale/fr/LC_MESSAGES/usbguard-gui.mo", mode = "644" },
     { source = "target/locale/it/LC_MESSAGES/usbguard-gui.mo", dest = "/usr/share/locale/it/LC_MESSAGES/usbguard-gui.mo", mode = "644" },
 ]
 

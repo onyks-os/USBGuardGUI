@@ -329,3 +329,38 @@ skipped. The existing per-file core-coverage gate remains enabled in CI.
 The application MSRV and reproducible toolchain are unchanged. Upstream metadata
 for zbus 6.0.0/6.1.0 requires Rust 1.89, while published ksni 0.3.7 still requires
 zbus 5; `DEPENDENCIES.md` records these coordinated-migration prerequisites.
+
+## French feature increment (next 0.2.0 target)
+
+The new French catalogue translates all 213 current messages. Seven gettext tests
+check current-template completeness, plural counts 0/1/2/40, security/action
+labels, rule-keyword preservation, actual rejection of a renamed placeholder,
+localized desktop/AppStream metadata and native package catalogue declarations.
+All 30 reproducibility tests also passed, including installed-Flatpak rejection
+when a registered catalogue is missing or its language list is empty/invalid.
+
+`make verify` passed the 108 standard Rust tests, lint, audit and dependency
+policy gates. The separate GTK focus/authentication regression passed once in
+English and once in French on a private D-Bus with memory settings and the local
+display; its French run asserts translated action labels before exercising the
+20 cancellation/refresh cycles. The initial C.UTF-8 test environment disabled
+gettext translations, so the test uses en_US.UTF-8 with LANGUAGE selecting the
+catalogue. CI explicitly generates that locale and uses Xvfb for both runs.
+The first local virtual-display attempt could not run because xvfb-run was not
+installed; it is a CI test dependency. Real host USBGuard policy was not changed.
+
+The French catalogue is an initial AI-assisted translation; fluent-speaker
+improvements remain welcome. Publication of 0.2.0 still requires the documented
+release gates; this feature increment does not retroactively alter 0.1.2 assets.
+
+The first remote lint run exposed a gettext-version difference: the runner's
+msgfmt accepted a renamed Rust-format placeholder that the local tool rejected.
+`scripts/check-translations.py` now checks compiled catalogues independently,
+including every plural form. Both normal and reproducible builds invoke it;
+the reproduction source archive explicitly includes the checker. Negative tests
+cover renamed, removed, extra and plural-only placeholder changes and CLI failure.
+
+The next remote graphical test correctly failed because the matrix runner lacked
+msgfmt before the first Cargo build: build.rs had selected its documented
+English-only fallback. The matrix now installs gettext before compilation, so
+French must actually load for the graphical assertions to pass.

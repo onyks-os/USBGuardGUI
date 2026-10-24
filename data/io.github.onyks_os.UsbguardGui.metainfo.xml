@@ -6,11 +6,14 @@
   <project_license>MIT</project_license>
   <name>USBGuardGUI</name>
   <name xml:lang="it">USBGuardGUI</name>
+  <name xml:lang="fr">USBGuardGUI</name>
   <summary>Control which USB devices connect</summary>
   <summary xml:lang="it">Controlla quali dispositivi USB si collegano</summary>
+  <summary xml:lang="fr">Contrôler quels périphériques USB se connectent</summary>
   <developer id="io.github.onyks_os">
     <name>onyks-os</name>
     <name xml:lang="it">onyks-os</name>
+    <name xml:lang="fr">onyks-os</name>
   </developer>
   <description>
     <p>
@@ -20,25 +23,32 @@
       access fails when it does.
     </p>
     <p xml:lang="it">Un’interfaccia desktop per USBGuard, il demone Linux che decide quali dispositivi USB possono comunicare con il computer. Mostra ogni dispositivo collegato e se è autorizzato, le regole nell’ordine in cui il demone le valuta, e spiega con precisione perché l’accesso non riesce quando succede.</p>
+    <p xml:lang="fr">Une interface de bureau pour USBGuard, le démon Linux qui détermine quels périphériques USB peuvent communiquer avec votre ordinateur. Consultez chaque périphérique connecté et son autorisation, lisez les règles dans l’ordre où le démon les évalue et découvrez précisément la cause d’un échec d’accès.</p>
     <p>
       The application runs without any privileges of its own. Every change is made by the
       USBGuard daemon, after the system's own authorization checks have approved it.
     </p>
     <p xml:lang="it">L’applicazione non ha privilegi propri. Ogni modifica la esegue il demone USBGuard, dopo che i controlli di autorizzazione del sistema l’hanno approvata.</p>
+    <p xml:lang="fr">L’application ne dispose d’aucun privilège propre. Chaque modification est effectuée par le démon USBGuard, après approbation des vérifications d’autorisation du système.</p>
     <ul>
       <li>Live device list, resilient to hubs with dozens of devices</li>
       <li xml:lang="it">Elenco dei dispositivi in tempo reale, che regge anche hub con decine di dispositivi</li>
+      <li xml:lang="fr">Liste des périphériques en temps réel, adaptée aux concentrateurs regroupant des dizaines de périphériques</li>
       <li>The policy ruleset in evaluation order</li>
       <li xml:lang="it">Le regole nell’ordine di valutazione</li>
+      <li xml:lang="fr">L’ensemble des règles dans l’ordre d’évaluation</li>
       <li>Diagnostics that name the exact cause of an access problem and its remedy</li>
       <li xml:lang="it">Una diagnostica che indica la causa esatta di un problema di accesso e come risolverlo</li>
+      <li xml:lang="fr">Un diagnostic indiquant la cause exacte d’un problème d’accès et sa solution</li>
       <li>Changes no system configuration: every change goes through USBGuard</li>
       <li xml:lang="it">Non modifica la configurazione del sistema: ogni modifica passa da USBGuard</li>
+      <li xml:lang="fr">Aucune configuration système modifiée : chaque modification passe par USBGuard</li>
     </ul>
     <p>
       Requires the USBGuard daemon and its D-Bus bridge (usbguard-dbus) on the host.
     </p>
     <p xml:lang="it">Richiede il demone USBGuard e il suo bridge D-Bus (usbguard-dbus) sul sistema.</p>
+    <p xml:lang="fr">Nécessite le démon USBGuard et sa passerelle D-Bus (usbguard-dbus) sur l’hôte.</p>
   </description>
   <launchable type="desktop-id">io.github.onyks_os.UsbguardGui.desktop</launchable>
   <provides>
@@ -54,12 +64,16 @@
   <keywords>
     <keyword>usb</keyword>
     <keyword xml:lang="it">usb</keyword>
+    <keyword xml:lang="fr">usb</keyword>
     <keyword>usbguard</keyword>
     <keyword xml:lang="it">usbguard</keyword>
+    <keyword xml:lang="fr">usbguard</keyword>
     <keyword>device</keyword>
     <keyword xml:lang="it">dispositivo</keyword>
+    <keyword xml:lang="fr">périphérique</keyword>
     <keyword>security</keyword>
     <keyword xml:lang="it">sicurezza</keyword>
+    <keyword xml:lang="fr">sécurité</keyword>
   </keywords>
   <requires>
     <display_length compare="ge">360</display_length>
@@ -73,26 +87,31 @@
     <screenshot type="default">
       <caption>Every connected device and whether it is authorized</caption>
       <caption xml:lang="it">Ogni dispositivo collegato e se è autorizzato</caption>
+      <caption xml:lang="fr">Chaque périphérique connecté et son autorisation</caption>
       <image>https://raw.githubusercontent.com/onyks-os/USBGuardGUI/v0.1.0/data/screenshots/01-devices.png</image>
     </screenshot>
     <screenshot>
       <caption>Allow, block, or reject a device, for this session or permanently</caption>
       <caption xml:lang="it">Consenti, blocca o rifiuta un dispositivo, per questa sessione o permanentemente</caption>
+      <caption xml:lang="fr">Autoriser, bloquer ou rejeter un périphérique pour cette session ou de façon permanente</caption>
       <image>https://raw.githubusercontent.com/onyks-os/USBGuardGUI/v0.1.0/data/screenshots/02-device-action.png</image>
     </screenshot>
     <screenshot>
       <caption>The policy rules in the order USBGuard evaluates them</caption>
       <caption xml:lang="it">Le regole della policy nell’ordine in cui USBGuard le valuta</caption>
+      <caption xml:lang="fr">Les règles dans l’ordre où USBGuard les évalue</caption>
       <image>https://raw.githubusercontent.com/onyks-os/USBGuardGUI/v0.1.0/data/screenshots/03-policy.png</image>
     </screenshot>
     <screenshot>
       <caption>A guided editor for new rules</caption>
       <caption xml:lang="it">Un editor guidato per le nuove regole</caption>
+      <caption xml:lang="fr">Un éditeur guidé pour créer des règles</caption>
       <image>https://raw.githubusercontent.com/onyks-os/USBGuardGUI/v0.1.0/data/screenshots/04-new-rule.png</image>
     </screenshot>
     <screenshot>
       <caption>Diagnostics that name the exact cause of an access problem</caption>
       <caption xml:lang="it">Una diagnostica che indica la causa esatta di un problema di accesso</caption>
+      <caption xml:lang="fr">Un diagnostic indiquant la cause exacte d’un problème d’accès</caption>
       <image>https://raw.githubusercontent.com/onyks-os/USBGuardGUI/v0.1.0/data/screenshots/05-diagnostics.png</image>
     </screenshot>
   </screenshots>
@@ -105,10 +124,14 @@
     <release version="0.1.2" date="2026-10-24" type="stable">
       <description>
         <p>Authentication cancellation and USBGuard reconnection are more reliable.</p>
+        <p xml:lang="fr">L’annulation de l’authentification et la reconnexion à USBGuard sont plus fiables.</p>
         <ul>
           <li>Avoid a device-table crash after cancelling authentication</li>
+          <li xml:lang="fr">Éviter un plantage du tableau des périphériques après l’annulation de l’authentification</li>
           <li>Back off reconnection attempts and refresh state after an inconclusive write</li>
+          <li xml:lang="fr">Espacer les tentatives de reconnexion et actualiser l’état après une écriture au résultat incertain</li>
           <li>Verify reproducible binaries and packages before publication</li>
+          <li xml:lang="fr">Vérifier la reproductibilité des binaires et des paquets avant publication</li>
         </ul>
       </description>
     </release>
@@ -116,21 +139,27 @@
       <description>
         <p>The status icon now appears when the application runs as a Flatpak.</p>
         <p xml:lang="it">L’icona di stato ora compare quando l’applicazione è eseguita come Flatpak.</p>
+        <p xml:lang="fr">L’icône d’état apparaît désormais lorsque l’application fonctionne dans un Flatpak.</p>
       </description>
     </release>
     <release version="0.1.0" date="2026-09-27" type="stable">
       <description>
         <p>First release.</p>
         <p xml:lang="it">Prima versione.</p>
+        <p xml:lang="fr">Première version.</p>
         <ul>
           <li>Live device list; allow, block, or reject a device for this session or permanently</li>
           <li xml:lang="it">Elenco dei dispositivi in tempo reale; consenti, blocca o rifiuta un dispositivo per questa sessione o permanentemente</li>
+          <li xml:lang="fr">Liste des périphériques en temps réel ; autoriser, bloquer ou rejeter un périphérique pour cette session ou de façon permanente</li>
           <li>Policy view in evaluation order, with a guided rule editor and safe rule removal</li>
           <li xml:lang="it">Vista delle regole nell’ordine di valutazione, con un editor guidato e una rimozione sicura</li>
+          <li xml:lang="fr">Vue de la politique dans l’ordre d’évaluation, avec un éditeur guidé et une suppression sûre des règles</li>
           <li>Notifications for newly inserted devices that are not authorized</li>
           <li xml:lang="it">Notifiche per i dispositivi appena collegati e non autorizzati</li>
+          <li xml:lang="fr">Notifications pour les nouveaux périphériques branchés non autorisés</li>
           <li>Diagnostics that name the exact cause of an access problem, and usbguard-gui --diagnose</li>
           <li xml:lang="it">Una diagnostica che indica la causa esatta di un problema di accesso, e usbguard-gui --diagnose</li>
+          <li xml:lang="fr">Un diagnostic indiquant la cause exacte d’un problème d’accès, et usbguard-gui --diagnose</li>
         </ul>
       </description>
     </release>
