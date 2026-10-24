@@ -39,6 +39,7 @@ case "${1:-}" in
             mkdir -p "target/locale/$lang/LC_MESSAGES"
             msgfmt --check "po/$lang.po" -o "target/locale/$lang/LC_MESSAGES/usbguard-gui.mo"
         done < po/LINGUAS
+        python3 scripts/check-translations.py target/locale/*/LC_MESSAGES/usbguard-gui.mo
         python3 /opt/reproducible/rpm.py
         python3 /opt/reproducible/deb.py
         bash /opt/reproducible/arch.sh

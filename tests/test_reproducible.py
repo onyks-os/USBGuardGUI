@@ -284,6 +284,7 @@ polkit = "*"
         self.assertIn(Path("packaging/70-usbguard-gui.rules.example"), files)
         self.assertIn(Path("packaging/arch/PKGBUILD"), files)
         self.assertIn(Path("tests/fixtures/rules/daemon-output.rules"), files)
+        self.assertIn(Path("scripts/check-translations.py"), files)
         self.assertNotIn(Path("packaging/reproducible/Containerfile"), files)
 
     def test_recipe_digest_includes_driver_and_recipe_contents(self):

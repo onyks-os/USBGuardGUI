@@ -69,6 +69,7 @@ i18n: ## Compile the catalogues into target/locale and the translated data files
 		mkdir -p target/locale/$$lang/LC_MESSAGES && \
 		msgfmt --check -o target/locale/$$lang/LC_MESSAGES/$(I18N_DOMAIN).mo po/$$lang.po || exit 1; \
 	done
+	@python3 scripts/check-translations.py $(foreach lang,$(LINGUAS),target/locale/$(lang)/LC_MESSAGES/$(I18N_DOMAIN).mo)
 	@msgfmt --desktop --template data/$(APP_ID).desktop.in -d po -o data/$(APP_ID).desktop
 	@msgfmt --xml --template data/$(APP_ID).metainfo.xml.in -d po \
 		-o data/$(APP_ID).metainfo.xml

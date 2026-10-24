@@ -45,8 +45,9 @@ or a plain text editor. `po/it.po` is a complete example.
 ## Rules for each string
 
 - **Keep every `{placeholder}` exactly as written**, but move it wherever your grammar needs it:
-  `Rejected “{device}” permanently` may become `“{device}” rifiutato permanentemente`. `msgfmt
-  --check` rejects a translation that drops, adds, or renames one.
+  `Rejected “{device}” permanently` may become `“{device}” rifiutato permanentemente`.
+  `make i18n` rejects dropped, added or renamed placeholders using a compiled-catalogue
+  checker even on gettext versions that do not understand the Rust format flag.
 - **Keep the underscore** in menu entries (`_Preferences`): it marks the keyboard access key. Put it
   before a letter of your translation.
 - **Read the `#. Translators:` comments** above a string: they say what it refers to.

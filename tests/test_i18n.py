@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import gettext
+import importlib.util
 import subprocess
 import tempfile
 import unittest
@@ -12,6 +13,9 @@ from pathlib import Path
 import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location("translation_check", ROOT / "scripts/check-translations.py")
+validator = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(validator)
 
 
 class TranslationTests(unittest.TestCase):
@@ -28,6 +32,7 @@ class TranslationTests(unittest.TestCase):
             capture_output=True, text=True, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
+        validator.validate(destination)
         with destination.open("rb") as catalogue:
             return gettext.GNUTranslations(catalogue)
 
@@ -72,18 +77,37 @@ class TranslationTests(unittest.TestCase):
         message = translate("USBGuard refused the request: {detail}")
         self.assertEqual(message.format(detail="example"), "USBGuard a refusé la requête : example")
 
-    def test_gettext_rejects_renamed_format_placeholder(self):
+    def test_validator_rejects_renamed_missing_and_extra_placeholders(self):
         source = (ROOT / "po/fr.po").read_text()
         original = 'msgstr "Non autorisé : {reason}"'
         self.assertIn(original, source)
         invalid = self.output / "invalid.po"
-        invalid.write_text(source.replace(original, 'msgstr "Non autorisé : {cause}"'))
+        for translated in ("{cause}", "aucune raison", "{reason} {extra}"):
+            with self.subTest(translated=translated):
+                invalid.write_text(source.replace(original, f'msgstr "Non autorisé : {translated}"'))
+                compiled = self.output / "invalid.mo"
+                # Do not rely on --check-format: older gettext does not support
+                # the rust-format flag. The independent checker must reject it.
+                subprocess.run(["msgfmt", "-o", str(compiled), str(invalid)], check=True)
+                with self.assertRaisesRegex(ValueError, "placeholder mismatch"):
+                    validator.validate(compiled)
+
+    def test_validator_checks_plural_forms_and_cli_failure(self):
+        source = (ROOT / "po/fr.po").read_text()
+        original = 'msgstr[1] "{count} périphériques USB bloqués"'
+        self.assertIn(original, source)
+        invalid = self.output / "plural.po"
+        invalid.write_text(source.replace(original, 'msgstr[1] "{other} périphériques USB bloqués"'))
+        compiled = self.output / "plural.mo"
+        subprocess.run(["msgfmt", "-o", str(compiled), str(invalid)], check=True)
+        with self.assertRaisesRegex(ValueError, "placeholder mismatch"):
+            validator.validate(compiled)
         result = subprocess.run(
-            ["msgfmt", "--check", "--check-format", "-o", str(self.output / "invalid.mo"), str(invalid)],
+            ["python3", str(ROOT / "scripts/check-translations.py"), str(compiled)],
             capture_output=True, text=True, check=False,
         )
         self.assertNotEqual(result.returncode, 0, result.stderr)
-        self.assertIn("cause", result.stderr)
+        self.assertIn("placeholder mismatch", result.stderr)
 
     def test_french_desktop_and_store_metadata(self):
         desktop = (ROOT / "data/io.github.onyks_os.UsbguardGui.desktop").read_text()

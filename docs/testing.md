@@ -332,7 +332,7 @@ zbus 5; `DEPENDENCIES.md` records these coordinated-migration prerequisites.
 
 ## French feature increment (next 0.2.0 target)
 
-The new French catalogue translates all 213 current messages. Six gettext tests
+The new French catalogue translates all 213 current messages. Seven gettext tests
 check current-template completeness, plural counts 0/1/2/40, security/action
 labels, rule-keyword preservation, actual rejection of a renamed placeholder,
 localized desktop/AppStream metadata and native package catalogue declarations.
@@ -352,3 +352,10 @@ installed; it is a CI test dependency. Real host USBGuard policy was not changed
 The French catalogue is an initial AI-assisted translation; fluent-speaker
 improvements remain welcome. Publication of 0.2.0 still requires the documented
 release gates; this feature increment does not retroactively alter 0.1.2 assets.
+
+The first remote lint run exposed a gettext-version difference: the runner's
+msgfmt accepted a renamed Rust-format placeholder that the local tool rejected.
+`scripts/check-translations.py` now checks compiled catalogues independently,
+including every plural form. Both normal and reproducible builds invoke it;
+the reproduction source archive explicitly includes the checker. Negative tests
+cover renamed, removed, extra and plural-only placeholder changes and CLI failure.
