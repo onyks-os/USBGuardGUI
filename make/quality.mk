@@ -5,7 +5,7 @@
 # everything here is language-agnostic orchestration.
 # ---------------------------------------------------------------------------
 
-.PHONY: lint lint-code lint-shell lint-docs lint-secrets format test integration-test fuzz audit
+.PHONY: lint lint-code lint-shell lint-docs lint-secrets format test integration-test fuzz audit dependency-policy test-dependency-policy
 
 ##@ Quality
 
@@ -55,3 +55,9 @@ integration-test: lang-test-integration ## Run integration tests (may require pr
 fuzz: lang-fuzz ## Run property-based fuzz tests
 
 audit: lang-audit ## Scan dependencies for known vulnerabilities
+
+dependency-policy: ## Check dependency licenses and registry/Git provenance
+	$(CARGO) deny --locked check licenses sources
+
+test-dependency-policy: ## Prove the dependency policy rejects forbidden inputs
+	python3 -m unittest discover -s tests -p 'test_dependency_policy.py' -v

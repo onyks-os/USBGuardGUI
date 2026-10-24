@@ -16,8 +16,8 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 > record the *choice* of dependency and the reason for it; exact versions are pinned by the
 > committed `Cargo.lock` — major versions are noted where they matter (`gtk4` 0.10 and
 > `libadwaita` 0.8 must move together). The **License** column was checked against each crate's
-> own metadata (`cargo metadata`) for 0.1.1. No license check runs in CI yet; `cargo deny` is the
-> intended tool.
+> own metadata (`cargo metadata`) and is enforced across the root manifest's full
+> dependency graph by `make dependency-policy` and the CI license/source job.
 
 ### 1.1 Runtime Dependencies
 
@@ -61,7 +61,7 @@ These are test tools, not additional package/runtime dependencies.
 | `cargo-fuzz` / `libfuzzer-sys` | Toolchain, not a manifest entry | MIT OR Apache-2.0 | Fuzzing the parser; target of zero panics over 10⁶ inputs. |
 | `cargo-llvm-cov` | Toolchain; CI pins 0.9.1 | MIT OR Apache-2.0 | `make coverage-core` enforces >90% line coverage per rule-language/operation-core file; `make coverage` produces an all-feature HTML report. |
 | `cargo-audit` | Toolchain | MIT OR Apache-2.0 | `make audit` — RustSec advisory scanning. |
-| `cargo-deny` | Toolchain | MIT OR Apache-2.0 | License and duplicate-dependency checks. Not yet run in CI. |
+| `cargo-deny` | Toolchain; CI pins 0.20.2 | MIT OR Apache-2.0 | Enforces the explicit license/source policy in `deny.toml`, including root-manifest optional, build, test and target-specific dependencies. Vulnerabilities remain the responsibility of cargo-audit; duplicate versions are not globally forbidden. |
 | Clippy, rustfmt | Toolchain component | MIT OR Apache-2.0 | `make lint`; Clippy enforces the no-panic rules (lint levels in `Cargo.toml`, denied outright on `src/rules/`) and, through `disallowed-methods`, the runtime-boundary rule. |
 | `cargo-deb`, `cargo-generate-rpm` | Toolchain | MIT | Native package building. |
 
@@ -130,6 +130,22 @@ The rationale for each accepted dependency is recorded in the tables above.
 2. Run `make verify` against the upgrade.
 3. Record the upgrade in [`CHANGELOG.md`](CHANGELOG.md) and update the tables above.
 
+`make dependency-policy` checks the committed root lockfile with all features and
+without a target filter. `deny.toml` permits only the explicitly reviewed SPDX
+choices used by this graph: MIT, Apache-2.0, Apache-2.0 WITH LLVM-exception,
+Unicode-3.0 and Unlicense. Other choices and unknown licenses fail. For an OR
+expression an allowed choice is sufficient; every part of an AND expression
+must be allowed. A new license requires a policy review rather than an automatic
+allow-list expansion. The system-library licenses remain separate from this
+Rust crate check.
+
+Sources are restricted to crates.io: unapproved Git and alternate registries
+fail. A future Git exception must identify an explicitly reviewed URL and full
+revision. `make test-dependency-policy` exercises real disposable Cargo graphs,
+including a forbidden Git source pinned to a commit. It needs Git, Python 3,
+Cargo and the pinned cargo-deny, and does not compile or fetch external fixtures.
+The separate fuzz workspace/tool installations are outside the root lockfile.
+
 ### 2.5 Software Bill of Materials (SBOM)
 
 A CycloneDX SBOM is generated and attached to every release; see
@@ -150,3 +166,12 @@ They remain transitive dependencies of the tested zbus 5/ksni stack in 0.1.2;
 the advisories are recorded, not globally suppressed. A coordinated zbus/ksni
 migration needs its own D-Bus compatibility, MSRV and tray tests rather than an
 unchecked major dependency change during this patch release.
+
+Migration feasibility was checked after the release: published zbus 6.0.0 and
+6.1.0 require Rust 1.89, above both the application's Rust 1.85 baseline and the
+reproducible builder's Rust 1.88.0. Published ksni 0.3.7 still requires zbus 5,
+as does its [upstream manifest](https://github.com/iovxw/ksni/blob/master/Cargo.toml).
+Updating only the direct zbus dependency would therefore retain the deprecated
+stack through the tray dependency. The coordinated migration remains pending a
+compatible ksni release and an explicit compiler/builder baseline update; the
+three informational notices remain visible in cargo-audit.
