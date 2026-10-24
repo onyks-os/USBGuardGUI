@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 20:18+0200\n"
+"POT-Creation-Date: 2026-10-24 18:59+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -74,91 +74,91 @@ msgstr ""
 msgid "USBGuard reports no connected devices."
 msgstr ""
 
-#: src/ui/device_view.rs:222
+#: src/ui/device_view.rs:237
 msgid "Name"
 msgstr ""
 
-#: src/ui/device_view.rs:224
+#: src/ui/device_view.rs:239
 #, rust-format
 msgid "(unreadable) {rule}"
 msgstr ""
 
-#: src/ui/device_view.rs:229
+#: src/ui/device_view.rs:244
 msgid "ID"
 msgstr ""
 
-#: src/ui/device_view.rs:234
+#: src/ui/device_view.rs:249
 msgid "Serial"
 msgstr ""
 
-#: src/ui/device_view.rs:237
+#: src/ui/device_view.rs:252
 msgid "Port"
 msgstr ""
 
-#: src/ui/device_view.rs:245
+#: src/ui/device_view.rs:260
 #, rust-format
 msgid "Daemon device id: {id}"
 msgstr ""
 
-#: src/ui/device_view.rs:252
+#: src/ui/device_view.rs:267
 msgid "Could not be parsed:"
 msgstr ""
 
-#: src/ui/device_view.rs:326
+#: src/ui/device_view.rs:341
 msgid "State"
 msgstr ""
 
-#: src/ui/device_view.rs:355 src/ui/rule_dialog.rs:187 src/ui/window.rs:826
+#: src/ui/device_view.rs:370 src/ui/rule_dialog.rs:187 src/ui/window.rs:826
 msgid "Cancel"
 msgstr ""
 
-#: src/ui/device_view.rs:357
+#: src/ui/device_view.rs:372
 msgid ""
 "Stop waiting. The daemon may already have acted; the list will show what it "
 "actually did."
 msgstr ""
 
-#: src/ui/device_view.rs:411
+#: src/ui/device_view.rs:426
 msgid "Actions"
 msgstr ""
 
-#: src/ui/device_view.rs:422
+#: src/ui/device_view.rs:437
 msgid "Allow"
 msgstr ""
 
-#: src/ui/device_view.rs:422
+#: src/ui/device_view.rs:437
 msgid "Allow this device"
 msgstr ""
 
-#: src/ui/device_view.rs:423
+#: src/ui/device_view.rs:438 src/ui/device_view.rs:540
 msgid "Block"
 msgstr ""
 
-#: src/ui/device_view.rs:423
+#: src/ui/device_view.rs:438
 msgid "Block this device"
 msgstr ""
 
-#: src/ui/device_view.rs:424 src/ui/window.rs:626
+#: src/ui/device_view.rs:439 src/ui/window.rs:626
 msgid "Reject"
 msgstr ""
 
-#: src/ui/device_view.rs:424
+#: src/ui/device_view.rs:439
 msgid "Reject this device"
 msgstr ""
 
-#: src/ui/device_view.rs:426 src/ui/preferences.rs:21
+#: src/ui/device_view.rs:441 src/ui/device_view.rs:541 src/ui/preferences.rs:21
 msgid "This session only"
 msgstr ""
 
-#: src/ui/device_view.rs:427
+#: src/ui/device_view.rs:442
 msgid "Undone when USBGuard restarts"
 msgstr ""
 
-#: src/ui/device_view.rs:428 src/ui/preferences.rs:22
+#: src/ui/device_view.rs:443 src/ui/preferences.rs:22
 msgid "Permanently"
 msgstr ""
 
-#: src/ui/device_view.rs:429
+#: src/ui/device_view.rs:444
 msgid "Written to the policy; survives a restart"
 msgstr ""
 
@@ -937,30 +937,48 @@ msgid "Diagnostics that name the exact cause of an access problem"
 msgstr ""
 
 #: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:98
+msgid ""
+"Authentication cancellation and USBGuard reconnection are more reliable."
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:100
+msgid "Avoid a device-table crash after cancelling authentication"
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:101
+msgid ""
+"Back off reconnection attempts and refresh state after an inconclusive write"
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:102
+msgid "Verify reproducible binaries and packages before publication"
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:108
 msgid "The status icon now appears when the application runs as a Flatpak."
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:103
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:113
 msgid "First release."
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:105
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:115
 msgid ""
 "Live device list; allow, block, or reject a device for this session or "
 "permanently"
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:106
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:116
 msgid ""
 "Policy view in evaluation order, with a guided rule editor and safe rule "
 "removal"
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:107
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:117
 msgid "Notifications for newly inserted devices that are not authorized"
 msgstr ""
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:108
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:118
 msgid ""
 "Diagnostics that name the exact cause of an access problem, and usbguard-gui "
 "--diagnose"

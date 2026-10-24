@@ -53,8 +53,14 @@ def verify(bundle, output, lockfile, runtime_repository=None, runtime_bundle=Non
     help_text = run("run", "--user", APP, "--help")
     if "Usage: usbguard-gui" not in help_text:
         raise ValueError("Installed Flatpak CLI did not start correctly")
-    checks = '''set -eu
-    test -f /app/share/locale/it/LC_MESSAGES/usbguard-gui.mo
+    # Keep this aligned with the catalogue list used by all package builders.
+    languages = [line.strip() for line in (ROOT / "po/LINGUAS").read_text().splitlines()
+                 if line.strip() and not line.lstrip().startswith("#")]
+    if not languages or any(not all(c.isalnum() or c in "_@-" for c in lang) for lang in languages):
+        raise ValueError("Invalid translation language list")
+    checks = 'set -eu\n' + ''.join(
+        f'test -f /app/share/locale/{lang}/LC_MESSAGES/usbguard-gui.mo\n' for lang in languages)
+    checks += '''
     test -f /app/share/doc/usbguard-gui/70-usbguard-gui.rules.example
     gsettings list-schemas | grep -Fx io.github.onyks_os.UsbguardGui
     glib-compile-schemas --strict --dry-run /app/share/glib-2.0/schemas
@@ -62,7 +68,8 @@ def verify(bundle, output, lockfile, runtime_repository=None, runtime_bundle=Non
     run("run", "--user", "--command=sh", APP, "-c", checks)
     report = {"runtime_ref": lock["ref"], "runtime_commit": actual,
               "bundle_sha256": hashlib.sha256(bundle.read_bytes()).hexdigest(),
-              "installed_cli": True, "installed_schema": True, "installed_assets": True}
+              "installed_cli": True, "installed_schema": True, "installed_assets": True,
+              "installed_languages": languages}
     (output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
     return report
 

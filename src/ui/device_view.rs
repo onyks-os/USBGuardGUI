@@ -536,6 +536,13 @@ mod tests {
     #[allow(clippy::unwrap_used)]
     fn gui_device_actions_survive_denied_authentication_and_refresh() {
         gtk::init().unwrap();
+        super::super::i18n::init();
+        let block_label = gettext("Block");
+        let session_label = gettext("This session only");
+        if std::env::var("LANGUAGE").as_deref() == Ok("fr") {
+            assert_eq!(block_label, "Bloquer");
+            assert_eq!(session_label, "Pour cette session uniquement");
+        }
         let slot: Rc<OnceCell<std::rc::Weak<DeviceView>>> = Rc::default();
         let device = parse_device(
             DeviceId::new(3),
@@ -576,7 +583,7 @@ mod tests {
         pump_for(Duration::from_millis(150));
         for _ in 0..20 {
             let block = find_widget::<gtk::MenuButton>(view.root.upcast_ref(), &|b| {
-                b.label().as_deref() == Some("Block")
+                b.label().as_deref() == Some(block_label.as_str())
             })
             .unwrap();
             let popover = block.popover().unwrap();
@@ -584,7 +591,7 @@ mod tests {
             block.popup();
             pump_for(Duration::from_millis(100));
             let session = find_widget::<gtk::Button>(popover.upcast_ref(), &|b| {
-                b.label().as_deref() == Some("This session only")
+                b.label().as_deref() == Some(session_label.as_str())
             })
             .unwrap();
             session.grab_focus();
@@ -606,7 +613,7 @@ mod tests {
         // Reconnection also removes the old rows, including while focus is
         // held by another window. It must clear the same stale focus chain.
         let block = find_widget::<gtk::MenuButton>(view.root.upcast_ref(), &|b| {
-            b.label().as_deref() == Some("Block")
+            b.label().as_deref() == Some(block_label.as_str())
         })
         .unwrap();
         block.grab_focus();

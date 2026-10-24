@@ -8,6 +8,10 @@ SPDX-License-Identifier: MIT
 The interface uses [GNU gettext](https://www.gnu.org/software/gettext/). Every translation is one
 file, `po/<language>.po`, and you need no Rust knowledge to write one.
 
+English is the source language; Italian and French catalogues are provided.
+The initial French catalogue was prepared with AI assistance; fluent-speaker
+improvements are welcome through the usual review process.
+
 ## What is translated, and what is not
 
 - **Translated**: every text in the window, the notifications, the status icon menu, the
@@ -19,6 +23,9 @@ file, `po/<language>.po`, and you need no Rust knowledge to write one.
     reports and must be readable by everyone;
   - the application name, `USBGuardGUI`, which appears in the strings as `{app}`.
 
+To try the supplied French catalogue from a development build, run
+`LANGUAGE=fr cargo run`.
+
 ## Start a new language
 
 You need `gettext` (`sudo dnf install gettext`, `sudo apt install gettext`, or
@@ -27,11 +34,11 @@ You need `gettext` (`sudo dnf install gettext`, `sudo apt install gettext`, or
 ```bash
 git clone https://github.com/onyks-os/USBGuardGUI.git && cd USBGuardGUI
 make i18n-pot                                   # refresh po/usbguard-gui.pot
-msginit -i po/usbguard-gui.pot -o po/fr.po -l fr_FR.UTF-8
-echo fr >> po/LINGUAS
+msginit -i po/usbguard-gui.pot -o po/es.po -l es_ES.UTF-8
+echo es >> po/LINGUAS
 ```
 
-Then translate `po/fr.po` with any editor — [Poedit](https://poedit.net/),
+Then translate `po/es.po` with any editor — [Poedit](https://poedit.net/),
 [GNOME Translation Editor](https://apps.gnome.org/Gtranslator/), [Lokalize](https://apps.kde.org/lokalize/),
 or a plain text editor. `po/it.po` is a complete example.
 
@@ -51,13 +58,13 @@ or a plain text editor. `po/it.po` is a complete example.
 ## Check and try it
 
 ```bash
-msgfmt --check --statistics -o /dev/null po/fr.po    # must report no error
+msgfmt --check --statistics -o /dev/null po/es.po    # must report no error
 make i18n                                            # regenerates data/*.desktop and metainfo
-LANGUAGE=fr cargo run                                # the window, in French
+LANGUAGE=es cargo run                                # the window, in Spanish
 ```
 
 To see the window with invented devices instead of your own, run `cargo run --example demo-bridge`
-in another terminal and start the window with `LANGUAGE=fr USBGUARD_GUI_BUS=session cargo run`.
+in another terminal and start the window with `LANGUAGE=es USBGUARD_GUI_BUS=session cargo run`.
 
 ## Submit
 
@@ -71,3 +78,10 @@ every commit needs a DCO `Signed-off-by` line (`git commit -s`). See [CONTRIBUTI
 When the interface changes, a maintainer runs `make i18n-update`, which merges new strings into
 every `.po` file and marks changed ones *fuzzy*. Translate the new and fuzzy entries, remove the
 `#, fuzzy` marker, and submit again.
+
+`make test-i18n`, included in `make verify`, checks compiled catalogue behavior, French completeness/plurals,
+format-placeholder rejection, localized desktop/store metadata and native
+package declarations for every language in `po/LINGUAS`. `make i18n-check`
+runs these tests in CI. Arch and Flatpak packaging already iterate over that
+list; the reproducible worker does too. The installed Flatpak verifier requires
+every registered catalogue before it writes a passing runtime report.

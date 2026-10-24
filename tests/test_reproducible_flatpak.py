@@ -94,13 +94,18 @@ class FlatpakTests(unittest.TestCase):
 
     def test_runtime_verification_is_private_pinned_and_records_only_success(self):
         for mode, failure in (("local", None), ("remote", None), ("cached", None),
-                              ("remote", "commit"), ("remote", "cli"), ("remote", "command")):
+                              ("remote", "commit"), ("remote", "cli"), ("remote", "command"),
+                              ("remote", "catalogue"), ("remote", "languages-empty"),
+                              ("remote", "languages-invalid")):
             with self.subTest(mode=mode, failure=failure), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
                 bundle, lockfile, output = root / "app.flatpak", root / "runtime.json", root / "result"
                 bundle.write_bytes(b"bundle")
                 lockfile.write_text(json.dumps({"ref": "runtime/org.gnome.Platform/x86_64/50",
                                                "commit": "pinned", "repository_file": "https://flathub.org/repo/flathub.flatpakrepo"}))
+                if failure in ("languages-empty", "languages-invalid"):
+                    (root / "po").mkdir()
+                    (root / "po/LINGUAS").write_text("# empty\n" if failure == "languages-empty" else "fr;exit\n")
                 calls = []
 
                 def run(command, *, calls=calls, output=output, failure=failure, **kwargs):
@@ -112,9 +117,15 @@ class FlatpakTests(unittest.TestCase):
                         text = "wrong" if failure == "commit" else "pinned"
                     if "--help" in command:
                         text = "wrong" if failure == "cli" else "Usage: usbguard-gui [OPTION]"
-                    return subprocess.CompletedProcess(command, 1 if failure == "command" else 0, text, "details")
+                    catalogue_check = "--command=sh" in command
+                    if catalogue_check:
+                        self.assertIn("/app/share/locale/fr/LC_MESSAGES/usbguard-gui.mo", command[-1])
+                        self.assertIn("/app/share/locale/it/LC_MESSAGES/usbguard-gui.mo", command[-1])
+                    failed = failure == "command" or (failure == "catalogue" and catalogue_check)
+                    return subprocess.CompletedProcess(command, 1 if failed else 0, text, "details")
 
-                with patch.object(runtime.subprocess, "run", side_effect=run):
+                with patch.object(runtime.subprocess, "run", side_effect=run), \
+                     patch.object(runtime, "ROOT", root if failure in ("languages-empty", "languages-invalid") else ROOT):
                     if failure:
                         with self.assertRaises((ValueError, subprocess.CalledProcessError)):
                             runtime.verify(bundle, output, lockfile)
@@ -125,6 +136,7 @@ class FlatpakTests(unittest.TestCase):
                                                 root / "local-repo" if mode == "local" else None,
                                                 root / "runtime.flatpak" if mode == "cached" else None)
                         self.assertEqual(report["runtime_commit"], "pinned")
+                        self.assertEqual(report["installed_languages"], ["fr", "it"])
                         if mode == "local":
                             self.assertTrue(any("--runtime" in call for call in calls))
                         if mode == "remote":

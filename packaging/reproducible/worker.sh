@@ -34,8 +34,11 @@ case "${1:-}" in
         install -m755 "$CARGO_TARGET_DIR/x86_64-unknown-linux-gnu/release/usbguard-gui" /output/usbguard-gui
         /output/usbguard-gui --help > /output/help.txt
         readelf -d /output/usbguard-gui > /output/elf-dynamic.txt
-        mkdir -p target/locale/it/LC_MESSAGES
-        msgfmt --check po/it.po -o target/locale/it/LC_MESSAGES/usbguard-gui.mo
+        while IFS= read -r lang; do
+            [[ -z $lang || $lang == \#* ]] && continue
+            mkdir -p "target/locale/$lang/LC_MESSAGES"
+            msgfmt --check "po/$lang.po" -o "target/locale/$lang/LC_MESSAGES/usbguard-gui.mo"
+        done < po/LINGUAS
         python3 /opt/reproducible/rpm.py
         python3 /opt/reproducible/deb.py
         bash /opt/reproducible/arch.sh

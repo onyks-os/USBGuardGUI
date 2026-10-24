@@ -14,9 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- French translations for the interface, notifications, desktop entry and
+  AppStream metadata; gettext/plural/format and package-catalogue tests, plus
+  the graphical focus regression in both English and French.
 - A pinned cargo-deny license/source gate in CI and `make verify`, with rejection
   tests for forbidden licenses across dependency kinds, optional/target-specific
   dependencies, SPDX AND/OR expressions and unapproved pinned Git sources.
+
+### Fixed
+
+- Reproducible builds compile every language registered in `po/LINGUAS`, and
+  installed Flatpak validation checks every registered catalogue.
 
 ## [0.1.2] - 2026-10-24
 
