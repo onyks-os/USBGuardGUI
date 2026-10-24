@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A pinned cargo-deny license/source gate in CI and `make verify`, with rejection
+  tests for forbidden licenses across dependency kinds, optional/target-specific
+  dependencies, SPDX AND/OR expressions and unapproved pinned Git sources.
+
 ## [0.1.2] - 2026-10-24
 
 ### Added

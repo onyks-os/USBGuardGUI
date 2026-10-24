@@ -309,3 +309,23 @@ The Flatpak report confirmed the pinned GNOME commit and installed CLI/schema/as
 The local Sigstore 3.6.6 verifier emitted an unsupported-root-key warning while
 successfully validating every artifact with its supported trusted keys.
 These checks do not substitute for interactive real-daemon/Polkit validation.
+
+## Dependency license/source policy (2026-10-24)
+
+`make dependency-policy` passed with cargo-deny 0.20.2 against the committed
+application lockfile and all features/targets. Six real-tool regression tests
+cover nine cases: forbidden licenses in normal, development, build and
+non-host-target dependencies; optional dependencies; missing licenses; SPDX
+AND/OR choices; and an unapproved Git source despite an exact revision pin.
+Fixtures use disposable local packages and an isolated Cargo home. No fixture
+compiles code or fetches an external dependency.
+
+The updated `make verify` passed all 108 standard Rust tests, Clippy/rustfmt,
+ShellCheck, the secret scan, cargo-audit and dependency-policy checks. Ruff and
+TOML/workflow-YAML parsing also passed. The ignored graphical regression remains
+a separate CI check. Markdownlint was unavailable locally and was reported as
+skipped. The existing per-file core-coverage gate remains enabled in CI.
+
+The application MSRV and reproducible toolchain are unchanged. Upstream metadata
+for zbus 6.0.0/6.1.0 requires Rust 1.89, while published ksni 0.3.7 still requires
+zbus 5; `DEPENDENCIES.md` records these coordinated-migration prerequisites.

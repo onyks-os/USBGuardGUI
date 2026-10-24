@@ -159,6 +159,25 @@ jobs:
       - name: Audit the committed lockfile
         run: cargo audit --file Cargo.lock
 
+  dependency-policy:
+    name: Dependency licenses and sources
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # master
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          shared-key: dependency-policy-0.20.2
+          cache-workspace-crates: false
+      - name: Install the pinned policy checker
+        run: cargo install cargo-deny --version 0.20.2 --locked
+      - name: Check the full dependency graph and rejection regressions
+        run: make dependency-policy test-dependency-policy
+
   build:
     name: Release build
     needs: test

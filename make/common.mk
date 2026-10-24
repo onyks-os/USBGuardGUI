@@ -26,7 +26,7 @@ install-hooks: ## Install the Git pre-commit hook (lint + unit tests)
 
 ##@ Verification
 
-verify: lint test audit ## Full local gate — run this before every push
+verify: lint test audit dependency-policy test-dependency-policy ## Full local gate — run this before every push
 	@echo "======================================================================"
 	@echo "[$(PROJECT_SHORT)] Local verification PASSED."
 	@echo "======================================================================"

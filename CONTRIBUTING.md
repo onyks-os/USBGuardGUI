@@ -46,6 +46,7 @@ By participating in this project you agree to abide by the
 
    ```bash
    make setup
+   cargo +stable install cargo-deny --version 0.20.2 --locked
    ```
 
 3. **Install the Git pre-commit hook** (runs lint + unit tests before each commit):
