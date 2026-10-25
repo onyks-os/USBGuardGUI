@@ -18,6 +18,10 @@ class CoverageToolTests(unittest.TestCase):
         self.bin.mkdir()
         self.tools = self.root / "tools"
         self.tools.mkdir()
+        # Cargo searches CARGO_HOME/bin before PATH for external subcommands.
+        # Keep a developer's (or CI's) installed plugins outside these fixtures.
+        self.cargo_home = self.root / "cargo-home"
+        self.cargo_home.mkdir()
         self.environment = dict(os.environ, PATH=str(self.bin),
                                 USBGUARD_GUI_TEST_TOOLS_ROOT=str(self.root / "desktop"))
         (self.bin / "dirname").symlink_to(shutil.which("dirname"))
@@ -28,7 +32,7 @@ class CoverageToolTests(unittest.TestCase):
         path.chmod(0o755)
 
     def make(self, target):
-        environment = dict(os.environ, PATH="/usr/bin:/bin")
+        environment = dict(os.environ, PATH="/usr/bin:/bin", CARGO_HOME=str(self.cargo_home))
         return subprocess.run([shutil.which("make"), "--no-print-directory", target,
                                f"COVERAGE_TOOLS_DIR={self.tools}",
                                f"CARGO={shutil.which('cargo')}"],
