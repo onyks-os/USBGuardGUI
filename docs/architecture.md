@@ -1455,6 +1455,15 @@ device from the system and requires physical re-insertion to undo.
 
 Filter entry over name, id, and serial. A "show blocked only" toggle.
 
+Each row's **Details** popover shows the port path, USB interfaces, connection
+type, and current authorization state as reported by USBGuard. It also labels
+the daemon device rule text as a device description; this text is not evidence
+that the rule caused the current authorization decision. `listDevices` does
+not identify the effective policy rule, so the view says when that information
+is unavailable instead of inferring it from the ruleset. The popover uses the
+currently bound device row and is replaced with that row on model updates; it
+does not retain device or policy IDs across reconnection.
+
 ### 9.3 Policy View
 
 The ruleset in evaluation order. **The order is semantically load-bearing** —

@@ -160,7 +160,7 @@ pub(in crate::ui) fn exercise() {
     let mut devices = vec![
         parse_device(
             DeviceId::new(1),
-            "allow id 1234:0001 name \"Visible\"".into(),
+            "allow id 1234:0001 name \"<b>Visible & USB</b>\" serial \"SN-1\" via-port \"2-3.1\" with-interface { 08:06:50 03:01:01 } with-connect-type \"hotplug\"".into(),
         ),
         parse_device(DeviceId::new(2), "block serial \"SERIAL\"".into()),
         parse_device(DeviceId::new(3), "reject name \"\"".into()),
@@ -172,6 +172,63 @@ pub(in crate::ui) fn exercise() {
     pump_for(Duration::from_millis(100));
     let columns = widgets::<gtk::ColumnView>(&view.root)[0].clone();
     assert_eq!(columns.model().unwrap().n_items(), 4);
+    let details = widgets::<gtk::MenuButton>(&view.root)
+        .into_iter()
+        .find(|b| b.label().as_deref() == Some("Details"))
+        .unwrap();
+    details.popup();
+    pump_for(Duration::from_millis(40));
+    let detail_label = widgets::<gtk::Label>(&details.popover().unwrap())
+        .into_iter()
+        .find(|label| label.text().contains("Matched policy rule"))
+        .unwrap();
+    let detail_text = detail_label.text();
+    assert!(detail_text.contains("State reported by USBGuard: Allowed"));
+    assert!(detail_text.contains("Physical port path: 2-3.1"));
+    assert!(detail_text.contains("08:06:50, 03:01:01"));
+    assert!(detail_text.contains("<b>Visible & USB</b>"));
+    assert!(!detail_label.uses_markup());
+    assert!(detail_text.contains("Not provided in the listDevices response."));
+    details.popdown();
+
+    view.set_devices(vec![devices[3].clone()]);
+    pump_for(Duration::from_millis(40));
+    let malformed_details = widgets::<gtk::MenuButton>(&view.root)
+        .into_iter()
+        .find(|b| b.label().as_deref() == Some("Details"))
+        .unwrap();
+    malformed_details.popup();
+    pump_for(Duration::from_millis(40));
+    let malformed_text = widgets::<gtk::Label>(&malformed_details.popover().unwrap())
+        .into_iter()
+        .find(|label| label.text().contains("Rule parsing issue"))
+        .unwrap()
+        .text();
+    assert!(malformed_text.contains("Unknown"));
+    assert!(malformed_text.contains("Rule parsing issue:"));
+    assert!(malformed_text.to_lowercase().contains("expected"));
+    assert!(malformed_text.contains("USB ID: —"));
+    malformed_details.popdown();
+
+    view.set_devices(vec![devices[2].clone()]);
+    pump_for(Duration::from_millis(40));
+    let sparse_details = widgets::<gtk::MenuButton>(&view.root)
+        .into_iter()
+        .find(|b| b.label().as_deref() == Some("Details"))
+        .unwrap();
+    sparse_details.popup();
+    pump_for(Duration::from_millis(40));
+    let sparse_text = widgets::<gtk::Label>(&sparse_details.popover().unwrap())
+        .into_iter()
+        .find(|label| label.text().contains("Matched policy rule"))
+        .unwrap()
+        .text();
+    assert!(sparse_text.contains("USB interfaces (class:subclass:protocol): —"));
+    assert!(sparse_text.contains("Physical port path: —"));
+    sparse_details.popdown();
+
+    view.set_devices(devices.clone());
+    pump_for(Duration::from_millis(40));
     let search = widgets::<gtk::SearchEntry>(&view.root)[0].clone();
     search.set_text("serial");
     search.emit_by_name::<()>("search-changed", &[]);
