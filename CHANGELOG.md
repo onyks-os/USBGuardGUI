@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Source crates exclude privileged VM-only tools while retaining required build inputs; a packaging regression enforces this boundary.
 - Installed Flatpak headless checks avoid starting the unrelated document portal.
 - Reproducible builds compile every language registered in `po/LINGUAS`, and
   installed Flatpak validation checks every registered catalogue.

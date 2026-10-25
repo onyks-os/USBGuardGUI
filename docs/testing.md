@@ -400,7 +400,7 @@ The October 25 driver additionally observes actual system-bus calls and denials
 inside the VM. It asserts the synthetic device ID, block target and `permanent=false`,
 so unchanged device state alone cannot make a missing GUI action pass. The host
 verifier rejects incomplete/failed reports and mismatches between the installed
-binary and the reproducible-build receipt; eight driver tests cover isolation,
+binary and the reproducible-build receipt; nine driver tests cover isolation,
 input rejection, stale-report handling and receipt validation.
 
 The VM marker guards root setup; no physical USB device or host filesystem is

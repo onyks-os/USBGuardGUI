@@ -104,6 +104,17 @@ class CleanInstallTests(unittest.TestCase):
                 vm.main(["copy", "--output", "/tmp/fixture", __file__, destination])
             run.assert_not_called()
 
+    def test_crate_omits_privileged_guest_tools_but_keeps_build_inputs(self):
+        root = Path(__file__).resolve().parents[1]
+        files = subprocess.check_output(
+            ["cargo", "package", "--list", "--allow-dirty", "--offline", "--locked"],
+            cwd=root, text=True).splitlines()
+        self.assertIn("build.rs", files)
+        self.assertIn("scripts/check-translations.py", files)
+        self.assertNotIn("SESSION_HANDOFF.md", files)
+        self.assertNotIn("scripts/verify-clean-install.py", files)
+        self.assertFalse(any(name.startswith("scripts/clean-install-") for name in files))
+
     def test_ssh_pins_identity_and_known_hosts_inside_output(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
