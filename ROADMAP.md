@@ -218,8 +218,8 @@ explicit at every step.
 | **0.1.0** | Released | Device list/search/filter; runtime or permanent allow/block/reject; policy editor and safe removal; diagnostics; preferences; notifications, background/tray, autostart; English/Italian; native and Flatpak packages. |
 | **0.1.1** | Released | Flatpak status-icon correction. |
 | **0.1.2** | Current stable | Authentication-cancellation crash fix, reconnect backoff, inconclusive-write handling, log privacy, per-file core coverage, reproducible binaries and all package formats. |
-| **0.2.0** | Next feature target, not released | zbus 6.1, direct SNI/menu implementation and Rust 1.89 compiler/builder baseline; clean-system daemon/Polkit verification. Includes the already-merged French catalogues and license/source/CI maintenance. |
-| **Later versions, unassigned** | Candidates with external prerequisites | Further translations and AUR publication; deferred, outside the current implementation work. |
+| **0.2.0** | Implementation complete; release pending | zbus 6.1, direct SNI/menu implementation and Rust 1.89; four clean-system daemon/Polkit checks; application fixes and >=98% production line coverage, GTK included. Includes the already-merged French catalogues and license/source/CI maintenance. |
+| **Following releases, versions unassigned** | Approved product milestones | Rule/device preview, device details and observed decisions, event history, desktop quality; ordered below. |
 
 The old “v0.2.0 scope” above is historical: those policy actions shipped in
 0.1.0. The new 0.2.0 target contains the post-0.1.2 dependency and validation work. No release date is promised; a tag
@@ -229,6 +229,24 @@ Real-daemon/Polkit checks now pass on disposable Ubuntu, Debian, Fedora and Arch
 installations, including cancelled and successful real PAM authentication and
 GUI reconnection. [Testing evidence](docs/testing.md#zbus-6-and-real-clean-system-validation-2026-10-2425)
 records the exact virtual-device/agent scope and package versions.
+
+### Approved product milestones (2026-10-25)
+
+The following work is approved in priority order. Version numbers and release dates
+will be assigned after each milestone passes its acceptance checks. Further languages
+and AUR publication remain deferred; they are not prerequisites for these milestones.
+
+| Priority | Milestone | Scope and acceptance criteria | Status |
+| :--- | :--- | :--- | :--- |
+| **1** | **Preview matching devices before adding a rule** | A read-only action in both rule-editor modes asks USBGuard which currently connected devices match the attributes. Show results, no matches, errors and cancellation; discard results after edits or closing. State explicitly that conditions and rule precedence are not simulated. No authorization or policy mutation is performed. Test target-independent queries, hostile text, stale replies and failure paths; maintain >=98% application line coverage. | Implemented; CI and release gates pending |
+| **2** | **Device details and observed decisions** | Show USB interfaces/functions and topology, plus the rule associated with a decision when reported by the daemon. Distinguish an observed decision from an unknown or outdated explanation; invalidate recycled device/rule IDs after changes and reconnection. | Planned |
+| **3** | **Local event history** | Show insertions, removals, authorization outcomes and reconnections observed while the app runs. Mark observation gaps; bound retention and make persistence opt-in. Offer export with identifiers obscured and test redaction. | Planned |
+| **4** | **Desktop quality** | Measure and reduce memory usage; verify keyboard navigation, screen-reader labels, Wayland and GNOME/KDE behavior. Track repeatable measurements and desktop-specific regressions. | Planned |
+
+All four retain the unprivileged D-Bus architecture. Each completed milestone must
+pass the existing tests, coverage and packaging gates before release. The first
+preview is an attribute-match snapshot, not a promise that saving a rule immediately
+changes those devices or that it wins over earlier policy rules.
 
 | Item | Description |
 | :--- | :---------- |

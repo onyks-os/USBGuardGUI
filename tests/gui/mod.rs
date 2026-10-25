@@ -67,6 +67,7 @@ fn gui_application_contracts() {
     let backend = Backend::start();
     super::config::tests::exercise();
     super::rule_dialog::tests::exercise(&app);
+    super::rule_preview::tests::exercise(&backend);
     super::policy_view::tests::exercise();
     super::device_view::tests::exercise();
     super::notify::tests::exercise(&app);

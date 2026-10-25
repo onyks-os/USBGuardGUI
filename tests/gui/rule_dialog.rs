@@ -20,12 +20,18 @@ pub(in crate::ui) fn exercise(app: &adw::Application) {
     });
     pump();
     let dialog = window.visible_dialog().unwrap();
+    let device_preview = button(&dialog, "Preview matching devices");
+    assert!(device_preview.is_sensitive());
     let mode = widgets::<gtk::Stack>(&dialog)
         .into_iter()
         .find(|s| s.child_by_name("text").is_some())
         .unwrap();
     mode.set_visible_child_name("text");
     pump();
+    assert!(
+        device_preview.is_sensitive(),
+        "preview is shared by both editor modes"
+    );
     assert_eq!(
         widgets::<gtk::Entry>(&dialog)
             .into_iter()

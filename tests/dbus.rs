@@ -67,6 +67,49 @@ async fn lists_devices_and_every_rule() {
 }
 
 #[tokio::test]
+async fn rule_device_preview_queries_all_states_by_attributes_only() {
+    let mock = Mock::start(vec![(7, device_rule("allow", 1))], vec![]).await;
+    let client = mock.client().await;
+    let rule =
+        parse_rule(r#"allow id 1234:0001 label "kiosk" if localtime(08:00-18:30:15) # office"#)
+            .unwrap();
+
+    let devices = client.preview_rule_devices(&rule).await.unwrap();
+
+    assert_eq!(devices.len(), 1);
+    assert_eq!(mock.calls(), ["listDevices match id 1234:0001"]);
+    assert_eq!(
+        mock.state.lock().unwrap().interactive,
+        [("listDevices", false)]
+    );
+}
+
+#[tokio::test]
+async fn rule_device_preview_validates_before_dbus_and_propagates_daemon_errors() {
+    let mock = Mock::start(vec![], vec![]).await;
+    let client = mock.client().await;
+    let mut invalid = parse_rule("allow id 1234:0001").unwrap();
+    invalid.target = Some(RuleTarget::Match);
+    assert!(matches!(
+        client.preview_rule_devices(&invalid).await,
+        Err(AppError::Parse(_))
+    ));
+    assert_eq!(mock.calls(), Vec::<String>::new());
+
+    mock.state.lock().unwrap().denied.insert("listDevices");
+    let rule = parse_rule("block id 1234:0001").unwrap();
+    assert!(matches!(
+        client.preview_rule_devices(&rule).await,
+        Err(AppError::Denied(_))
+    ));
+    assert_eq!(mock.calls(), ["listDevices match id 1234:0001"]);
+    assert_eq!(
+        mock.state.lock().unwrap().interactive,
+        [("listDevices", false)]
+    );
+}
+
+#[tokio::test]
 async fn persistence_booleans_reach_the_wire_with_the_right_polarity() {
     let mock = Mock::start(vec![(3, device_rule("block", 3))], vec![]).await;
     let client = mock.client().await;
