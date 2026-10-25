@@ -96,8 +96,9 @@ jobs:
         run: cargo build --no-default-features
 
   coverage:
-    name: Core coverage (>90% per file)
+    name: Application coverage (>=98%, GTK included)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -107,10 +108,22 @@ jobs:
           toolchain: stable
           components: llvm-tools-preview
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - name: Install isolated desktop test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext dbus-daemon xvfb xdotool locales
+          sudo locale-gen en_US.UTF-8
       - name: Install coverage tool
         run: cargo install cargo-llvm-cov --version 0.9.1 --locked
-      - name: Test and enforce core coverage
-        run: make coverage-core
+      - name: Test and enforce application coverage
+        run: make coverage-app
+      - name: Upload production coverage report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: application-coverage
+          path: target/coverage-application.json
+          if-no-files-found: warn
 
   reproducible:
     name: Reproducible Linux GUI binary and all package formats

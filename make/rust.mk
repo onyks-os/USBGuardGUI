@@ -4,6 +4,11 @@
 
 CARGO ?= cargo
 
+# cargo install --root target/tools keeps developer tools local to this checkout.
+COVERAGE_TOOLS_DIR ?= $(CURDIR)/target/tools/bin
+coverage coverage-app coverage-core coverage-tools: export PATH := $(COVERAGE_TOOLS_DIR):$(PATH)
+coverage coverage-app: export LANGUAGE := en
+
 .PHONY: lang-setup lang-lint lang-format lang-test lang-test-integration lang-fuzz lang-audit lang-build lang-clean coverage doc
 
 lang-setup:
@@ -55,16 +60,16 @@ lang-clean:
 
 ##@ Rust extras
 
-coverage: ## Run the test suite with a coverage report (cargo-llvm-cov)
-	@$(CARGO) llvm-cov --all-features --workspace --html
+coverage: coverage-app ## Enforce whole-application coverage and produce an HTML report
+	@$(CARGO) llvm-cov report --html
 
 doc: ## Build and open the rustdoc API documentation
 	@$(CARGO) doc --no-deps --all-features --open
 
 .PHONY: coverage-core
-coverage-core: ## Measure headless coverage and require >90% per rule/operation-core file
+coverage-core: coverage-tools ## Measure headless coverage and require >90% per rule/operation-core file
 	@$(CARGO) llvm-cov --locked --no-default-features --json --output-path target/coverage-headless.json
-	@python3 scripts/check-coverage.py target/coverage-headless.json
+	@python3 scripts/check-coverage.py --core target/coverage-headless.json
 
 .PHONY: reproducible test-reproducible
 REPRO_ARGS ?=
@@ -73,3 +78,30 @@ reproducible: ## Compare two clean offline GUI binaries, RPMs, DEBs, Arch packag
 
 test-reproducible: ## Test source normalization and the reproducibility checker's failure paths
 	@python3 -m unittest discover -s tests -p 'test_reproducible*.py' -v
+
+.PHONY: coverage-app test-coverage
+test-coverage: ## Prove coverage thresholds reject missing files and rounded percentages
+	@python3 -m unittest discover -s tests -p 'test_coverage*.py' -v
+
+coverage-app: coverage-tools test-coverage ## Require >=98% production line coverage, including GTK and both feature configurations
+	@scripts/test-gui.sh --check
+	@$(CARGO) llvm-cov clean --workspace
+	@$(CARGO) llvm-cov --locked --all-features --no-report
+	@$(CARGO) llvm-cov --locked --no-default-features --no-report --test cli
+	@scripts/test-gui.sh $(CARGO) llvm-cov --locked --all-features --no-report --lib -- gui_application_contracts --ignored --test-threads=1
+	@scripts/test-gui.sh $(CARGO) llvm-cov --locked --all-features --no-report --lib -- gui_device_actions --ignored --test-threads=1
+	@scripts/test-gui.sh $(CARGO) llvm-cov --locked --all-features --no-report --test gui_lifecycle -- --ignored --test-threads=1
+	@scripts/test-gui.sh $(CARGO) llvm-cov --locked --all-features --no-report --lib -- gui_authentication_notices --ignored --test-threads=1
+	@$(CARGO) llvm-cov report --json --output-path target/coverage-application.json
+	@python3 scripts/check-coverage.py target/coverage-application.json
+	@python3 scripts/check-coverage.py --core target/coverage-application.json
+
+.PHONY: coverage-tools
+coverage-tools: ## Check cargo-llvm-cov before running coverage or clearing profiles
+	@if ! command -v cargo-llvm-cov >/dev/null 2>&1; then \
+		echo "cargo-llvm-cov is required. Install the pinned version:" >&2; \
+		echo "  cargo install cargo-llvm-cov --version 0.9.1 --locked --root target/tools" >&2; \
+		echo "  rustup component add llvm-tools-preview" >&2; \
+		exit 1; \
+	fi
+	@$(CARGO) llvm-cov --version

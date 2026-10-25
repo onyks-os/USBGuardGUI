@@ -1077,7 +1077,9 @@ is wrong.
 reply; it does not withdraw a request the daemon may already have executed. The
 interface states this in as many words, and a cancellation is always followed by
 a re-read, so what is displayed afterwards is the observed state and not the
-presumed one.
+presumed one. Cancellation outcomes and rule-cache invalidation are queued
+asynchronously under backpressure: GTK never blocks and a full queue does not
+discard either event.
 
 ---
 
@@ -1797,7 +1799,7 @@ hardware.
 T2 and T13 now have mock tests in `tests/dbus.rs`: interrupted writes before
 and after execution, a ten-minute wait using Tokio virtual time, and cancellation
 while authentication is pending. The notice-stage boundaries at 20 and 180 s
-are unit-tested in `src/dbus/commands.rs`. These tests simulate the transport
+are unit-tested in `tests/unit/dbus_commands.rs`. These tests simulate the transport
 and authentication wait; real USBGuard/Polkit checks remain manual.
 
 The graphical focus regression is run separately from the display-free suite.
@@ -1817,7 +1819,8 @@ reproduced the native GTK 4.22.5 crash and now passes; see [testing.md](testing.
 | Idle memory | RSS < 110 MB, PSS < 70 MB | `smem`, after 10 minutes in background with 20 devices |
 | Direct first-party system filesystem access | zero | `strace -f -k` on `/etc`, `/var`, `/sys`, with library accesses attributed separately |
 | Parser robustness | zero panics over 10⁶ fuzz inputs | `cargo-fuzz` |
-| Parser coverage | > 90% of lines | `cargo-llvm-cov` |
+| Application coverage | ≥ 98% of production lines, GUI and headless configuration included | `make coverage-app` / `cargo-llvm-cov` |
+| Critical-file coverage | > 90% of lines per rule/operation/error file | `make coverage-core` |
 
 **Filesystem measurement (2026-10-18):** the background GUI reached its device
 snapshot on a private demo bus; `--diagnose` reported connected. The GUI made
@@ -2066,3 +2069,22 @@ configuration.
 None of risks 1 through 5 can be closed without upstream change. All six are
 detectable at runtime, and each maps to a diagnostic state or a test above,
 which is the property that matters: the program fails in a way it can explain.
+
+### Whole-application regression coverage (2026-10-25)
+
+Unit-test bodies live in `tests/unit/`; display-driven contracts live in
+`tests/gui/`. Their modules retain access to private implementation details under
+`cfg(test)`, while LLVM reports measure production source only. CI enforces the
+aggregate ≥98% line target with every executable `src/` file required. The GUI
+uses real GTK widgets and private D-Bus mocks, including actual 20/180-second
+GLib timers. This does not replace real Polkit/PAM clean-install verification.
+
+Changing from the guided rule form to text releases the preview borrow before
+setting the entry: synchronous `changed` callbacks can then replace the preview
+without a `RefCell` panic. Runtime-parameter denials survive subsequent parameter
+signals; unknown values remain unselected and insensitive. Policy error-page
+messages are escaped before entering libadwaita's markup-capable description.
+Tray registration permits one request in flight across preference changes. The
+completion reads the latest setting: disabling background stops the returned
+handle; a rapid off/on toggle reuses that request instead of racing for the same
+native bus name.

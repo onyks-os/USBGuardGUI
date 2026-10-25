@@ -76,14 +76,18 @@ impl PendingOperation {
         }
         self.handle.abort();
         let (id, ui_tx) = (self.id, self.ui_tx);
-        // try_send: a full channel must not block the GTK main thread; the
-        // cache invalidation below is what matters, and a snapshot follows
-        // any reconnect anyway.
-        let _ = ui_tx.try_send(UiEvent::OperationFinished {
-            op: id,
-            result: Err(AppError::Cancelled),
+        // Preserve both events under backpressure without blocking GTK.
+        // A full queue is temporary; dropping the invalidation could leave
+        // a rule created by the cancelled request invisible indefinitely.
+        runtime().spawn(async move {
+            let _ = ui_tx
+                .send(UiEvent::OperationFinished {
+                    op: id,
+                    result: Err(AppError::Cancelled),
+                })
+                .await;
+            let _ = ui_tx.send(UiEvent::InvalidateRuleCache).await;
         });
-        let _ = ui_tx.try_send(UiEvent::InvalidateRuleCache);
     }
 }
 
@@ -109,78 +113,5 @@ where
 }
 
 #[cfg(test)]
-mod tests {
-    use std::time::{Duration, Instant};
-
-    use super::{NO_AGENT_HINT_AFTER, WAITING_NOTICE_AFTER, spawn};
-    use crate::model::{AppError, OperationOutcome, PendingKind as PendingStage, UiEvent};
-
-    #[test]
-    fn completed_operation_reports_its_outcome() {
-        let (tx, rx) = async_channel::unbounded();
-        let op = spawn("test", tx, async {
-            Ok(OperationOutcome::ParameterSet {
-                previous: "block".into(),
-            })
-        });
-        let event = rx.recv_blocking().unwrap();
-        assert_eq!(
-            event,
-            UiEvent::OperationFinished {
-                op: op.id,
-                result: Ok(OperationOutcome::ParameterSet {
-                    previous: "block".into()
-                }),
-            }
-        );
-    }
-
-    #[test]
-    fn cancel_reports_and_invalidates() {
-        let (tx, rx) = async_channel::unbounded();
-        let op = spawn("slow", tx, async {
-            // Stands in for a Polkit prompt left open.
-            tokio::time::sleep(Duration::from_secs(3600)).await;
-            Err(AppError::Cancelled)
-        });
-        let id = op.id;
-        op.cancel();
-        assert_eq!(
-            rx.recv_blocking().unwrap(),
-            UiEvent::OperationFinished {
-                op: id,
-                result: Err(AppError::Cancelled)
-            }
-        );
-        assert_eq!(rx.recv_blocking().unwrap(), UiEvent::InvalidateRuleCache);
-    }
-
-    #[test]
-    fn stages_never_auto_cancel() {
-        let (tx, _rx) = async_channel::unbounded();
-        let op = spawn("x", tx, async {
-            tokio::time::sleep(Duration::from_secs(3600)).await;
-            Err(AppError::Cancelled)
-        });
-        let t0 = op.started;
-        assert_eq!(op.stage(t0), PendingStage::Started);
-        assert_eq!(
-            op.stage(t0 + WAITING_NOTICE_AFTER.saturating_sub(Duration::from_millis(1))),
-            PendingStage::Started
-        );
-        assert_eq!(
-            op.stage(t0 + WAITING_NOTICE_AFTER),
-            PendingStage::WaitingForAuthentication
-        );
-        assert_eq!(
-            op.stage(t0 + NO_AGENT_HINT_AFTER.saturating_sub(Duration::from_millis(1))),
-            PendingStage::WaitingForAuthentication
-        );
-        for elapsed in [NO_AGENT_HINT_AFTER, Duration::from_secs(600)] {
-            assert_eq!(op.stage(t0 + elapsed), PendingStage::PossiblyNoAgent);
-        }
-        assert!(!op.is_finished());
-        let _ = Instant::now();
-        op.cancel();
-    }
-}
+#[path = "../../tests/unit/dbus_commands.rs"]
+mod tests;

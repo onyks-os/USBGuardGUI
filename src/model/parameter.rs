@@ -52,14 +52,5 @@ impl fmt::Display for Parameter {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::Parameter;
-
-    #[test]
-    fn names_round_trip() {
-        for p in Parameter::ALL {
-            assert_eq!(Parameter::from_name(p.name()), Some(p));
-        }
-        assert_eq!(Parameter::from_name("RuleFile"), None);
-    }
-}
+#[path = "../../tests/unit/model_parameter.rs"]
+mod tests;

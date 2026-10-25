@@ -67,6 +67,7 @@ pub(super) struct PolicyView {
     rules: Rc<RefCell<Vec<RuleHandle>>>,
     handler: PolicyHandler,
     remove_block: Rc<RefCell<Option<String>>>,
+    parameter_block: Rc<Cell<bool>>,
 }
 
 impl PolicyView {
@@ -221,6 +222,7 @@ impl PolicyView {
             rules: Rc::default(),
             handler,
             remove_block: Rc::default(),
+            parameter_block: Rc::default(),
         }
     }
 
@@ -240,7 +242,8 @@ impl PolicyView {
     }
 
     pub(super) fn set_error(&self, message: &str) {
-        self.error.set_description(Some(message));
+        self.error
+            .set_description(Some(&gtk::glib::markup_escape_text(message)));
         self.list_stack.set_visible_child_name("error");
     }
 
@@ -250,10 +253,13 @@ impl PolicyView {
         let p = self.parameters.iter().find(|p| p.parameter == parameter)?;
         let index = parameter.allowed_values().iter().position(|v| *v == value);
         self.updating.set(true);
-        if let Some(index) = index.and_then(|i| u32::try_from(i).ok()) {
-            p.row.set_selected(index);
-        }
-        p.row.set_sensitive(true);
+        p.row.set_selected(
+            index
+                .and_then(|i| u32::try_from(i).ok())
+                .unwrap_or(gtk::INVALID_LIST_POSITION),
+        );
+        p.row
+            .set_sensitive(index.is_some() && !self.parameter_block.get());
         self.updating.set(false);
         p.value.replace(Some(value.to_owned()))
     }
@@ -274,15 +280,19 @@ impl PolicyView {
     /// Makes rule and parameter changes insensitive, with the reason as
     /// tooltip, when the daemon has refused them (§3.5).
     pub(super) fn set_blocks(&self, rules: Option<&str>, parameters: Option<&str>) {
+        self.parameter_block.set(parameters.is_some());
         self.add_button.set_sensitive(rules.is_none());
         self.add_button.set_tooltip_text(rules);
         *self.remove_block.borrow_mut() = rules.map(str::to_owned);
         let rules = self.rules();
         self.set_rules(rules);
         for p in self.parameters.iter() {
-            if p.value.borrow().is_some() {
-                p.row.set_sensitive(parameters.is_none());
-            }
+            let known = p
+                .value
+                .borrow()
+                .as_ref()
+                .is_some_and(|v| p.parameter.allowed_values().contains(&v.as_str()));
+            p.row.set_sensitive(known && parameters.is_none());
             p.row.set_tooltip_text(parameters);
         }
     }
@@ -333,3 +343,7 @@ impl PolicyView {
         row
     }
 }
+
+#[cfg(test)]
+#[path = "../../tests/gui/policy_view.rs"]
+pub(super) mod tests;

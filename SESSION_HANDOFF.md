@@ -1,5 +1,26 @@
 # Development handoff — 2026-10-25
 
+Completed implementation follow-up: the user explicitly requested **98% coverage across the entire
+application, including GTK**, plus an edge-case review. The local gate passes at **4841/4928 = 98.2346%**.
+The implementation is on
+`test/core-coverage-98` (the branch name predates the clarified whole-app scope).
+
+- Production fixes: cancellable-operation events survive queue backpressure;
+  Guided → Text releases its preview borrow before GTK's synchronous callbacks;
+  parameter signals preserve structural denials and disable unknown values;
+  policy error descriptions escape markup; one tray registration in flight
+  follows the latest background preference, including rapid off/on changes.
+- Unit tests moved to `tests/unit/`, graphical contracts to `tests/gui/`, preserving
+  all existing tests. `make coverage-app` measures production source across GUI
+  and headless feature configurations, with private display/buses/user dirs.
+- Graphical tests cover real 20/180-second notices. Do not edit the launcher
+  while it is executing. The 180-second test is intentionally a wall-clock wait.
+- New coverage checker rejects omitted GUI files, malformed/duplicate reports,
+  test-code inflation and percentages that only round to 98%.
+- The original zbus migration / real clean-install work below is complete;
+  these new GUI tests simulate the backend and do not replace its PAM receipts.
+
+
 The requested zbus/ksni migration and clean-install verification are implemented
 and locally verified. No translation expansion or AUR publication was undertaken.
 
@@ -36,3 +57,21 @@ Developer tools: `/home/onyks/.cargo/bin` and `target/tools/bin` (cargo-deny 0.2
 cargo-llvm-cov 0.9.1). Use `/bin/bash`, `login:false`. The host lacks /dev/kvm,
 so VM execution uses TCG. Historical detailed pause instructions are preserved
 in commit `ccfb96d`; the work described there has now been completed.
+
+Whole-app evidence: `docs/validation/application-coverage-2026-10-25.json`;
+full LLVM JSON `target/coverage-application.json`; HTML
+`target/llvm-cov/html/index.html`; logs `target/coverage-98-complete.log`,
+`target/coverage-98-verify-final.log`, `target/coverage-98-msrv.log`,
+`target/coverage-98-properties.log`. The native test host lacked Xvfb/xdotool:
+RPMs were downloaded/extracted under `target/coverage-tools/root` without a host
+installation. `make coverage` now discovers both local tool locations automatically, including
+the unpacked desktop libraries; no manual PATH/LD_LIBRARY_PATH exports are needed.
+Missing dependencies fail before tests with install instructions. Four new tool
+discovery/preflight regressions bring the Python suite to 65 tests. The diagnostic
+GUI regression now accepts the no-agent CI case and separately checks an IPC
+denial with copyable commands. CI installs normal Ubuntu test packages.
+
+Coverage command follow-up: `make coverage` succeeded without any manually added
+PATH or LD_LIBRARY_PATH (`target/coverage-user-entrypoint.log`), still 98.2346%.
+`target/coverage-tools-gui.log` verifies the agent-independent diagnostic fixture;
+`target/coverage-tools-tests.log` has 13 checker/tool tests and Clippy is clean.

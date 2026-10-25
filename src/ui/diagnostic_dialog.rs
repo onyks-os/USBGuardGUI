@@ -108,3 +108,7 @@ pub(super) fn present(parent: &impl IsA<gtk::Widget>) {
         }
     });
 }
+
+#[cfg(test)]
+#[path = "../../tests/gui/diagnostic_dialog.rs"]
+pub(super) mod tests;

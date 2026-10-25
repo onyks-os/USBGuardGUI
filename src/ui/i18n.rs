@@ -149,21 +149,5 @@ pub(super) fn field_error(err: &FieldError) -> String {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::fill;
-
-    #[test]
-    fn placeholders_are_filled_wherever_they_are() {
-        assert_eq!(fill("{b} then {a}", &[("a", "1"), ("b", "2")]), "2 then 1");
-        assert_eq!(fill("no placeholders", &[("a", "1")]), "no placeholders");
-    }
-    #[test]
-    fn uncertain_write_explains_possible_effect_without_daemon_details() {
-        let message = super::app_error(&crate::model::AppError::Inconclusive(
-            "PRIVATE_SERIAL_9281".into(),
-        ));
-        assert!(message.contains("may already have acted"));
-        assert!(message.contains("before trying again"));
-        assert!(!message.contains("PRIVATE_SERIAL_9281"));
-    }
-}
+#[path = "../../tests/unit/ui_i18n.rs"]
+mod tests;

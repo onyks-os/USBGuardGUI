@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Enforce >=98% production line coverage across the complete application, including
+  GTK and headless builds. Isolated desktop tests cover dialogs, notifications,
+  device/rule operations, single-instance lifecycle and real 20/180-second notices;
+  unit-test source no longer inflates the measured application coverage.
 - Migrate to zbus 6.1 and Rust 1.89, including the CI minimum and pinned
   reproducible builder. Replace ksni with fixed SNI/D-Bus menu interfaces on
   zbus; preserve native/Flatpak registration, actions and watcher reconnection.
@@ -35,6 +39,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Coverage targets find checkout-local cargo-llvm-cov without shell PATH changes,
+  check graphical prerequisites before running tests, and give pinned install
+  instructions when tools are absent. The diagnostic GUI regression handles
+  both desktop Polkit agents and agent-less CI runners; tool-discovery fixtures
+  isolate Cargo's plugin directory from globally installed tools.
+- Switching the new-rule form from Guided to Text no longer aborts on a
+  synchronously re-entered preview borrow.
+- Cancellation preserves its outcome and cache invalidation when the UI event
+  queue is full, without blocking GTK.
+- Parameter updates preserve structural access denials and keep unknown daemon
+  values unselected and insensitive.
+- Policy read failures display daemon details as literal text instead of markup.
+- A late tray registration cannot resurrect the icon after background mode is
+  disabled; concurrent requests are coalesced.
 - Source crates exclude privileged VM-only tools while retaining required build inputs; a packaging regression enforces this boundary.
 - Installed Flatpak headless checks avoid starting the unrelated document portal.
 - Reproducible builds compile every language registered in `po/LINGUAS`, and

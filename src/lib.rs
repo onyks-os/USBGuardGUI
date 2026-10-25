@@ -19,11 +19,11 @@ pub mod runtime;
 pub mod ui;
 
 #[cfg(test)]
-mod tests {
-    use super::VERSION;
+#[path = "../tests/unit/lib.rs"]
+mod tests;
 
-    #[test]
-    fn version_is_not_empty() {
-        assert_ne!(VERSION, "");
-    }
-}
+#[cfg(test)]
+extern crate self as usbguard_gui;
+#[cfg(test)]
+#[path = "../tests/support/mod.rs"]
+mod testsupport;

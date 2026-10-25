@@ -435,4 +435,5 @@ pub(super) fn stop(handle: &TrayHandle) {
 }
 
 #[cfg(test)]
+#[path = "../../tests/unit/ui_tray.rs"]
 mod tests;

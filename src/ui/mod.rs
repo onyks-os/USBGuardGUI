@@ -206,3 +206,7 @@ fn reload_parameters(ui_tx: async_channel::Sender<UiEvent>) {
         }
     });
 }
+
+#[cfg(test)]
+#[path = "../../tests/gui/mod.rs"]
+mod tests;

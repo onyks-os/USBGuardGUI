@@ -76,26 +76,66 @@ new signal subscriptions after restart, and absence of spurious subsequent loss.
 
 ## Coverage gate
 
-Install the development tools, then run:
+Install GTK/libadwaita development packages, gettext, dbus-daemon, Xvfb,
+xdotool and the `en_US.UTF-8` locale, then run:
 
 ```bash
 rustup component add llvm-tools-preview
-cargo install cargo-llvm-cov --version 0.9.1 --locked
-make coverage-core
+cargo install cargo-llvm-cov --version 0.9.1 --locked --root target/tools
+make coverage-app
+make coverage  # same gate, plus target/llvm-cov/html/index.html
 ```
 
-This executes the headless suite and writes `target/coverage-headless.json`.
-`scripts/check-coverage.py` requires **more than 90% line coverage per file** in
-`src/rules/*.rs`, `src/dbus/commands.rs`, and `src/dbus/errors.rs`. Missing or
-empty coverage for a required file fails the gate. CI runs the same target.
-The existing `make coverage` produces an HTML report with all features enabled.
+The Make targets automatically add `target/tools/bin` to their own PATH; no
+interactive shell PATH change is needed for that installation. A missing plugin
+fails before profile cleanup with the exact install commands. GUI dependencies
+are also checked before Rust tests: `scripts/test-gui.sh --check`. Installed
+Xvfb/xdotool are preferred; an unpacked bundle under
+`target/coverage-tools/root` (or `USBGUARD_GUI_TEST_TOOLS_ROOT`) is also supported,
+including its private library directory. These checks do not install anything. Coverage runs GTK contracts in English
+independently of the caller's LANGUAGE; the separate French focus regression is
+unchanged.
 
-The headless report does not measure GTK workflows. A high parser percentage
-must not be presented as whole-application coverage. Standard LLVM reports also
-count inline unit-test code; the JSON preserves the detailed regions for review.
-Property-generated inputs can slightly change the measured percentages between runs.
+The application gate requires **at least 98% of production lines across all
+application source files**, including GTK, the executable and the build without
+GUI. It resets workspace profiles, runs ordinary tests and isolated graphical
+processes, then writes `target/coverage-application.json`. Tests live outside
+`src/`, so their own lines do not inflate the denominator. No production file is
+excluded for being difficult to exercise. The four files containing only module
+exports/constants/types have no executable lines; missing coverage for any executable
+source file fails the checker. Percentages are compared as integers: a rounded
+98.00% below the threshold fails. Checker regressions run with `make test-coverage`.
 
-Measured results for this revision:
+`scripts/test-gui.sh` gives each process a private Xvfb display, memory GSettings,
+user directories and session/system bus addresses. Its bus has no service
+activation directories, so host portals, agents and keyrings cannot start.
+USBGuard, notifications and the tray watcher are simulated on that private bus;
+these tests never mutate the host's USB authorization. GUI contracts, the existing
+focus regression and the real executable run separately so GTK is initialized on
+one thread per process. A separate **180-second wall-clock test** checks both
+20/180-second notices and cancellation through the actual GTK row.
+
+`make coverage-core` remains a faster headless check, requiring **more than 90%
+per file** in `src/rules/*.rs`, `dbus/commands.rs` and `dbus/errors.rs`; it is not
+whole-application coverage. CI now enforces the complete `coverage-app` gate and
+uploads its JSON. Line coverage is not branch coverage or proof of no remaining
+bugs; real authentication, packaging and cross-distribution checks below retain
+their separate scope.
+
+Measured on 2026-10-25 (Rust 1.99.0, GTK 4.22.5, libadwaita 1.9.4):
+**4,841 / 4,928 production lines = 98.2346%** across 38 executable source files.
+The [committed receipt](validation/application-coverage-2026-10-25.json) records
+per-file results and source/test digests. Parser, cancellation and error
+classification each reached 100% line coverage. The ordinary suite passed
+144 tests including the doctest; four display/lifecycle tests passed separately,
+plus the headless-only CLI case. Nine coverage-checker regressions and all
+52 existing Python regressions passed. Property tests also passed with
+`PROPTEST_CASES=4096` (eight properties). Rust 1.89 all-target/all-feature checking,
+Clippy, formatting, ShellCheck, Ruff, audit and dependency-policy checks passed.
+
+Historical measurements from the earlier reliability revision (before the
+whole-application gate; inline test code was then included):
+
 
 | Check | Result |
 | :--- | :--- |

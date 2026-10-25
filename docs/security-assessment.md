@@ -258,3 +258,24 @@ Generated credentials stay private and are omitted from validation reports.
 The test-user Polkit fixture grants reads and requires real PAM authentication
 for each write; it is never installed on the host or by product packages.
 Distribution defaults are recorded separately from that explicit test fixture.
+
+## Reliability edge-case review (2026-10-25, unreleased)
+
+The whole-application coverage work found and regression-tested an abort in the
+local new-rule dialog: setting text emitted `changed` while the canonical preview
+was still borrowed. The borrow now ends before signal emission (availability,
+O5). Queued cancellation notifications/invalidation survive backpressure, retaining
+the client-side-only cancellation contract and avoiding a falsely fresh ruleset.
+
+Parameter signals cannot undo an observed structural denial; unknown values are
+not presented as a valid current choice. This affects UI capability presentation,
+not the daemon's authorization checks. Libadwaita interprets status-page
+descriptions as markup, so policy failure details are now escaped (display
+integrity). Tray registration checks the latest setting and keeps one request in flight,
+preventing late callbacks or rapid off/on changes from reversing the user's choice.
+
+The test launcher redirects both bus addresses and all user configuration to
+private fixtures and disables service activation directories. Tests add no
+production privileges, network dependencies, daemon changes or authorization
+bypasses. Coverage measures executed production lines, not every possible branch
+or every desktop/daemon version; real Polkit/PAM receipts remain separately scoped.

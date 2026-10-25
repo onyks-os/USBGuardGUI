@@ -2,7 +2,7 @@
 //! [`UiEvent`] into widget changes ([`MainWindow::apply`]), and the lifecycle
 //! of every user operation: start, pending notices, cancel, outcome.
 
-use std::cell::{OnceCell, RefCell};
+use std::cell::{Cell, OnceCell, RefCell};
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 
@@ -110,6 +110,8 @@ struct Inner {
     /// Keeps the application alive while the window is hidden.
     hold: RefCell<Option<gio::ApplicationHoldGuard>>,
     tray: RefCell<Option<TrayHandle>>,
+    /// At most one registration may be in flight, across setting changes.
+    tray_starting: Cell<bool>,
     tray_commands: async_channel::Sender<TrayCommand>,
 }
 
@@ -246,6 +248,7 @@ impl MainWindow {
             notifier: Notifier::new(app),
             hold: RefCell::default(),
             tray: RefCell::default(),
+            tray_starting: Cell::new(false),
             tray_commands,
         });
         let _ = slot.set(Rc::downgrade(&inner));
@@ -354,7 +357,11 @@ impl MainWindow {
     fn sync_tray(&self) {
         let wanted = self.0.config.run_in_background();
         let running = self.0.tray.borrow().is_some();
-        if wanted && !running {
+        if !wanted {
+            if let Some(handle) = self.0.tray.borrow_mut().take() {
+                tray::stop(&handle);
+            }
+        } else if !running && !self.0.tray_starting.replace(true) {
             let (reply, answer) = async_channel::bounded::<TrayResult>(1);
             tray::start(self.0.tray_commands.clone(), reply);
             let weak = Rc::downgrade(&self.0);
@@ -363,6 +370,15 @@ impl MainWindow {
                     return;
                 };
                 let Some(inner) = weak.upgrade() else { return };
+                inner.tray_starting.set(false);
+                // Read the latest preference, including a rapid off/on toggle.
+                // Keeping one request in flight avoids native bus-name races.
+                if !inner.config.run_in_background() {
+                    if let Ok(handle) = result {
+                        tray::stop(&handle);
+                    }
+                    return;
+                }
                 match result {
                     Ok(handle) => {
                         *inner.tray.borrow_mut() = Some(handle);
@@ -373,8 +389,6 @@ impl MainWindow {
                     Err(reason) => tracing::info!("no status icon: {reason}"),
                 }
             });
-        } else if !wanted && let Some(handle) = self.0.tray.borrow_mut().take() {
-            tray::stop(&handle);
         }
     }
 
@@ -1143,3 +1157,7 @@ impl MainWindow {
         self.0.state.borrow_mut().access = Some(access);
     }
 }
+
+#[cfg(test)]
+#[path = "../../tests/gui/window.rs"]
+pub(super) mod tests;

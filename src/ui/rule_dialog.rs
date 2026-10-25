@@ -140,10 +140,13 @@ pub(super) fn present(
         let (form, refresh) = (form.clone(), refresh.clone());
         move |_| {
             // Carry the guided rule over into the text mode as a start.
-            if form.mode.visible_child_name().as_deref() == Some("text")
-                && let Some(rule) = form.current.borrow().as_ref()
-            {
-                form.text.set_text(&rule.to_string());
+            if form.mode.visible_child_name().as_deref() == Some("text") {
+                // set_text emits changed synchronously; its handler replaces
+                // current. Release the borrow before crossing that boundary.
+                let text = form.current.borrow().as_ref().map(ToString::to_string);
+                if let Some(text) = text {
+                    form.text.set_text(&text);
+                }
             }
             refresh();
         }
@@ -498,3 +501,7 @@ fn caret_message(text: &str, err: ParseError) -> String {
     );
     format!("{heading}\n{text}\n{}^", " ".repeat(column))
 }
+
+#[cfg(test)]
+#[path = "../../tests/gui/rule_dialog.rs"]
+pub(super) mod tests;
