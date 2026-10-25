@@ -518,6 +518,12 @@ installed executable SHA-256, authorization fixture and each successful case:
 - [Fedora 44](validation/zbus6-clean-install-2026-10-25/fedora.json)
 - [Arch rolling](validation/zbus6-clean-install-2026-10-25/arch.json)
 
+The desktop-quality candidate has a separate [reproducible build receipt](validation/desktop-quality-2026-10-25/reproducible.json)
+and [Fedora 44 guest receipt](validation/desktop-quality-2026-10-25/fedora.json).
+That guest run passed the four daemon/Polkit cases plus the new screen-reader
+label assertion (5/5), using synthetic USB only. Its installed executable SHA-256
+is `71b56efffc9d97c6ad9228d8ae03356453c24a40f604d7e6977d6e27ca9fbbbd`.
+
 All four pass no-agent denial, real-agent cancellation, successful PAM-authenticated
 runtime block without persistent-rule changes, and daemon restart/GUI reconnection.
 The detailed [test scope and reproduction](testing.md#zbus-6-and-real-clean-system-validation-2026-10-2425)

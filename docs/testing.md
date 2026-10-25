@@ -453,7 +453,8 @@ Polkit and PAM inside disposable QEMU guests:
 | :---- | :----- | :--------------- | :---- | :------------ |
 | Ubuntu 24.04.5 | 6.8.0-147-generic | 1.1.2+ds-6build2 | polkit-gnome | 4/4 passed, October 24 |
 | Debian 13.7 | 6.12.113+deb13-amd64 | 1.1.3+ds-3 | mate-polkit | 4/4 passed, October 25 |
-| Fedora 44 | 6.19.10-300.fc44.x86_64 | 1.1.4-1.fc44 | mate-polkit | 4/4 passed, October 25 |
+| Fedora 44 (baseline) | 6.19.10-300.fc44.x86_64 | 1.1.4-1.fc44 | mate-polkit | 4/4 passed, October 25 |
+| Fedora 44 (desktop-quality candidate) | 6.19.10-300.fc44.x86_64 | 1.1.4-1.fc44 | mate-polkit | 5/5 passed, October 25; includes AT-SPI |
 | Arch rolling | 7.2.11-arch1-1 | 1.1.4-11 | polkit-gnome | 4/4 passed, October 25 |
 
 Each suite starts the installed GTK app as the unprivileged test user under
@@ -470,8 +471,11 @@ synthetic USB disk, requests Block / This session only, and checks:
 The guest driver now performs an additional AT-SPI assertion that the device
 filter, device list, device details action and main menu expose screen-reader
 names. It runs only inside the disposable Xvfb guest; the host desktop is not
-queried. The recorded October 24–25 runs predate this assertion and remain
-evidence for the four daemon/Polkit cases above.
+queried. The original October 24–25 runs predate this assertion and remain
+evidence for the four daemon/Polkit cases above. A new Fedora 44 run against the
+desktop-quality candidate passed all five checks, including AT-SPI; its package
+and executable hashes are recorded in
+[the desktop-quality validation receipts](validation/desktop-quality-2026-10-25/).
 
 The October 25 driver additionally observes actual system-bus calls and denials
 inside the VM. It asserts the synthetic device ID, block target and `permanent=false`,
