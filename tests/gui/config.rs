@@ -4,6 +4,8 @@ pub(in crate::ui) fn exercise() {
     let defaults = Config(None);
     assert!(!defaults.run_in_background());
     assert!(defaults.notify_inserted());
+    assert!(!defaults.persist_history());
+    assert_eq!(defaults.history_data(), "");
     assert!(!defaults.start_in_background());
     assert_eq!(defaults.default_persistence(), Persistence::RuntimeOnly);
     assert_eq!(defaults.window_size(), (940, 600));
@@ -20,6 +22,14 @@ pub(in crate::ui) fn exercise() {
     assert!(config.start_in_background());
     s.set_boolean("notify-inserted", false).unwrap();
     assert!(!config.notify_inserted());
+    assert!(!config.persist_history());
+    config.set_persist_history(true);
+    assert!(config.persist_history());
+    config.save_history("123|i\n");
+    assert_eq!(config.history_data(), "123|i\n");
+    config.set_persist_history(false);
+    assert!(!config.persist_history());
+    assert_eq!(config.history_data(), "");
     s.set_enum("default-persistence", 1).unwrap();
     assert_eq!(config.default_persistence(), Persistence::Permanent);
     config.save_window(800, 500, true);

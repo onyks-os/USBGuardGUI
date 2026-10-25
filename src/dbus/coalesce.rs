@@ -62,6 +62,8 @@ impl Pending {
             delta: DeviceDelta {
                 id,
                 removed: false,
+                observed_insert: false,
+                observed_remove: false,
                 target: None,
                 rule_text: None,
                 attrs: DeviceAttributes::default(),
@@ -126,18 +128,28 @@ impl Coalescer {
                 event: DeviceEvent::Remove,
                 ..
             } => {
+                let observed_insert = self
+                    .pending
+                    .get(&id)
+                    .is_some_and(|pending| pending.delta.observed_insert);
                 let mut removed = Pending::fresh(id);
                 removed.delta.removed = true;
+                removed.delta.observed_insert = observed_insert;
+                removed.delta.observed_remove = true;
                 self.pending.insert(id, removed);
             }
             DeviceSignal::Presence {
                 id,
+                event,
                 target,
                 rule,
                 attrs,
                 ..
             } => {
                 let entry = self.live_entry(id);
+                if event == DeviceEvent::Insert {
+                    entry.delta.observed_insert = true;
+                }
                 if !entry.policy_decided {
                     entry.delta.target = Some(target);
                 }
@@ -165,7 +177,9 @@ impl Coalescer {
     fn live_entry(&mut self, id: DeviceId) -> &mut Pending {
         let entry = self.pending.entry(id).or_insert_with(|| Pending::fresh(id));
         if entry.delta.removed {
+            let observed_remove = entry.delta.observed_remove;
             *entry = Pending::fresh(id);
+            entry.delta.observed_remove = observed_remove;
         }
         entry
     }

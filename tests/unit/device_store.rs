@@ -6,6 +6,8 @@ fn delta(id: u32) -> DeviceDelta {
     DeviceDelta {
         id: DeviceId::new(id),
         removed: false,
+        observed_insert: false,
+        observed_remove: false,
         target: None,
         rule_text: None,
         attrs: DeviceAttributes::default(),

@@ -280,15 +280,19 @@ async fn t3_a_forty_device_burst_resynchronizes_within_the_ceiling() {
         mock.presence(*id, 1, 1, rule, "hub").await;
     }
 
-    // The resync snapshot replaces the deltas; the final state is the
-    // daemon's list, with zero event loss.
+    // The resync snapshot gives the current state; history marks that the
+    // large burst may have hidden intermediate transitions.
     let mut last_snapshot = None;
+    let mut saw_observation_gap = false;
     while let Ok(Ok(event)) = tokio::time::timeout(MAX_LATENCY * 2, rx.recv()).await {
-        if let UiEvent::DeviceSnapshot(devices) = event {
-            last_snapshot = Some(devices);
+        match event {
+            UiEvent::DeviceSnapshot(devices) => last_snapshot = Some(devices),
+            UiEvent::ObservationGap => saw_observation_gap = true,
+            _ => {}
         }
     }
     let devices = last_snapshot.expect("a resynchronization snapshot");
+    assert!(saw_observation_gap);
     assert_eq!(devices.len(), 45);
     assert!(
         started.elapsed() < Duration::from_secs(2),

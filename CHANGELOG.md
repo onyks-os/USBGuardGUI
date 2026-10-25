@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A local event history for observed device insertions/removals, authorization
+  outcomes, daemon reconnections and resynchronization gaps. It is capped at 200
+  entries, stores only categories and timestamps, persists only by opt-in, and
+  exports JSON without device identifiers.
 - A per-device details popover with USB interfaces, physical port path,
   connection type and daemon-reported state. It distinguishes the device rule
   text from the effective policy rule, which `listDevices` does not report.

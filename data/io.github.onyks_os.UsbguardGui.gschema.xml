@@ -24,6 +24,15 @@
       <default>true</default>
       <summary>Notify when an unauthorized device is inserted</summary>
     </key>
+    <key name="persist-history" type="b">
+      <default>false</default>
+      <summary>Keep event history between application runs</summary>
+      <description>Off by default. The history stores only event types and timestamps, without device identifiers.</description>
+    </key>
+    <key name="history-data" type="s">
+      <default>''</default>
+      <summary>Privacy-preserving event history data</summary>
+    </key>
     <key name="default-persistence" enum="io.github.onyks_os.UsbguardGui.Persistence">
       <default>'runtime-only'</default>
       <summary>Preselected persistence for device actions</summary>

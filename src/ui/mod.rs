@@ -13,6 +13,7 @@ mod autostart;
 mod config;
 mod device_view;
 mod diagnostic_dialog;
+mod history;
 mod i18n;
 mod notify;
 mod policy_view;

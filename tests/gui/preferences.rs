@@ -32,6 +32,14 @@ pub(in crate::ui) fn exercise(app: &adw::Application) {
     notify.set_active(false);
     assert!(!config.notify_inserted());
     notify.set_active(true);
+    let history = switches
+        .iter()
+        .find(|s| s.title() == "Keep event history between runs")
+        .unwrap();
+    history.set_active(true);
+    assert!(config.persist_history());
+    history.set_active(false);
+    assert!(!config.persist_history());
     close_dialogs(&window);
     let defaults = super::super::config::tests::without_schema();
     present_preferences(&window, &defaults);
