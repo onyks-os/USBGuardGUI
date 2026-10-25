@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: USBGuard GUI\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 20:09+0200\n"
+"POT-Creation-Date: 2026-10-25 18:59+0100\n"
 "PO-Revision-Date: 2026-09-25 19:39+0200\n"
 "Last-Translator: onyks-os\n"
 "Language-Team: Italian\n"
@@ -74,45 +74,45 @@ msgstr "Nessun dispositivo USB"
 msgid "USBGuard reports no connected devices."
 msgstr "USBGuard non segnala dispositivi collegati."
 
-#: src/ui/device_view.rs:222
+#: src/ui/device_view.rs:236
 msgid "Name"
 msgstr "Nome"
 
-#: src/ui/device_view.rs:224
+#: src/ui/device_view.rs:238
 #, rust-format
 msgid "(unreadable) {rule}"
 msgstr "(illeggibile) {rule}"
 
-#: src/ui/device_view.rs:229
+#: src/ui/device_view.rs:243
 msgid "ID"
 msgstr "ID"
 
-#: src/ui/device_view.rs:234
+#: src/ui/device_view.rs:248
 msgid "Serial"
 msgstr "Numero di serie"
 
-#: src/ui/device_view.rs:237
+#: src/ui/device_view.rs:251
 msgid "Port"
 msgstr "Porta"
 
-#: src/ui/device_view.rs:245
+#: src/ui/device_view.rs:259
 #, rust-format
 msgid "Daemon device id: {id}"
 msgstr "ID del dispositivo nel demone: {id}"
 
-#: src/ui/device_view.rs:252
+#: src/ui/device_view.rs:266
 msgid "Could not be parsed:"
 msgstr "Impossibile interpretare:"
 
-#: src/ui/device_view.rs:326
+#: src/ui/device_view.rs:340
 msgid "State"
 msgstr "Stato"
 
-#: src/ui/device_view.rs:355 src/ui/rule_dialog.rs:187 src/ui/window.rs:826
+#: src/ui/device_view.rs:369 src/ui/rule_dialog.rs:196 src/ui/window.rs:838
 msgid "Cancel"
 msgstr "Annulla"
 
-#: src/ui/device_view.rs:357
+#: src/ui/device_view.rs:371
 msgid ""
 "Stop waiting. The daemon may already have acted; the list will show what it "
 "actually did."
@@ -120,47 +120,47 @@ msgstr ""
 "Smetti di attendere. Il demone potrebbe aver già agito: l’elenco mostrerà "
 "cosa ha fatto davvero."
 
-#: src/ui/device_view.rs:411
+#: src/ui/device_view.rs:425
 msgid "Actions"
 msgstr "Azioni"
 
-#: src/ui/device_view.rs:422
+#: src/ui/device_view.rs:436
 msgid "Allow"
 msgstr "Consenti"
 
-#: src/ui/device_view.rs:422
+#: src/ui/device_view.rs:436
 msgid "Allow this device"
 msgstr "Consenti questo dispositivo"
 
-#: src/ui/device_view.rs:423
+#: src/ui/device_view.rs:437
 msgid "Block"
 msgstr "Blocca"
 
-#: src/ui/device_view.rs:423
+#: src/ui/device_view.rs:437
 msgid "Block this device"
 msgstr "Blocca questo dispositivo"
 
-#: src/ui/device_view.rs:424 src/ui/window.rs:626
+#: src/ui/device_view.rs:438 src/ui/window.rs:638
 msgid "Reject"
 msgstr "Rifiuta"
 
-#: src/ui/device_view.rs:424
+#: src/ui/device_view.rs:438
 msgid "Reject this device"
 msgstr "Rifiuta questo dispositivo"
 
-#: src/ui/device_view.rs:426 src/ui/preferences.rs:21
+#: src/ui/device_view.rs:440 src/ui/preferences.rs:21
 msgid "This session only"
 msgstr "Solo per questa sessione"
 
-#: src/ui/device_view.rs:427
+#: src/ui/device_view.rs:441
 msgid "Undone when USBGuard restarts"
 msgstr "Annullato al riavvio di USBGuard"
 
-#: src/ui/device_view.rs:428 src/ui/preferences.rs:22
+#: src/ui/device_view.rs:442 src/ui/preferences.rs:22
 msgid "Permanently"
 msgstr "Permanentemente"
 
-#: src/ui/device_view.rs:429
+#: src/ui/device_view.rs:443
 msgid "Written to the policy; survives a restart"
 msgstr "Scritto nelle regole; resta dopo un riavvio"
 
@@ -212,7 +212,7 @@ msgstr "Nessun agente di autenticazione Polkit in esecuzione"
 msgid "Access denied"
 msgstr "Accesso negato"
 
-#: src/ui/i18n.rs:76 src/ui/window.rs:968
+#: src/ui/i18n.rs:76 src/ui/window.rs:980
 #, rust-format
 msgid "Not permitted: {reason}"
 msgstr "Non consentito: {reason}"
@@ -387,11 +387,11 @@ msgid "What happens to a device plugged in while USBGuard runs"
 msgstr ""
 "Cosa succede a un dispositivo collegato mentre USBGuard è in esecuzione"
 
-#: src/ui/policy_view.rs:78
+#: src/ui/policy_view.rs:79
 msgid "Runtime parameters"
 msgstr "Parametri di esecuzione"
 
-#: src/ui/policy_view.rs:80
+#: src/ui/policy_view.rs:81
 msgid ""
 "Changes apply immediately and last until USBGuard restarts. Everything else "
 "in usbguard-daemon.conf is startup configuration and cannot be changed from "
@@ -401,37 +401,37 @@ msgstr ""
 "resto di usbguard-daemon.conf è configurazione di avvio e non si può "
 "modificare da qui."
 
-#: src/ui/policy_view.rs:135
+#: src/ui/policy_view.rs:136
 msgid "Add Rule…"
 msgstr "Aggiungi regola…"
 
-#: src/ui/policy_view.rs:164
+#: src/ui/policy_view.rs:165
 msgid "The ruleset could not be read"
 msgstr "Impossibile leggere le regole"
 
-#: src/ui/policy_view.rs:170
+#: src/ui/policy_view.rs:171
 msgid "Reading the ruleset…"
 msgstr "Lettura delle regole…"
 
-#: src/ui/policy_view.rs:177
+#: src/ui/policy_view.rs:178
 msgid "The ruleset is empty"
 msgstr "Non ci sono regole"
 
-#: src/ui/policy_view.rs:179
+#: src/ui/policy_view.rs:180
 msgid "Devices are treated according to the implicit policy target."
 msgstr ""
 "I dispositivi vengono trattati secondo l’azione implicita della policy."
 
-#: src/ui/policy_view.rs:314
+#: src/ui/policy_view.rs:324
 #, rust-format
 msgid "Daemon rule id: {id}"
 msgstr "ID della regola nel demone: {id}"
 
-#: src/ui/policy_view.rs:325
+#: src/ui/policy_view.rs:335
 msgid "Remove this rule"
 msgstr "Rimuovi questa regola"
 
-#: src/ui/policy_view.rs:327
+#: src/ui/policy_view.rs:337
 msgid "Remove rule"
 msgstr "Rimuovi regola"
 
@@ -500,23 +500,23 @@ msgstr ""
 msgid "translator-credits"
 msgstr "onyks-os"
 
-#: src/ui/rule_dialog.rs:154
+#: src/ui/rule_dialog.rs:163
 msgid "Add an attribute"
 msgstr "Aggiungi un attributo"
 
-#: src/ui/rule_dialog.rs:189
+#: src/ui/rule_dialog.rs:198
 msgid "Add"
 msgstr "Aggiungi"
 
-#: src/ui/rule_dialog.rs:202
+#: src/ui/rule_dialog.rs:211
 msgid "Target"
 msgstr "Azione"
 
-#: src/ui/rule_dialog.rs:212
+#: src/ui/rule_dialog.rs:221
 msgid "Attributes"
 msgstr "Attributi"
 
-#: src/ui/rule_dialog.rs:214
+#: src/ui/rule_dialog.rs:223
 msgid ""
 "A device matches when every attribute matches. No attribute matches every "
 "device."
@@ -524,11 +524,11 @@ msgstr ""
 "Un dispositivo corrisponde quando corrispondono tutti gli attributi. Senza "
 "attributi, corrisponde ogni dispositivo."
 
-#: src/ui/rule_dialog.rs:228
+#: src/ui/rule_dialog.rs:237
 msgid "Rule text"
 msgstr "Testo della regola"
 
-#: src/ui/rule_dialog.rs:231
+#: src/ui/rule_dialog.rs:240
 msgid ""
 "The usbguard-rules.conf(5) syntax. The target must be allow, block, or "
 "reject."
@@ -537,86 +537,142 @@ msgstr ""
 "reject."
 
 #. Translators: the rule dialog mode that builds a rule field by field.
-#: src/ui/rule_dialog.rs:238
+#: src/ui/rule_dialog.rs:247
 msgid "Guided"
 msgstr "Guidata"
 
 #. Translators: the rule dialog mode where the rule is typed as text.
-#: src/ui/rule_dialog.rs:240
+#: src/ui/rule_dialog.rs:249
 msgid "Text"
 msgstr "Testo"
 
-#: src/ui/rule_dialog.rs:272
+#: src/ui/rule_dialog.rs:281
 msgid "Will be sent as"
 msgstr "Verrà inviata così"
 
-#: src/ui/rule_dialog.rs:277
+#: src/ui/rule_dialog.rs:286
 msgid "At the end"
 msgstr "In fondo"
 
-#: src/ui/rule_dialog.rs:284
+#: src/ui/rule_dialog.rs:293
 #, rust-format
 msgid "After {position}. {rule}"
 msgstr "Dopo {position}. {rule}"
 
-#: src/ui/rule_dialog.rs:293
+#: src/ui/rule_dialog.rs:302
 msgid "Position"
 msgstr "Posizione"
 
-#: src/ui/rule_dialog.rs:294
+#: src/ui/rule_dialog.rs:303
 msgid "The first matching rule decides"
 msgstr "Decide la prima regola che corrisponde"
 
-#: src/ui/rule_dialog.rs:298
+#: src/ui/rule_dialog.rs:307
 msgid "Keep after USBGuard restarts"
 msgstr "Mantieni dopo il riavvio di USBGuard"
 
-#: src/ui/rule_dialog.rs:299
+#: src/ui/rule_dialog.rs:308
 msgid "Off: the rule lasts until USBGuard restarts"
 msgstr "Se disattivato, la regola dura fino al riavvio di USBGuard"
 
-#: src/ui/rule_dialog.rs:303
+#: src/ui/rule_dialog.rs:312
 msgid "Placement"
 msgstr "Collocazione"
 
-#: src/ui/rule_dialog.rs:331
+#: src/ui/rule_dialog.rs:342
 msgid "New Rule"
 msgstr "Nuova regola"
 
-#: src/ui/rule_dialog.rs:363
+#: src/ui/rule_dialog.rs:375
 msgid "(single value)"
 msgstr "(valore singolo)"
 
-#: src/ui/rule_dialog.rs:368
+#: src/ui/rule_dialog.rs:380
 msgid "How several values are compared with the device’s"
 msgstr "Come vengono confrontati più valori con quelli del dispositivo"
 
-#: src/ui/rule_dialog.rs:376
+#: src/ui/rule_dialog.rs:388
 msgid "Remove this attribute"
 msgstr "Rimuovi questo attributo"
 
-#: src/ui/rule_dialog.rs:464
+#: src/ui/rule_dialog.rs:476
 #, rust-format
 msgid "Internal error: the rule does not survive rendering ({error})"
 msgstr ""
 "Errore interno: la regola non sopravvive alla conversione in testo ({error})"
 
-#: src/ui/rule_dialog.rs:493
+#: src/ui/rule_dialog.rs:506
 #, rust-format
 msgid "{problem} (character {column}):"
 msgstr "{problem} (carattere {column}):"
 
-#: src/ui/tray.rs:54
+#: src/ui/rule_preview.rs:34 src/ui/rule_preview.rs:97
+#: src/ui/rule_preview.rs:161
+msgid "Preview matching devices"
+msgstr "Anteprima dei dispositivi corrispondenti"
+
+#: src/ui/rule_preview.rs:45
+msgid "Device preview"
+msgstr "Anteprima dispositivi"
+
+#: src/ui/rule_preview.rs:47
+msgid ""
+"Matches connected devices against this rule’s attributes. Conditions and "
+"earlier rules can change the final decision."
+msgstr ""
+"Confronta i dispositivi collegati con gli attributi di questa regola. Le "
+"condizioni e le regole precedenti possono cambiare la decisione finale."
+
+#: src/ui/rule_preview.rs:78
+msgid "Preview again after editing or when connected devices change."
+msgstr ""
+"Ripeti l’anteprima dopo aver modificato la regola o quando cambiano i "
+"dispositivi collegati."
+
+#: src/ui/rule_preview.rs:80
+msgid "Enter a valid rule to preview matching devices."
+msgstr ""
+"Inserisci una regola valida per visualizzare i dispositivi corrispondenti."
+
+#: src/ui/rule_preview.rs:110
+msgid "Preview cancelled."
+msgstr "Anteprima annullata."
+
+#: src/ui/rule_preview.rs:118
+msgid "Cancel preview"
+msgstr "Annulla anteprima"
+
+#: src/ui/rule_preview.rs:120
+msgid "Checking connected devices…"
+msgstr "Controllo dei dispositivi collegati…"
+
+#: src/ui/rule_preview.rs:170
+msgid "No connected devices match these attributes in this snapshot."
+msgstr ""
+"Nessun dispositivo collegato corrisponde a questi attributi in questa "
+"istantanea."
+
+#: src/ui/rule_preview.rs:173
+#, rust-format
+msgid "Matching devices in this snapshot: {count}"
+msgstr "Dispositivi corrispondenti in questa istantanea: {count}"
+
+#: src/ui/rule_preview.rs:185
+#, rust-format
+msgid "{name} · {usb_id} · port {port} · device #{id}"
+msgstr "{name} · {usb_id} · porta {port} · dispositivo #{id}"
+
+#: src/ui/tray.rs:187
 #, rust-format
 msgid "{total} USB devices, {blocked} not authorized"
 msgstr "{total} dispositivi USB, {blocked} non autorizzati"
 
-#: src/ui/tray.rs:71
+#: src/ui/tray.rs:349
 #, rust-format
 msgid "Show {app}"
 msgstr "Mostra {app}"
 
-#: src/ui/tray.rs:80
+#: src/ui/tray.rs:350
 msgid "Quit"
 msgstr "Esci"
 
@@ -629,42 +685,42 @@ msgstr "Sola lettura"
 msgid "Disconnected"
 msgstr "Disconnesso"
 
-#: src/ui/window.rs:163
+#: src/ui/window.rs:165
 msgid "Devices"
 msgstr "Dispositivi"
 
 #. Translators: the page listing USBGuard's rules.
-#: src/ui/window.rs:170
+#: src/ui/window.rs:172
 msgid "Policy"
 msgstr "Regole"
 
-#: src/ui/window.rs:177
+#: src/ui/window.rs:179
 msgid "Show USBGuard access diagnostics"
 msgstr "Mostra la diagnostica dell’accesso a USBGuard"
 
-#: src/ui/window.rs:181
+#: src/ui/window.rs:183
 msgid "_Preferences"
 msgstr "_Preferenze"
 
-#: src/ui/window.rs:183
+#: src/ui/window.rs:185
 #, rust-format
 msgid "_About {app}"
 msgstr "I_nformazioni su {app}"
 
-#: src/ui/window.rs:186
+#: src/ui/window.rs:188
 msgid "_Quit"
 msgstr "_Esci"
 
-#: src/ui/window.rs:190
+#: src/ui/window.rs:192
 msgid "Main menu"
 msgstr "Menu principale"
 
-#: src/ui/window.rs:329
+#: src/ui/window.rs:332
 #, rust-format
 msgid "{app} is still running"
 msgstr "{app} è ancora in esecuzione"
 
-#: src/ui/window.rs:334
+#: src/ui/window.rs:337
 msgid ""
 "It will announce newly inserted devices. Use the status icon to reopen it or "
 "quit."
@@ -672,7 +728,7 @@ msgstr ""
 "Continuerà a segnalare i dispositivi appena collegati. Usa l’icona di stato "
 "per riaprirlo o per uscire."
 
-#: src/ui/window.rs:340
+#: src/ui/window.rs:343
 #, rust-format
 msgid ""
 "It will announce newly inserted devices. This desktop has no status icon "
@@ -683,37 +739,37 @@ msgstr ""
 "un’area per le icone di stato: apri di nuovo {app} dal menu delle "
 "applicazioni per mostrare la finestra, ed esci dal suo menu principale."
 
-#: src/ui/window.rs:401
+#: src/ui/window.rs:413
 msgid "That device is no longer connected. Nothing was changed."
 msgstr "Quel dispositivo non è più collegato. Non è stato modificato nulla."
 
-#: src/ui/window.rs:492
+#: src/ui/window.rs:504
 #, rust-format
 msgid "“{device}” was plugged in and is not authorized"
 msgstr "“{device}” è stato collegato e non è autorizzato"
 
-#: src/ui/window.rs:495
+#: src/ui/window.rs:507
 msgid "A device was plugged in and is not authorized"
 msgstr "È stato collegato un dispositivo non autorizzato"
 
-#: src/ui/window.rs:501
+#: src/ui/window.rs:513
 #, rust-format
 msgid "{count} device was plugged in and is not authorized"
 msgid_plural "{count} devices were plugged in and are not authorized"
 msgstr[0] "È stato collegato {count} dispositivo non autorizzato"
 msgstr[1] "Sono stati collegati {count} dispositivi non autorizzati"
 
-#: src/ui/window.rs:567
+#: src/ui/window.rs:579
 #, rust-format
 msgid "Not permitted: {reason}. See the diagnostics for the remedy."
 msgstr "Non consentito: {reason}. La diagnostica indica come rimediare."
 
-#: src/ui/window.rs:621
+#: src/ui/window.rs:633
 #, rust-format
 msgid "Reject “{device}”?"
 msgstr "Rifiutare “{device}”?"
 
-#: src/ui/window.rs:623
+#: src/ui/window.rs:635
 msgid ""
 "Rejecting removes the device from the system. It can only be used again "
 "after it is physically unplugged and plugged back in."
@@ -721,12 +777,12 @@ msgstr ""
 "Rifiutare un dispositivo lo rimuove dal sistema. Si potrà usare di nuovo "
 "solo dopo averlo scollegato e ricollegato fisicamente."
 
-#: src/ui/window.rs:653
+#: src/ui/window.rs:665
 #, rust-format
 msgid "device {id}"
 msgstr "dispositivo {id}"
 
-#: src/ui/window.rs:716
+#: src/ui/window.rs:728
 msgid ""
 "Stopped waiting. USBGuard may already have acted; the list shows what it "
 "actually did."
@@ -734,21 +790,21 @@ msgstr ""
 "Attesa interrotta. USBGuard potrebbe aver già agito: l’elenco mostra cosa ha "
 "fatto davvero."
 
-#: src/ui/window.rs:737
+#: src/ui/window.rs:749
 #, rust-format
 msgid "Remove rule {position}?"
 msgstr "Rimuovere la regola {position}?"
 
-#: src/ui/window.rs:742
+#: src/ui/window.rs:754
 msgid "Remove"
 msgstr "Rimuovi"
 
-#: src/ui/window.rs:756
+#: src/ui/window.rs:768
 #, rust-format
 msgid "Change {parameter}?"
 msgstr "Modificare {parameter}?"
 
-#: src/ui/window.rs:761
+#: src/ui/window.rs:773
 #, rust-format
 msgid ""
 "From “{old}” to “{new}”. The change applies immediately and lasts until "
@@ -757,15 +813,15 @@ msgstr ""
 "Da “{old}” a “{new}”. La modifica si applica subito e dura fino al riavvio "
 "di USBGuard."
 
-#: src/ui/window.rs:766
+#: src/ui/window.rs:778
 msgid "Change"
 msgstr "Modifica"
 
-#: src/ui/window.rs:820
+#: src/ui/window.rs:832
 msgid "Which rule?"
 msgstr "Quale regola?"
 
-#: src/ui/window.rs:822
+#: src/ui/window.rs:834
 msgid ""
 "Several rules have exactly this text. They differ only in their position in "
 "the evaluation order. Choose the one to remove."
@@ -773,62 +829,62 @@ msgstr ""
 "Più regole hanno esattamente questo testo e differiscono solo per la "
 "posizione nell’ordine di valutazione. Scegli quella da rimuovere."
 
-#: src/ui/window.rs:832
+#: src/ui/window.rs:844
 #, rust-format
 msgid "Rule {position}"
 msgstr "Regola {position}"
 
-#: src/ui/window.rs:880
+#: src/ui/window.rs:892
 #, rust-format
 msgid "Allowed “{device}” for this session"
 msgstr "“{device}” consentito per questa sessione"
 
-#: src/ui/window.rs:883
+#: src/ui/window.rs:895
 #, rust-format
 msgid "Allowed “{device}” permanently"
 msgstr "“{device}” consentito permanentemente"
 
-#: src/ui/window.rs:886
+#: src/ui/window.rs:898
 #, rust-format
 msgid "Blocked “{device}” for this session"
 msgstr "“{device}” bloccato per questa sessione"
 
-#: src/ui/window.rs:889
+#: src/ui/window.rs:901
 #, rust-format
 msgid "Blocked “{device}” permanently"
 msgstr "“{device}” bloccato permanentemente"
 
-#: src/ui/window.rs:892
+#: src/ui/window.rs:904
 #, rust-format
 msgid "Rejected “{device}” for this session"
 msgstr "“{device}” rifiutato per questa sessione"
 
-#: src/ui/window.rs:895
+#: src/ui/window.rs:907
 #, rust-format
 msgid "Rejected “{device}” permanently"
 msgstr "“{device}” rifiutato permanentemente"
 
-#: src/ui/window.rs:910
+#: src/ui/window.rs:922
 msgid "Rule removed"
 msgstr "Regola rimossa"
 
-#: src/ui/window.rs:914
+#: src/ui/window.rs:926
 msgid ""
 "That rule no longer exists — it was removed elsewhere. Nothing was changed."
 msgstr ""
 "Quella regola non esiste più: è stata rimossa altrove. Non è stato "
 "modificato nulla."
 
-#: src/ui/window.rs:928
+#: src/ui/window.rs:940
 msgid "Rule added"
 msgstr "Regola aggiunta"
 
-#: src/ui/window.rs:936
+#: src/ui/window.rs:948
 #, rust-format
 msgid "{parameter} is now “{value}”"
 msgstr "{parameter} ora vale “{value}”"
 
-#: src/ui/window.rs:973
+#: src/ui/window.rs:985
 msgid ""
 "Not authorized, and no Polkit agent seems to be running to ask for a "
 "password. See the diagnostics."
@@ -836,7 +892,7 @@ msgstr ""
 "Non autorizzato, e non sembra esserci un agente Polkit in esecuzione per "
 "chiedere la password. Consulta la diagnostica."
 
-#: src/ui/window.rs:977
+#: src/ui/window.rs:989
 msgid ""
 "Not authorized. If the password prompt was cancelled, try again; otherwise "
 "the diagnostics explain how to grant access."
@@ -844,14 +900,14 @@ msgstr ""
 "Non autorizzato. Se la richiesta della password è stata annullata, riprova; "
 "altrimenti la diagnostica spiega come concedere l’accesso."
 
-#: src/ui/window.rs:981
+#: src/ui/window.rs:993
 msgid ""
 "Cancelled. USBGuard may already have acted; what is shown is what it reports."
 msgstr ""
 "Annullato. USBGuard potrebbe aver già agito: ciò che vedi è quello che "
 "riporta."
 
-#: src/ui/window.rs:985
+#: src/ui/window.rs:997
 msgid ""
 "The ruleset changed in the meantime, so nothing was done. It has been re-"
 "read; please choose again."
@@ -859,33 +915,33 @@ msgstr ""
 "Le regole sono cambiate nel frattempo, quindi non è stato fatto nulla. Sono "
 "state rilette: scegli di nuovo."
 
-#: src/ui/window.rs:1043
+#: src/ui/window.rs:1055
 #, rust-format
 msgid "USBGuard reported an error: {reason}"
 msgstr "USBGuard ha segnalato un errore: {reason}"
 
-#: src/ui/window.rs:1056
+#: src/ui/window.rs:1068
 msgid ""
 "Connection to USBGuard lost. Retrying… The list below may be out of date."
 msgstr ""
 "Connessione a USBGuard persa. Nuovo tentativo in corso… L’elenco qui sotto "
 "potrebbe non essere aggiornato."
 
-#: src/ui/window.rs:1059
+#: src/ui/window.rs:1071
 msgid "Details"
 msgstr "Dettagli"
 
-#: src/ui/window.rs:1093
+#: src/ui/window.rs:1105
 #, rust-format
 msgid "{parameter} was changed to “{value}”"
 msgstr "{parameter} è stato impostato a “{value}”"
 
-#: src/ui/window.rs:1138
+#: src/ui/window.rs:1150
 #, rust-format
 msgid "USBGuard: {problem}"
 msgstr "USBGuard: {problem}"
 
-#: src/ui/window.rs:1141
+#: src/ui/window.rs:1153
 msgid "How to fix"
 msgstr "Come risolvere"
 
@@ -1002,15 +1058,33 @@ msgid "Diagnostics that name the exact cause of an access problem"
 msgstr "Una diagnostica che indica la causa esatta di un problema di accesso"
 
 #: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:98
+msgid ""
+"Authentication cancellation and USBGuard reconnection are more reliable."
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:100
+msgid "Avoid a device-table crash after cancelling authentication"
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:101
+msgid ""
+"Back off reconnection attempts and refresh state after an inconclusive write"
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:102
+msgid "Verify reproducible binaries and packages before publication"
+msgstr ""
+
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:108
 msgid "The status icon now appears when the application runs as a Flatpak."
 msgstr ""
 "L’icona di stato ora compare quando l’applicazione è eseguita come Flatpak."
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:103
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:113
 msgid "First release."
 msgstr "Prima versione."
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:105
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:115
 msgid ""
 "Live device list; allow, block, or reject a device for this session or "
 "permanently"
@@ -1018,7 +1092,7 @@ msgstr ""
 "Elenco dei dispositivi in tempo reale; consenti, blocca o rifiuta un "
 "dispositivo per questa sessione o permanentemente"
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:106
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:116
 msgid ""
 "Policy view in evaluation order, with a guided rule editor and safe rule "
 "removal"
@@ -1026,11 +1100,11 @@ msgstr ""
 "Vista delle regole nell’ordine di valutazione, con un editor guidato e una "
 "rimozione sicura"
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:107
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:117
 msgid "Notifications for newly inserted devices that are not authorized"
 msgstr "Notifiche per i dispositivi appena collegati e non autorizzati"
 
-#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:108
+#: data/io.github.onyks_os.UsbguardGui.metainfo.xml.in:118
 msgid ""
 "Diagnostics that name the exact cause of an access problem, and usbguard-gui "
 "--diagnose"

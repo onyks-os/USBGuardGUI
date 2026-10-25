@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: USBGuardGUI\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 18:59+0200\n"
+"POT-Creation-Date: 2026-10-25 18:59+0100\n"
 "PO-Revision-Date: 2026-10-24 18:00+0200\n"
 "Last-Translator: USBGuardGUI project\n"
 "Language-Team: French\n"
@@ -72,45 +72,45 @@ msgstr "Aucun périphérique USB"
 msgid "USBGuard reports no connected devices."
 msgstr "USBGuard ne signale aucun périphérique connecté."
 
-#: src/ui/device_view.rs:237
+#: src/ui/device_view.rs:236
 msgid "Name"
 msgstr "Nom"
 
-#: src/ui/device_view.rs:239
+#: src/ui/device_view.rs:238
 #, rust-format
 msgid "(unreadable) {rule}"
 msgstr "(illisible) {rule}"
 
-#: src/ui/device_view.rs:244
+#: src/ui/device_view.rs:243
 msgid "ID"
 msgstr "Identifiant"
 
-#: src/ui/device_view.rs:249
+#: src/ui/device_view.rs:248
 msgid "Serial"
 msgstr "Numéro de série"
 
-#: src/ui/device_view.rs:252
+#: src/ui/device_view.rs:251
 msgid "Port"
 msgstr "Port"
 
-#: src/ui/device_view.rs:260
+#: src/ui/device_view.rs:259
 #, rust-format
 msgid "Daemon device id: {id}"
 msgstr "Identifiant du périphérique dans le démon : {id}"
 
-#: src/ui/device_view.rs:267
+#: src/ui/device_view.rs:266
 msgid "Could not be parsed:"
 msgstr "Impossible d’analyser :"
 
-#: src/ui/device_view.rs:341
+#: src/ui/device_view.rs:340
 msgid "State"
 msgstr "État"
 
-#: src/ui/device_view.rs:370 src/ui/rule_dialog.rs:187 src/ui/window.rs:826
+#: src/ui/device_view.rs:369 src/ui/rule_dialog.rs:196 src/ui/window.rs:838
 msgid "Cancel"
 msgstr "Annuler"
 
-#: src/ui/device_view.rs:372
+#: src/ui/device_view.rs:371
 msgid ""
 "Stop waiting. The daemon may already have acted; the list will show what it "
 "actually did."
@@ -118,47 +118,47 @@ msgstr ""
 "Cesser d’attendre. Le démon a peut-être déjà agi ; la liste indiquera ce "
 "qu’il a réellement fait."
 
-#: src/ui/device_view.rs:426
+#: src/ui/device_view.rs:425
 msgid "Actions"
 msgstr "Actions"
 
-#: src/ui/device_view.rs:437
+#: src/ui/device_view.rs:436
 msgid "Allow"
 msgstr "Autoriser"
 
-#: src/ui/device_view.rs:437
+#: src/ui/device_view.rs:436
 msgid "Allow this device"
 msgstr "Autoriser ce périphérique"
 
-#: src/ui/device_view.rs:438 src/ui/device_view.rs:540
+#: src/ui/device_view.rs:437
 msgid "Block"
 msgstr "Bloquer"
 
-#: src/ui/device_view.rs:438
+#: src/ui/device_view.rs:437
 msgid "Block this device"
 msgstr "Bloquer ce périphérique"
 
-#: src/ui/device_view.rs:439 src/ui/window.rs:626
+#: src/ui/device_view.rs:438 src/ui/window.rs:638
 msgid "Reject"
 msgstr "Rejeter"
 
-#: src/ui/device_view.rs:439
+#: src/ui/device_view.rs:438
 msgid "Reject this device"
 msgstr "Rejeter ce périphérique"
 
-#: src/ui/device_view.rs:441 src/ui/device_view.rs:541 src/ui/preferences.rs:21
+#: src/ui/device_view.rs:440 src/ui/preferences.rs:21
 msgid "This session only"
 msgstr "Pour cette session uniquement"
 
-#: src/ui/device_view.rs:442
+#: src/ui/device_view.rs:441
 msgid "Undone when USBGuard restarts"
 msgstr "Annulé au redémarrage d’USBGuard"
 
-#: src/ui/device_view.rs:443 src/ui/preferences.rs:22
+#: src/ui/device_view.rs:442 src/ui/preferences.rs:22
 msgid "Permanently"
 msgstr "De façon permanente"
 
-#: src/ui/device_view.rs:444
+#: src/ui/device_view.rs:443
 msgid "Written to the policy; survives a restart"
 msgstr "Enregistré dans la politique ; conservé après un redémarrage"
 
@@ -210,7 +210,7 @@ msgstr "Aucun agent d’authentification Polkit n’est en cours d’exécution"
 msgid "Access denied"
 msgstr "Accès refusé"
 
-#: src/ui/i18n.rs:76 src/ui/window.rs:968
+#: src/ui/i18n.rs:76 src/ui/window.rs:980
 #, rust-format
 msgid "Not permitted: {reason}"
 msgstr "Non autorisé : {reason}"
@@ -384,11 +384,11 @@ msgstr "Ce qui arrive à un périphérique qui ne correspond à aucune règle"
 msgid "What happens to a device plugged in while USBGuard runs"
 msgstr "Ce qui arrive à un périphérique branché pendant l’exécution d’USBGuard"
 
-#: src/ui/policy_view.rs:78
+#: src/ui/policy_view.rs:79
 msgid "Runtime parameters"
 msgstr "Paramètres d’exécution"
 
-#: src/ui/policy_view.rs:80
+#: src/ui/policy_view.rs:81
 msgid ""
 "Changes apply immediately and last until USBGuard restarts. Everything else "
 "in usbguard-daemon.conf is startup configuration and cannot be changed from "
@@ -398,37 +398,37 @@ msgstr ""
 "redémarrage d’USBGuard. Tous les autres paramètres d’usbguard-daemon.conf "
 "sont lus au démarrage et ne peuvent pas être modifiés ici."
 
-#: src/ui/policy_view.rs:135
+#: src/ui/policy_view.rs:136
 msgid "Add Rule…"
 msgstr "Ajouter une règle…"
 
-#: src/ui/policy_view.rs:164
+#: src/ui/policy_view.rs:165
 msgid "The ruleset could not be read"
 msgstr "Impossible de lire l’ensemble des règles"
 
-#: src/ui/policy_view.rs:170
+#: src/ui/policy_view.rs:171
 msgid "Reading the ruleset…"
 msgstr "Lecture des règles…"
 
-#: src/ui/policy_view.rs:177
+#: src/ui/policy_view.rs:178
 msgid "The ruleset is empty"
 msgstr "L’ensemble des règles est vide"
 
-#: src/ui/policy_view.rs:179
+#: src/ui/policy_view.rs:180
 msgid "Devices are treated according to the implicit policy target."
 msgstr ""
 "Les périphériques sont traités selon la cible de la politique implicite."
 
-#: src/ui/policy_view.rs:314
+#: src/ui/policy_view.rs:324
 #, rust-format
 msgid "Daemon rule id: {id}"
 msgstr "Identifiant de la règle dans le démon : {id}"
 
-#: src/ui/policy_view.rs:325
+#: src/ui/policy_view.rs:335
 msgid "Remove this rule"
 msgstr "Supprimer cette règle"
 
-#: src/ui/policy_view.rs:327
+#: src/ui/policy_view.rs:337
 msgid "Remove rule"
 msgstr "Supprimer la règle"
 
@@ -500,23 +500,23 @@ msgstr ""
 msgid "translator-credits"
 msgstr "Projet USBGuardGUI"
 
-#: src/ui/rule_dialog.rs:154
+#: src/ui/rule_dialog.rs:163
 msgid "Add an attribute"
 msgstr "Ajouter un attribut"
 
-#: src/ui/rule_dialog.rs:189
+#: src/ui/rule_dialog.rs:198
 msgid "Add"
 msgstr "Ajouter"
 
-#: src/ui/rule_dialog.rs:202
+#: src/ui/rule_dialog.rs:211
 msgid "Target"
 msgstr "Cible"
 
-#: src/ui/rule_dialog.rs:212
+#: src/ui/rule_dialog.rs:221
 msgid "Attributes"
 msgstr "Attributs"
 
-#: src/ui/rule_dialog.rs:214
+#: src/ui/rule_dialog.rs:223
 msgid ""
 "A device matches when every attribute matches. No attribute matches every "
 "device."
@@ -524,11 +524,11 @@ msgstr ""
 "Un périphérique correspond lorsque tous les attributs correspondent. Sans "
 "attribut, tous les périphériques correspondent."
 
-#: src/ui/rule_dialog.rs:228
+#: src/ui/rule_dialog.rs:237
 msgid "Rule text"
 msgstr "Texte de la règle"
 
-#: src/ui/rule_dialog.rs:231
+#: src/ui/rule_dialog.rs:240
 msgid ""
 "The usbguard-rules.conf(5) syntax. The target must be allow, block, or "
 "reject."
@@ -536,86 +536,143 @@ msgstr ""
 "Syntaxe d’usbguard-rules.conf(5). La cible doit être allow, block ou reject."
 
 #. Translators: the rule dialog mode that builds a rule field by field.
-#: src/ui/rule_dialog.rs:238
+#: src/ui/rule_dialog.rs:247
 msgid "Guided"
 msgstr "Guidé"
 
 #. Translators: the rule dialog mode where the rule is typed as text.
-#: src/ui/rule_dialog.rs:240
+#: src/ui/rule_dialog.rs:249
 msgid "Text"
 msgstr "Texte"
 
-#: src/ui/rule_dialog.rs:272
+#: src/ui/rule_dialog.rs:281
 msgid "Will be sent as"
 msgstr "Sera envoyé sous la forme"
 
-#: src/ui/rule_dialog.rs:277
+#: src/ui/rule_dialog.rs:286
 msgid "At the end"
 msgstr "À la fin"
 
-#: src/ui/rule_dialog.rs:284
+#: src/ui/rule_dialog.rs:293
 #, rust-format
 msgid "After {position}. {rule}"
 msgstr "Après {position}. {rule}"
 
-#: src/ui/rule_dialog.rs:293
+#: src/ui/rule_dialog.rs:302
 msgid "Position"
 msgstr "Position"
 
-#: src/ui/rule_dialog.rs:294
+#: src/ui/rule_dialog.rs:303
 msgid "The first matching rule decides"
 msgstr "La première règle correspondante décide"
 
-#: src/ui/rule_dialog.rs:298
+#: src/ui/rule_dialog.rs:307
 msgid "Keep after USBGuard restarts"
 msgstr "Conserver après le redémarrage d’USBGuard"
 
-#: src/ui/rule_dialog.rs:299
+#: src/ui/rule_dialog.rs:308
 msgid "Off: the rule lasts until USBGuard restarts"
 msgstr "Désactivé : la règle reste en vigueur jusqu’au redémarrage d’USBGuard"
 
-#: src/ui/rule_dialog.rs:303
+#: src/ui/rule_dialog.rs:312
 msgid "Placement"
 msgstr "Emplacement"
 
-#: src/ui/rule_dialog.rs:331
+#: src/ui/rule_dialog.rs:342
 msgid "New Rule"
 msgstr "Nouvelle règle"
 
-#: src/ui/rule_dialog.rs:363
+#: src/ui/rule_dialog.rs:375
 msgid "(single value)"
 msgstr "(valeur unique)"
 
-#: src/ui/rule_dialog.rs:368
+#: src/ui/rule_dialog.rs:380
 msgid "How several values are compared with the device’s"
 msgstr "Comment plusieurs valeurs sont comparées à celles du périphérique"
 
-#: src/ui/rule_dialog.rs:376
+#: src/ui/rule_dialog.rs:388
 msgid "Remove this attribute"
 msgstr "Supprimer cet attribut"
 
-#: src/ui/rule_dialog.rs:464
+#: src/ui/rule_dialog.rs:476
 #, rust-format
 msgid "Internal error: the rule does not survive rendering ({error})"
 msgstr ""
 "Erreur interne : la règle ne peut pas être restituée fidèlement ({error})"
 
-#: src/ui/rule_dialog.rs:493
+#: src/ui/rule_dialog.rs:506
 #, rust-format
 msgid "{problem} (character {column}):"
 msgstr "{problem} (caractère {column}) :"
 
-#: src/ui/tray.rs:54
+#: src/ui/rule_preview.rs:34 src/ui/rule_preview.rs:97
+#: src/ui/rule_preview.rs:161
+msgid "Preview matching devices"
+msgstr "Prévisualiser les périphériques correspondants"
+
+#: src/ui/rule_preview.rs:45
+msgid "Device preview"
+msgstr "Aperçu des périphériques"
+
+#: src/ui/rule_preview.rs:47
+msgid ""
+"Matches connected devices against this rule’s attributes. Conditions and "
+"earlier rules can change the final decision."
+msgstr ""
+"Compare les périphériques connectés aux attributs de cette règle. Les "
+"conditions et les règles précédentes peuvent modifier la décision finale."
+
+#: src/ui/rule_preview.rs:78
+msgid "Preview again after editing or when connected devices change."
+msgstr ""
+"Relancez l’aperçu après modification de la règle ou changement des "
+"périphériques connectés."
+
+#: src/ui/rule_preview.rs:80
+msgid "Enter a valid rule to preview matching devices."
+msgstr ""
+"Saisissez une règle valide pour prévisualiser les périphériques "
+"correspondants."
+
+#: src/ui/rule_preview.rs:110
+msgid "Preview cancelled."
+msgstr "Prévisualisation annulée."
+
+#: src/ui/rule_preview.rs:118
+msgid "Cancel preview"
+msgstr "Annuler l’aperçu"
+
+#: src/ui/rule_preview.rs:120
+msgid "Checking connected devices…"
+msgstr "Vérification des périphériques connectés…"
+
+#: src/ui/rule_preview.rs:170
+msgid "No connected devices match these attributes in this snapshot."
+msgstr ""
+"Aucun périphérique connecté ne correspond à ces attributs dans cet "
+"instantané."
+
+#: src/ui/rule_preview.rs:173
+#, rust-format
+msgid "Matching devices in this snapshot: {count}"
+msgstr "Périphériques correspondants dans cet instantané : {count}"
+
+#: src/ui/rule_preview.rs:185
+#, rust-format
+msgid "{name} · {usb_id} · port {port} · device #{id}"
+msgstr "{name} · {usb_id} · port {port} · périphérique #{id}"
+
+#: src/ui/tray.rs:187
 #, rust-format
 msgid "{total} USB devices, {blocked} not authorized"
 msgstr "{total} périphériques USB, dont {blocked} non autorisés"
 
-#: src/ui/tray.rs:71
+#: src/ui/tray.rs:349
 #, rust-format
 msgid "Show {app}"
 msgstr "Afficher {app}"
 
-#: src/ui/tray.rs:80
+#: src/ui/tray.rs:350
 msgid "Quit"
 msgstr "Quitter"
 
@@ -628,42 +685,42 @@ msgstr "Lecture seule"
 msgid "Disconnected"
 msgstr "Déconnecté"
 
-#: src/ui/window.rs:163
+#: src/ui/window.rs:165
 msgid "Devices"
 msgstr "Périphériques"
 
 #. Translators: the page listing USBGuard's rules.
-#: src/ui/window.rs:170
+#: src/ui/window.rs:172
 msgid "Policy"
 msgstr "Politique"
 
-#: src/ui/window.rs:177
+#: src/ui/window.rs:179
 msgid "Show USBGuard access diagnostics"
 msgstr "Afficher le diagnostic d’accès à USBGuard"
 
-#: src/ui/window.rs:181
+#: src/ui/window.rs:183
 msgid "_Preferences"
 msgstr "_Préférences"
 
-#: src/ui/window.rs:183
+#: src/ui/window.rs:185
 #, rust-format
 msgid "_About {app}"
 msgstr "_À propos de {app}"
 
-#: src/ui/window.rs:186
+#: src/ui/window.rs:188
 msgid "_Quit"
 msgstr "_Quitter"
 
-#: src/ui/window.rs:190
+#: src/ui/window.rs:192
 msgid "Main menu"
 msgstr "Menu principal"
 
-#: src/ui/window.rs:329
+#: src/ui/window.rs:332
 #, rust-format
 msgid "{app} is still running"
 msgstr "{app} est toujours en cours d’exécution"
 
-#: src/ui/window.rs:334
+#: src/ui/window.rs:337
 msgid ""
 "It will announce newly inserted devices. Use the status icon to reopen it or "
 "quit."
@@ -671,7 +728,7 @@ msgstr ""
 "Les nouveaux périphériques branchés seront signalés. Utilisez l’icône d’état "
 "pour rouvrir l’application ou la quitter."
 
-#: src/ui/window.rs:340
+#: src/ui/window.rs:343
 #, rust-format
 msgid ""
 "It will announce newly inserted devices. This desktop has no status icon "
@@ -683,39 +740,39 @@ msgstr ""
 "applications pour afficher la fenêtre, puis quittez depuis son menu "
 "principal."
 
-#: src/ui/window.rs:401
+#: src/ui/window.rs:413
 msgid "That device is no longer connected. Nothing was changed."
 msgstr ""
 "Ce périphérique n’est plus connecté. Aucune modification n’a été effectuée."
 
-#: src/ui/window.rs:492
+#: src/ui/window.rs:504
 #, rust-format
 msgid "“{device}” was plugged in and is not authorized"
 msgstr "« {device} » a été branché et n’est pas autorisé"
 
-#: src/ui/window.rs:495
+#: src/ui/window.rs:507
 msgid "A device was plugged in and is not authorized"
 msgstr "Un périphérique a été branché et n’est pas autorisé"
 
-#: src/ui/window.rs:501
+#: src/ui/window.rs:513
 #, rust-format
 msgid "{count} device was plugged in and is not authorized"
 msgid_plural "{count} devices were plugged in and are not authorized"
 msgstr[0] "{count} périphérique a été branché et n’est pas autorisé"
 msgstr[1] "{count} périphériques ont été branchés et ne sont pas autorisés"
 
-#: src/ui/window.rs:567
+#: src/ui/window.rs:579
 #, rust-format
 msgid "Not permitted: {reason}. See the diagnostics for the remedy."
 msgstr ""
 "Non autorisé : {reason}. Consultez le diagnostic pour connaître la solution."
 
-#: src/ui/window.rs:621
+#: src/ui/window.rs:633
 #, rust-format
 msgid "Reject “{device}”?"
 msgstr "Rejeter « {device} » ?"
 
-#: src/ui/window.rs:623
+#: src/ui/window.rs:635
 msgid ""
 "Rejecting removes the device from the system. It can only be used again "
 "after it is physically unplugged and plugged back in."
@@ -723,12 +780,12 @@ msgstr ""
 "Le rejet retire le périphérique du système. Pour le réutiliser, il faut le "
 "débrancher physiquement puis le rebrancher."
 
-#: src/ui/window.rs:653
+#: src/ui/window.rs:665
 #, rust-format
 msgid "device {id}"
 msgstr "périphérique {id}"
 
-#: src/ui/window.rs:716
+#: src/ui/window.rs:728
 msgid ""
 "Stopped waiting. USBGuard may already have acted; the list shows what it "
 "actually did."
@@ -736,21 +793,21 @@ msgstr ""
 "L’attente a été interrompue. USBGuard a peut-être déjà agi ; la liste "
 "indique ce qu’il a réellement fait."
 
-#: src/ui/window.rs:737
+#: src/ui/window.rs:749
 #, rust-format
 msgid "Remove rule {position}?"
 msgstr "Supprimer la règle {position} ?"
 
-#: src/ui/window.rs:742
+#: src/ui/window.rs:754
 msgid "Remove"
 msgstr "Supprimer"
 
-#: src/ui/window.rs:756
+#: src/ui/window.rs:768
 #, rust-format
 msgid "Change {parameter}?"
 msgstr "Modifier {parameter} ?"
 
-#: src/ui/window.rs:761
+#: src/ui/window.rs:773
 #, rust-format
 msgid ""
 "From “{old}” to “{new}”. The change applies immediately and lasts until "
@@ -759,15 +816,15 @@ msgstr ""
 "De « {old} » à « {new} ». La modification s’applique immédiatement et reste "
 "en vigueur jusqu’au redémarrage d’USBGuard."
 
-#: src/ui/window.rs:766
+#: src/ui/window.rs:778
 msgid "Change"
 msgstr "Modifier"
 
-#: src/ui/window.rs:820
+#: src/ui/window.rs:832
 msgid "Which rule?"
 msgstr "Quelle règle ?"
 
-#: src/ui/window.rs:822
+#: src/ui/window.rs:834
 msgid ""
 "Several rules have exactly this text. They differ only in their position in "
 "the evaluation order. Choose the one to remove."
@@ -775,62 +832,62 @@ msgstr ""
 "Plusieurs règles ont exactement ce texte. Seule leur position dans l’ordre "
 "d’évaluation diffère. Choisissez celle à supprimer."
 
-#: src/ui/window.rs:832
+#: src/ui/window.rs:844
 #, rust-format
 msgid "Rule {position}"
 msgstr "Règle {position}"
 
-#: src/ui/window.rs:880
+#: src/ui/window.rs:892
 #, rust-format
 msgid "Allowed “{device}” for this session"
 msgstr "« {device} » autorisé pour cette session"
 
-#: src/ui/window.rs:883
+#: src/ui/window.rs:895
 #, rust-format
 msgid "Allowed “{device}” permanently"
 msgstr "« {device} » autorisé de façon permanente"
 
-#: src/ui/window.rs:886
+#: src/ui/window.rs:898
 #, rust-format
 msgid "Blocked “{device}” for this session"
 msgstr "« {device} » bloqué pour cette session"
 
-#: src/ui/window.rs:889
+#: src/ui/window.rs:901
 #, rust-format
 msgid "Blocked “{device}” permanently"
 msgstr "« {device} » bloqué de façon permanente"
 
-#: src/ui/window.rs:892
+#: src/ui/window.rs:904
 #, rust-format
 msgid "Rejected “{device}” for this session"
 msgstr "« {device} » rejeté pour cette session"
 
-#: src/ui/window.rs:895
+#: src/ui/window.rs:907
 #, rust-format
 msgid "Rejected “{device}” permanently"
 msgstr "« {device} » rejeté de façon permanente"
 
-#: src/ui/window.rs:910
+#: src/ui/window.rs:922
 msgid "Rule removed"
 msgstr "Règle supprimée"
 
-#: src/ui/window.rs:914
+#: src/ui/window.rs:926
 msgid ""
 "That rule no longer exists — it was removed elsewhere. Nothing was changed."
 msgstr ""
 "Cette règle n’existe plus : elle a été supprimée ailleurs. Aucune "
 "modification n’a été effectuée."
 
-#: src/ui/window.rs:928
+#: src/ui/window.rs:940
 msgid "Rule added"
 msgstr "Règle ajoutée"
 
-#: src/ui/window.rs:936
+#: src/ui/window.rs:948
 #, rust-format
 msgid "{parameter} is now “{value}”"
 msgstr "{parameter} vaut désormais « {value} »"
 
-#: src/ui/window.rs:973
+#: src/ui/window.rs:985
 msgid ""
 "Not authorized, and no Polkit agent seems to be running to ask for a "
 "password. See the diagnostics."
@@ -838,7 +895,7 @@ msgstr ""
 "Accès non autorisé, et aucun agent Polkit ne semble être en cours "
 "d’exécution pour demander un mot de passe. Consultez le diagnostic."
 
-#: src/ui/window.rs:977
+#: src/ui/window.rs:989
 msgid ""
 "Not authorized. If the password prompt was cancelled, try again; otherwise "
 "the diagnostics explain how to grant access."
@@ -846,14 +903,14 @@ msgstr ""
 "Accès non autorisé. Si la demande de mot de passe a été annulée, réessayez ; "
 "sinon, le diagnostic explique comment accorder l’accès."
 
-#: src/ui/window.rs:981
+#: src/ui/window.rs:993
 msgid ""
 "Cancelled. USBGuard may already have acted; what is shown is what it reports."
 msgstr ""
 "Annulé. USBGuard a peut-être déjà agi ; l’état affiché est celui qu’il "
 "signale."
 
-#: src/ui/window.rs:985
+#: src/ui/window.rs:997
 msgid ""
 "The ruleset changed in the meantime, so nothing was done. It has been re-"
 "read; please choose again."
@@ -861,33 +918,33 @@ msgstr ""
 "L’ensemble des règles a changé entre-temps ; aucune action n’a donc été "
 "effectuée. Les règles ont été relues ; veuillez choisir à nouveau."
 
-#: src/ui/window.rs:1043
+#: src/ui/window.rs:1055
 #, rust-format
 msgid "USBGuard reported an error: {reason}"
 msgstr "USBGuard a signalé une erreur : {reason}"
 
-#: src/ui/window.rs:1056
+#: src/ui/window.rs:1068
 msgid ""
 "Connection to USBGuard lost. Retrying… The list below may be out of date."
 msgstr ""
 "Connexion à USBGuard perdue. Nouvelle tentative… La liste ci-dessous peut "
 "être obsolète."
 
-#: src/ui/window.rs:1059
+#: src/ui/window.rs:1071
 msgid "Details"
 msgstr "Détails"
 
-#: src/ui/window.rs:1093
+#: src/ui/window.rs:1105
 #, rust-format
 msgid "{parameter} was changed to “{value}”"
 msgstr "{parameter} a été défini sur « {value} »"
 
-#: src/ui/window.rs:1138
+#: src/ui/window.rs:1150
 #, rust-format
 msgid "USBGuard: {problem}"
 msgstr "USBGuard : {problem}"
 
-#: src/ui/window.rs:1141
+#: src/ui/window.rs:1153
 msgid "How to fix"
 msgstr "Comment résoudre le problème"
 

@@ -39,6 +39,8 @@ pub struct State {
     pub interactive: Vec<(&'static str, bool)>,
     /// Hold applyDevicePolicy before execution or after execution but before its reply.
     pub apply_gate: Option<Arc<WriteGate>>,
+    /// Hold listDevices for GTK cancellation and stale-reply tests.
+    pub device_list_gate: Option<Arc<WriteGate>>,
     /// Arbitrary daemon failures, including device identifiers for privacy tests.
     pub failures: HashMap<&'static str, String>,
 }
@@ -148,7 +150,7 @@ pub struct Devices(pub Shared);
 #[interface(name = "org.usbguard.Devices1")]
 impl Devices {
     #[zbus(name = "listDevices")]
-    fn list_devices(
+    async fn list_devices(
         &self,
         #[zbus(header)] header: Header<'_>,
         query: &str,
@@ -159,12 +161,19 @@ impl Devices {
             "listDevices",
             format!("listDevices {query}"),
         )?;
-        if query != "match" {
+        if query != "match" && !query.starts_with("match ") {
             return Err(fdo::Error::Failed(
                 "IPC method: usbguard.IPC.listDevices: RuleParserError".into(),
             ));
         }
-        Ok(self.0.lock().unwrap().devices.clone())
+        let (devices, gate) = {
+            let state = self.0.lock().unwrap();
+            (state.devices.clone(), state.device_list_gate.clone())
+        };
+        if let Some(gate) = gate {
+            gate.wait().await;
+        }
+        Ok(devices)
     }
 
     #[zbus(name = "applyDevicePolicy")]

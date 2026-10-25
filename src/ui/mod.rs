@@ -18,6 +18,7 @@ mod notify;
 mod policy_view;
 mod preferences;
 mod rule_dialog;
+mod rule_preview;
 mod tray;
 mod window;
 

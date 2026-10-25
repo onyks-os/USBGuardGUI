@@ -28,6 +28,7 @@ use crate::runtime::runtime;
 use gettextrs::gettext;
 
 use super::i18n::{self, fill, value_hint};
+use super::rule_preview::DevicePreview;
 
 /// What the user asked to add.
 #[derive(Debug, Clone)]
@@ -88,6 +89,7 @@ struct Form {
     persistent: adw::SwitchRow,
     rules: Vec<RuleHandle>,
     current: RefCell<Option<Rule>>,
+    devices: Rc<DevicePreview>,
 }
 
 /// Opens the dialog. `on_submit` receives the validated rule.
@@ -98,6 +100,10 @@ pub(super) fn present(
     on_submit: impl Fn(NewRule) + 'static,
 ) {
     let form = Rc::new(build(rules, default_persistence));
+    form.dialog.connect_closed({
+        let devices = form.devices.clone();
+        move |_| devices.close()
+    });
 
     form.add.connect_clicked({
         let form = form.clone();
@@ -319,6 +325,8 @@ fn build(rules: Vec<RuleHandle>, default_persistence: Persistence) -> Form {
     column.append(&switcher);
     column.append(&mode);
     column.append(&preview_group);
+    let devices = DevicePreview::new();
+    column.append(&devices.group);
     column.append(&placement);
 
     let toolbar = adw::ToolbarView::new();
@@ -357,6 +365,7 @@ fn build(rules: Vec<RuleHandle>, default_persistence: Persistence) -> Form {
         persistent,
         rules,
         current: RefCell::new(None),
+        devices,
     }
 }
 
@@ -484,6 +493,7 @@ fn recompute(form: &Form) {
             *form.current.borrow_mut() = None;
         }
     }
+    form.devices.set_rule(form.current.borrow().clone());
 }
 
 /// "error at character N" plus the input with a caret under the offending

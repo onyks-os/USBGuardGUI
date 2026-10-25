@@ -11,8 +11,8 @@ use zbus::Connection;
 use super::errors::{app_error, mutation_error};
 use super::proxies::{UsbGuardDevicesProxy, UsbGuardPolicyProxy, UsbGuardProxy};
 use crate::model::{
-    AppError, Device, DeviceId, DevicePolicy, Parameter, Persistence, RemoveOutcome, Rule,
-    RuleHandle, RuleId,
+    AppError, AttributeName, Device, DeviceId, DevicePolicy, Parameter, Persistence, RemoveOutcome,
+    Rule, RuleHandle, RuleId, RuleTarget,
 };
 use crate::rules::{parse_device, render_checked};
 
@@ -99,9 +99,32 @@ impl Client {
     /// Any D-Bus failure, classified per §6.3.
     #[instrument(skip(self), level = "debug")]
     pub async fn list_devices(&self) -> Result<Vec<Device>, AppError> {
+        self.query_devices(QUERY_ALL_DEVICES).await
+    }
+
+    /// Connected devices matching a policy rule's attributes, regardless of
+    /// their current authorization state. This is a read-only snapshot:
+    /// conditions and policy precedence are not evaluated by `listDevices`.
+    /// Labels and comments are metadata and are omitted from the query.
+    ///
+    /// # Errors
+    ///
+    /// Invalid policy rules fail local validation before any call is sent;
+    /// otherwise any D-Bus failure, classified per §6.3.
+    #[instrument(skip(self, rule), level = "debug")]
+    pub async fn preview_rule_devices(&self, rule: &Rule) -> Result<Vec<Device>, AppError> {
+        let mut query = crate::rules::parse_rule(&render_checked(rule)?)?;
+        query.target = Some(RuleTarget::Match);
+        query.condition = None;
+        query.comment = None;
+        query.attributes.retain(|a| a.name != AttributeName::Label);
+        self.query_devices(&query.to_string()).await
+    }
+
+    async fn query_devices(&self, query: &str) -> Result<Vec<Device>, AppError> {
         let raw = self
             .devices
-            .list_devices(QUERY_ALL_DEVICES)
+            .list_devices(query)
             .await
             .map_err(|e| app_error(&e))?;
         debug!(count = raw.len(), "listDevices");

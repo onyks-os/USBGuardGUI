@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A read-only preview in both new-rule editor modes showing connected devices
+  matching the rule's attributes. Conditions and earlier-rule precedence are
+  called out as factors the preview cannot simulate; edits, cancellation and
+  closing invalidate pending results. Device names are displayed as plain text.
 - French translations for the interface, notifications, desktop entry and
   AppStream metadata; gettext/plural/format and package-catalogue tests, plus
   the graphical focus regression in both English and French.

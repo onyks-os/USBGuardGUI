@@ -1490,6 +1490,17 @@ does not accept it (§2.4.6, **[P0]**).
 An escape hatch: a raw-text mode for users who would rather type the rule, with
 the same validation applied.
 
+Both editor modes also offer an on-demand **device preview**. The client sends
+the canonical rule through `listDevices` with target `match`, retaining its
+attributes while removing `label`, condition and comment metadata. USBGuard
+returns the current devices whose rule attributes match, regardless of their
+current authorization state. This is a read-only snapshot: it does not evaluate
+condition clauses or the position of earlier rules, so it cannot predict which
+rule will decide a device's final policy. A changed rule or a closed dialog
+cancels and invalidates the pending reply. Device attributes are displayed as
+plain text, not markup. The query uses the existing read-access path and cannot
+change device or policy state.
+
 ### 9.5 Notifications
 
 Desktop notifications for a newly inserted device that is not authorized, via
