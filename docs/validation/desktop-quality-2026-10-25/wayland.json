@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "validated_at": "2026-10-25T22:01:58.147216+00:00",
+  "scope": "Native Wayland window on headless Weston/Pixman with a synthetic seat; no X11 fallback",
+  "os_release": "NAME=\"Fedora Linux\"\nVERSION=\"44 (Cloud Edition)\"\nRELEASE_TYPE=stable\nID=fedora\nVERSION_ID=44\nVERSION_CODENAME=\"\"\nPRETTY_NAME=\"Fedora Linux 44 (Cloud Edition)\"\nANSI_COLOR=\"0;38;2;60;110;180\"\nLOGO=fedora-logo-icon\nCPE_NAME=\"cpe:/o:fedoraproject:fedora:44\"\nHOME_URL=\"https://fedoraproject.org/\"\nDOCUMENTATION_URL=\"https://docs.fedoraproject.org/en-US/fedora/f44/\"\nSUPPORT_URL=\"https://ask.fedoraproject.org/\"\nBUG_REPORT_URL=\"https://bugzilla.redhat.com/\"\nREDHAT_BUGZILLA_PRODUCT=\"Fedora\"\nREDHAT_BUGZILLA_PRODUCT_VERSION=44\nREDHAT_SUPPORT_PRODUCT=\"Fedora\"\nREDHAT_SUPPORT_PRODUCT_VERSION=44\nSUPPORT_END=2027-05-19\nVARIANT=\"Cloud Edition\"\nVARIANT_ID=cloud\n",
+  "kernel": "6.19.10-300.fc44.x86_64",
+  "compositor": "weston 15.0.1",
+  "binary_sha256": "71b56efffc9d97c6ad9228d8ae03356453c24a40f604d7e6977d6e27ca9fbbbd",
+  "window": {
+    "xdg_surface": 20,
+    "surface": 18,
+    "toplevel": 21,
+    "frame_callback": 26
+  },
+  "mapped_after_seconds": 8.746,
+  "alive_after_frame_seconds": 5,
+  "cases": [
+    "main toplevel configured",
+    "main surface buffer committed",
+    "matching frame callback received",
+    "GUI alive for five seconds after frame"
+  ],
+  "test_driver_sha256": "61c2d009a182d93fd315b9148863f2f6228b0a6caebb8a9122301c92e2a59562",
+  "protocol_sha256": "26889ef87036aec0672325f5f497e6a5db539d12195bf7dda4c356bf6e20e79b",
+  "candidate_receipt": "fedora.json"
+}

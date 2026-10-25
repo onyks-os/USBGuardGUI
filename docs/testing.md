@@ -97,6 +97,46 @@ after 600 seconds with 20 demo devices. Environment: Fedora 44, GNOME Shell
 Cairo renderer. Both limits passed. This is a repeatable local baseline, not
 a GNOME/KDE comparison or a release-binary measurement.
 
+## Native Wayland guest smoke check
+
+The marked Fedora 44 guest also checks the installed candidate with Weston
+15.0.1's headless backend, Pixman renderer and synthetic input seat. GTK uses
+`GDK_BACKEND=wayland` with Cairo, a private session bus/runtime/configuration,
+and no X11 fallback. This smoke check disables GTK accessibility; the separate
+AT-SPI/Xvfb guest run verifies accessible names and keyboard focus.
+
+The check allows up to 120 seconds for GTK startup under QEMU TCG and requires
+the main `USBGuardGUI` toplevel's configuration acknowledgement, a buffer commit
+on that same surface and its matching frame callback. The app must stay alive
+for five more seconds. Registry discovery or an empty surface alone cannot
+pass. The first exploratory launcher used a five-second deadline and stopped
+before GTK finished starting; it was a test timeout, not evidence of a GUI crash.
+
+For a guest already prepared and validated with the clean-install driver:
+
+```sh
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  sudo dnf -y install weston
+python3 scripts/verify-clean-install.py copy --output target/clean-fedora \
+  scripts/clean-install-guest-wayland.py /home/usbguard-test/wayland-test.py
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  dbus-run-session -- python3 /home/usbguard-test/wayland-test.py
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  cat wayland-report.json
+python3 scripts/verify-clean-install.py stop --output target/clean-fedora
+```
+
+The script refuses to run outside the marked VM or as root. Its report records
+the installed executable, test-driver and protocol-log SHA-256 digests; raw
+logs remain inside the disposable guest. Failed runs remove any stale passing
+report. `make test-clean-install-driver` checks the VM guards and incomplete
+protocol cases without starting a compositor or examining a live desktop.
+
+The [Fedora Wayland receipt](validation/desktop-quality-2026-10-25/wayland.json)
+matches the same candidate executable as the 5/5 GUI/PAM guest receipt. This is
+a native Wayland rendering check; GNOME/KDE shell, tray, portal and interactive
+session behavior remain separate milestone acceptance checks.
+
 ## Reconnection regressions
 
 The supervisor is also tested with a bridge whose name stays owned while reads

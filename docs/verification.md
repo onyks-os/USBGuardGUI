@@ -524,6 +524,14 @@ That guest run passed the four daemon/Polkit cases plus accessible-name and
 Tab/Shift+Tab focus assertions (5/5), using synthetic USB only. Its installed
 executable SHA-256 is `71b56efffc9d97c6ad9228d8ae03356453c24a40f604d7e6977d6e27ca9fbbbd`.
 
+The same installed executable also passed the separate
+[native Wayland smoke check](validation/desktop-quality-2026-10-25/wayland.json)
+on headless Weston 15.0.1/Pixman. The check ties the main window's XDG
+configuration to a committed buffer and its frame callback, then observes
+five seconds of continued liveness. Its startup timeout accounts for TCG;
+GNOME/KDE session integration remains open. See the
+[guest reproduction procedure](testing.md#native-wayland-guest-smoke-check).
+
 All four pass no-agent denial, real-agent cancellation, successful PAM-authenticated
 runtime block without persistent-rule changes, and daemon restart/GUI reconnection.
 The detailed [test scope and reproduction](testing.md#zbus-6-and-real-clean-system-validation-2026-10-2425)
