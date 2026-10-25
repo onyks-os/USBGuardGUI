@@ -225,12 +225,15 @@ The old “v0.2.0 scope” above is historical: those policy actions shipped in
 0.1.0. The new 0.2.0 target contains the post-0.1.2 dependency and validation work. No release date is promised; a tag
 requires the usual CI, coverage, reproducibility and installed-runtime gates.
 
-Real-daemon/Polkit checks on clean installations
-remain complementary to the new mock tests; those tests do not exercise a real authentication agent.
+Real-daemon/Polkit checks now pass on disposable Ubuntu, Debian, Fedora and Arch
+installations, including cancelled and successful real PAM authentication and
+GUI reconnection. [Testing evidence](docs/testing.md#zbus-6-and-real-clean-system-validation-2026-10-2425)
+records the exact virtual-device/agent scope and package versions.
 
 | Item | Description |
 | :--- | :---------- |
 | **D-Bus dependency migration** | Implemented: zbus 6.1 with Rust 1.89 in the application, CI and pinned builder. The fixed SNI/menu interfaces run directly on zbus, replacing ksni and the deprecated stack; wire, watcher-restart and GTK regression tests pass. See DEPENDENCIES.md. |
+| **Clean-install verification** | Complete for the four reference guests: native package installation, real daemon/Polkit/PAM, denial/cancellation/success and restart/reconnection; receipts are linked from docs/testing.md. |
 | **Translations** | French is implemented for the next feature target. Open issues invite Spanish, Russian, Chinese, German, Brazilian Portuguese, and Japanese; [docs/translating.md](docs/translating.md) explains how. |
 | **Arch User Repository** | A `usbguard-gui` package, when AUR registrations reopen. |
 

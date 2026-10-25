@@ -193,11 +193,37 @@ async fn native_and_sandbox_registration_export_compatible_interfaces() {
         }
         assert_eq!(item.get_property::<i32>("WindowId").await.unwrap(), 0);
         let mut changed = item.receive_signal("NewToolTip").await.unwrap();
+        let properties = proxy(
+            &observer,
+            &service,
+            ITEM_PATH,
+            "org.freedesktop.DBus.Properties",
+        )
+        .await;
+        let mut property_changes = properties
+            .receive_signal("PropertiesChanged")
+            .await
+            .unwrap();
         update_counts(&handle, 4, 2).await.unwrap();
         tokio::time::timeout(Duration::from_secs(2), changed.next())
             .await
             .unwrap()
             .unwrap();
+        let signal = tokio::time::timeout(Duration::from_secs(2), property_changes.next())
+            .await
+            .unwrap()
+            .unwrap();
+        let (interface, changed_values, invalidated): (String, Properties, Vec<String>) =
+            signal.body().deserialize().unwrap();
+        assert_eq!(interface, "org.kde.StatusNotifierItem");
+        assert_eq!(invalidated, [] as [String; 0]);
+        let tooltip: ToolTip = changed_values["ToolTip"]
+            .try_clone()
+            .unwrap()
+            .try_into()
+            .unwrap();
+        assert_eq!(tooltip.2, APP_NAME);
+        assert!(tooltip.3.contains('4') && tooltip.3.contains('2'));
         let tooltip: ToolTip = item.get_property("ToolTip").await.unwrap();
         assert_eq!(tooltip.2, APP_NAME);
         assert!(tooltip.3.contains('4') && tooltip.3.contains('2'));

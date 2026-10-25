@@ -60,6 +60,44 @@ class CleanInstallTests(unittest.TestCase):
                 vm.validate(argparse.Namespace(output=root, package=root / "candidate.deb"))
             run.assert_not_called()
 
+    def validation_fixture(self, root):
+        directory = root / "vm"
+        directory.mkdir()
+        (directory / "vm.json").write_text(json.dumps({"distro": "fedora", "port": 12345}))
+        (directory / "credentials.json").write_text(json.dumps({"password": "fixture-only"}))
+        output = root / "build"
+        (output / "first").mkdir(parents=True)
+        package = output / "first/candidate.rpm"
+        package.write_bytes(b"test package")
+        (output / "report.json").write_text(json.dumps({"binary_sha256": "a" * 64}))
+        ui = {"passed": True, "cases": ["no-agent", "cancel", "password", "restart"], "binary_sha256": "a" * 64}
+        return argparse.Namespace(output=directory, package=package), ui
+
+    def test_successful_validation_checks_installed_bytes_and_records_receipt(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            args, ui = self.validation_fixture(Path(temporary))
+            with patch.object(vm, "command") as run, patch.object(vm.subprocess, "check_output", return_value=json.dumps(ui)):
+                vm.validate(args)
+            report = json.loads((args.output / "report.json").read_text())
+            self.assertTrue(report["ui"]["passed"])
+            self.assertEqual(report["package_sha256"], vm.hashlib.sha256(args.package.read_bytes()).hexdigest())
+            self.assertIn("validated_at", report)
+            script = run.call_args.args[0][-1]
+            self.assertIn("--cacheonly -y reinstall", script)
+            self.assertIn("rm -f ui-report.json", script)
+
+    def test_incomplete_failed_or_wrong_binary_validation_cannot_publish_receipt(self):
+        for changes in ({"passed": False}, {"cases": ["no-agent"]}, {"binary_sha256": "b" * 64}):
+            with self.subTest(changes=changes), tempfile.TemporaryDirectory() as temporary:
+                args, ui = self.validation_fixture(Path(temporary))
+                old = '{"previous": true}'
+                (args.output / "report.json").write_text(old)
+                ui.update(changes)
+                with patch.object(vm, "command"), patch.object(vm.subprocess, "check_output", return_value=json.dumps(ui)), self.assertRaises(ValueError):
+                    vm.validate(args)
+                self.assertFalse((args.output / "report.json").exists())
+                self.assertEqual((args.output / "report.previous.json").read_text(), old)
+
     def test_copy_cannot_write_outside_guest_home(self):
         for destination in ("/etc/sudoers", "/home/usbguard-test/../../etc/sudoers"):
             with self.subTest(destination=destination), patch.object(vm, "command") as run, self.assertRaises(SystemExit):

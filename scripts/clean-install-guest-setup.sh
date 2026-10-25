@@ -49,5 +49,7 @@ if systemctl cat polkit-agent-helper.socket >/dev/null 2>&1; then
 fi
 systemctl enable --now usbguard.service
 systemctl enable --now usbguard-dbus.service
+# Reload the fixture even when package installation already started the daemon.
+systemctl restart usbguard.service usbguard-dbus.service
 chown -R usbguard-test: /home/usbguard-test/baseline
 usbguard list-devices

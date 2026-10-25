@@ -495,3 +495,35 @@ The stable `v0.1.2` tag targets the same source commit. Its
 repeats these gates before publishing and then runs the separate crates.io job.
 Stable signatures use `refs/tags/v0.1.2` in the certificate identity; candidate
 signatures use `refs/tags/v0.1.2-rc.1`.
+
+## Post-0.1.2 zbus 6 validation (2026-10-24–25)
+
+The migration candidate was built twice offline with Rust 1.89.0 in the pinned
+Ubuntu builder. Native binary, RPM, DEB, Arch package, Flatpak bundle and the
+Flatpak executable matched byte-for-byte. The receipt preserves the exact
+modified-worktree source/recipe digests; these checkpoint packages still identify
+as 0.1.2 and are distinct from the published stable 0.1.2 artifacts.
+
+- [Reproducible-build receipt](validation/zbus6-checkpoint-2026-10-24/reproducible.json)
+- [Installed pinned Flatpak runtime receipt](validation/zbus6-checkpoint-2026-10-24/flatpak.json)
+- [Dependency audit](validation/zbus6-checkpoint-2026-10-24/audit.json)
+
+The exact native executable exercised in all four real daemon/Polkit guests has
+SHA-256 `e6f620ab6756d34849a15357b9967fe1b07541a0b509686f3d930484ff53cf82`.
+Receipts record image SHA-256, native package SHA-256, kernel, USBGuard package,
+installed executable SHA-256, authorization fixture and each successful case:
+
+- [Ubuntu 24.04.5](validation/zbus6-checkpoint-2026-10-24/ubuntu.json)
+- [Debian 13.7](validation/zbus6-clean-install-2026-10-25/debian.json)
+- [Fedora 44](validation/zbus6-clean-install-2026-10-25/fedora.json)
+- [Arch rolling](validation/zbus6-clean-install-2026-10-25/arch.json)
+
+All four pass no-agent denial, real-agent cancellation, successful PAM-authenticated
+runtime block without persistent-rule changes, and daemon restart/GUI reconnection.
+The detailed [test scope and reproduction](testing.md#zbus-6-and-real-clean-system-validation-2026-10-2425)
+distinguishes distribution files from the test-only authorization fixture and
+virtual devices from physical hardware. Guest credentials, disk images and raw
+logs stay under ignored `target/`; they are not release payloads. All VMs are
+stopped after collection. Follow-up changes refine tests/tooling/documentation;
+the stored local reproduction receipt remains evidence for its recorded snapshot,
+while CI runs the reproduction gate again on the PR source.

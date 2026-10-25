@@ -5,6 +5,8 @@
 import importlib
 import json
 import os
+import re
+import shutil
 import subprocess
 import tempfile
 import time
@@ -83,6 +85,29 @@ def target():
     return lines[0].split(': ', 1)[1].split()[0]
 
 
+def request_block():
+    previous = calls_log.read_text().count('member=applyDevicePolicy')
+    offset = calls_log.stat().st_size
+    click(wait(lambda: find(name='Block')))
+    subprocess.run(['xdotool', 'key', 'Return'], check=True)
+    wait(lambda: calls_log.read_text().count('member=applyDevicePolicy') > previous)
+    fragment = calls_log.read_text()[offset:]
+    # Verify the GUI actually requested the synthetic device, block, runtime-only.
+    expected_id = next(line.split(':', 1)[0] for line in devices().splitlines()
+                       if 'serial "usbguard-clean-test"' in line)
+    wait(lambda: len(re.findall(r'uint32 (\d+)', calls_log.read_text()[offset:])) >= 2
+         and 'boolean false' in calls_log.read_text()[offset:])
+    fragment = calls_log.read_text()[offset:]
+    assert re.findall(r'uint32 (\d+)', fragment)[:2] == [expected_id, '1']
+    assert 'boolean false' in fragment
+    return offset
+
+
+def wait_denial(offset):
+    wait(lambda: 'error_name=org.freedesktop.DBus.Error.AccessDenied' in calls_log.read_text()[offset:])
+    wait(lambda: find(name='Block'))
+
+
 processes = []
 private_runtime = tempfile.TemporaryDirectory(prefix='usbguard-ui-', ignore_cleanup_errors=True)
 display = f':{100 + os.getpid() % 60000}'
@@ -114,6 +139,12 @@ try:
     processes.append(subprocess.Popen([str(registry)], env=env, stdout=log, stderr=log))
     time.sleep(2)
     pyatspi = importlib.import_module('pyatspi')
+    calls_log = Path('mutation-calls.log')
+    calls_output = calls_log.open('w')
+    processes.append(subprocess.Popen(['sudo', 'stdbuf', '-oL', 'dbus-monitor', '--system',
+        "type='method_call',interface='org.usbguard.Devices1',member='applyDevicePolicy'",
+        "type='error',sender='org.usbguard1'"], stdout=calls_output, stderr=log, env=env))
+    time.sleep(1)
     app = subprocess.Popen(['usbguard-gui'], env=env, stdout=log, stderr=log)
     processes.append(app)
     wait(lambda: find(role='entry') or find(role='text'))
@@ -130,11 +161,11 @@ try:
         assert target() == 'allow'
         rules = subprocess.check_output(['sudo', 'usbguard', 'list-rules'], text=True)
         # With no agent the backend must refuse, leaving the GUI responsive.
-        click(wait(lambda: find(name='Block')))
-        subprocess.run(['xdotool', 'key', 'Return'], check=True)
-        time.sleep(5)
+        offset = request_block()
+        wait_denial(offset)
+        time.sleep(1)
         assert app.poll() is None and target() == 'allow'
-        print('Checkpoint passed', flush=True)
+        print(f'Passed checkpoint {len(report["cases"]) + 1}', flush=True)
         report['cases'].append('no-agent: refused; GUI alive; device unchanged')
         agent_paths = [Path('/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1'),
                        Path('/usr/libexec/polkit-gnome-authentication-agent-1'),
@@ -144,17 +175,16 @@ try:
         agent = next(path for path in agent_paths if path.is_file())
         processes.append(subprocess.Popen([str(agent)], env=env, stdout=log, stderr=log))
         time.sleep(4)
-        click(wait(lambda: find(name='Block')))
-        subprocess.run(['xdotool', 'key', 'Return'], check=True)
+        offset = request_block()
         wait(lambda: find(role='password text'))
         # Escape dismisses the real agent's dialog, like its Cancel button.
         subprocess.run(['xdotool', 'key', 'Escape'], check=True)
-        time.sleep(4)
+        wait_denial(offset)
+        time.sleep(1)
         assert app.poll() is None and target() == 'allow'
-        print('Checkpoint passed', flush=True)
+        print(f'Passed checkpoint {len(report["cases"]) + 1}', flush=True)
         report['cases'].append('agent-cancel: refused; GUI alive; device unchanged')
-        click(wait(lambda: find(name='Block')))
-        subprocess.run(['xdotool', 'key', 'Return'], check=True)
+        request_block()
         password = wait(lambda: find(role='password text'))
         secret = json.loads(Path('credentials.json').read_text())['password']
         password.queryEditableText().setTextContents(secret)
@@ -162,13 +192,13 @@ try:
         wait(lambda: target() == 'block')
         assert app.poll() is None
         assert subprocess.check_output(['sudo', 'usbguard', 'list-rules'], text=True) == rules
-        print('Checkpoint passed', flush=True)
+        print(f'Passed checkpoint {len(report["cases"]) + 1}', flush=True)
         report['cases'].append('agent-password: runtime block; persistent rules unchanged')
         subprocess.run(['sudo', 'systemctl', 'restart', 'usbguard.service', 'usbguard-dbus.service'], check=True)
         wait(lambda: target() == 'allow')
         wait(lambda: find(name='Allowed'))
         assert app.poll() is None
-        print('Checkpoint passed', flush=True)
+        print(f'Passed checkpoint {len(report["cases"]) + 1}', flush=True)
         report['cases'].append('daemon-restart: GUI reconnected; persistent allow restored')
         report['passed'] = True
         Path('ui-report.json').write_text(json.dumps(report, indent=2) + '\n')
@@ -183,5 +213,14 @@ finally:
                 process.kill()
                 process.wait()
 
+    if 'calls_output' in globals():
+        calls_output.close()
     log.close()
+    # The document portal can outlive the test until dbus-run-session exits.
+    # Detach only its mount inside this test's private runtime before removal.
+    mount = Path(private_runtime.name) / 'doc'
+    if os.path.ismount(mount):
+        unmount = shutil.which('fusermount3') or shutil.which('fusermount')
+        if unmount:
+            subprocess.run([unmount, '-uz', str(mount)], check=True)
     private_runtime.cleanup()

@@ -8,6 +8,7 @@ The VM sees a synthetic USB disk, never a host USB device or host filesystem.
 # SPDX-License-Identifier: MIT
 
 import argparse
+import datetime
 import hashlib
 import json
 import secrets
@@ -98,6 +99,8 @@ def validate(args):
     extension = ".deb" if marker["distro"] in ("ubuntu", "debian") else ".rpm" if marker["distro"] == "fedora" else ".pkg.tar.zst"
     if not package.name.endswith(extension):
         raise ValueError("Package format does not match the guest")
+    if (directory / "report.json").exists():
+        (directory / "report.json").replace(directory / "report.previous.json")
     uploads = [(package, "candidate" + extension),
                (Path(__file__).with_name("clean-install-guest-policy.sh"), "policy.sh"),
                (Path(__file__).with_name("clean-install-guest-ui.py"), "ui-test.py"),
@@ -105,16 +108,24 @@ def validate(args):
     for source, name in uploads:
         with source.open("rb") as content:
             command([*ssh_args(directory), "umask 077; cat > " + shlex.quote(f"/home/{USER}/{name}")], stdin=content)
-    install = {"ubuntu": "sudo apt-get install -y ./candidate.deb", "debian": "sudo apt-get install -y ./candidate.deb",
-               "fedora": "sudo dnf -y install ./candidate.rpm", "arch": "sudo pacman -U --noconfirm ./candidate.pkg.tar.zst"}[marker["distro"]]
+    install = {"ubuntu": "sudo apt-get install --reinstall -y ./candidate.deb", "debian": "sudo apt-get install --reinstall -y ./candidate.deb",
+               "fedora": "if rpm -q usbguard-gui >/dev/null 2>&1; then sudo dnf --cacheonly -y reinstall ./candidate.rpm; else sudo dnf --cacheonly -y install ./candidate.rpm; fi", "arch": "sudo pacman -U --noconfirm ./candidate.pkg.tar.zst"}[marker["distro"]]
     script = "set -eu\ntest -f /etc/usbguard-clean-install-vm\n" + install + "\n"
     script += "usbguard-gui --help\nusbguard-gui --diagnose > baseline/diagnose.txt || test $? -eq 3\n"
-    script += "sudo bash ./policy.sh\nflock --wait 300 ui-test.lock dbus-run-session -- python3 ./ui-test.py\n"
+    script += "rm -f ui-report.json\nsudo bash ./policy.sh\nflock --wait 300 ui-test.lock dbus-run-session -- python3 ./ui-test.py\n"
     with (directory / "validation.log").open("w") as log:
         command([*ssh_args(directory), "bash -c " + shlex.quote(script)], stdout=log, stderr=subprocess.STDOUT)
     result = subprocess.check_output([*ssh_args(directory), "cat ui-report.json"], text=True)
-    report = {**marker, "package": package.name, "package_sha256": hashlib.sha256(package.read_bytes()).hexdigest(),
-              "ui": json.loads(result)}
+    ui = json.loads(result)
+    if ui.get("passed") is not True or len(ui.get("cases", [])) != 4:
+        raise ValueError("Guest did not complete all four GUI/PAM cases")
+    receipt = package.parent.parent / "report.json"
+    if receipt.is_file():
+        expected = json.loads(receipt.read_text())["binary_sha256"]
+        if ui.get("binary_sha256") != expected:
+            raise ValueError("Installed binary differs from the measured build")
+    report = {**marker, "validated_at": datetime.datetime.now(datetime.UTC).isoformat(), "package": package.name, "package_sha256": hashlib.sha256(package.read_bytes()).hexdigest(),
+              "ui": ui}
     (directory / "report.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
 
@@ -162,7 +173,7 @@ def main(argv=None):
         command([*ssh_args(args.output.resolve()), shlex.join(args.command)])
     elif args.action == "collect":
         with (args.output / "guest-evidence.tar.gz").open("wb") as evidence:
-            command([*ssh_args(args.output.resolve()), "tar --ignore-failed-read -czf - baseline ui.log ui-report.json"], stdout=evidence)
+            command([*ssh_args(args.output.resolve()), "tar --ignore-failed-read -czf - baseline ui.log ui-report.json mutation-calls.log"], stdout=evidence)
     elif args.action == "validate":
         validate(args)
     elif args.action == "copy":

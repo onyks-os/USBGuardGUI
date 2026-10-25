@@ -28,7 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   zbus; preserve native/Flatpak registration, actions and watcher reconnection.
   The deprecated zvariant/zvariant_derive/zbus_names dependency stack is removed.
 - Add disposable QEMU clean-install validation with synthetic USB storage,
-  native packages and real Polkit/PAM; isolation guards are regression-tested.
+  native packages and real Polkit/PAM. Ubuntu, Debian, Fedora and Arch pass
+  denial, cancellation, runtime authorization and daemon-restart/reconnection
+  checks. The verifier validates observed calls, installed hashes and complete
+  receipts; isolation and failure guards are regression-tested.
 
 ### Fixed
 

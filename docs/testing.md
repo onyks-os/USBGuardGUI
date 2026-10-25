@@ -364,3 +364,91 @@ The next remote graphical test correctly failed because the matrix runner lacked
 msgfmt before the first Cargo build: build.rs had selected its documented
 English-only fallback. The matrix now installs gettext before compilation, so
 French must actually load for the graphical assertions to pass.
+
+## zbus 6 and real clean-system validation (2026-10-24–25)
+
+The post-0.1.2 implementation uses zbus 6.1 and Rust 1.89. The direct fixed
+SNI/menu interfaces replace ksni, removing the deprecated standalone zvariant
+stack. Private-bus tests verify wire signatures, native/Flatpak registration,
+menu actions, both tooltip notification mechanisms, watcher restart and shutdown.
+The 114 standard Rust tests and separate GTK cancellation regression pass;
+coverage remains above 90% in every required core file. The dependency audit
+has no vulnerabilities or informational warnings, and license/source checks pass.
+
+Native package verification now also runs against real USBGuard, system D-Bus,
+Polkit and PAM inside disposable QEMU guests:
+
+| Guest | Kernel | USBGuard package | Agent | GUI/PAM cases |
+| :---- | :----- | :--------------- | :---- | :------------ |
+| Ubuntu 24.04.5 | 6.8.0-147-generic | 1.1.2+ds-6build2 | polkit-gnome | 4/4 passed, October 24 |
+| Debian 13.7 | 6.12.113+deb13-amd64 | 1.1.3+ds-3 | mate-polkit | 4/4 passed, October 25 |
+| Fedora 44 | 6.19.10-300.fc44.x86_64 | 1.1.4-1.fc44 | mate-polkit | 4/4 passed, October 25 |
+| Arch rolling | 7.2.11-arch1-1 | 1.1.4-11 | polkit-gnome | 4/4 passed, October 25 |
+
+Each suite starts the installed GTK app as the unprivileged test user under
+Xvfb/Openbox, with memory settings and a software renderer. It filters the
+synthetic USB disk, requests Block / This session only, and checks:
+
+1. Without an agent, the request is denied, the device stays allowed and the GUI survives.
+2. Dismissing the real agent's password dialog denies the request without changing the device.
+3. A correct password passes real PAM authentication, blocks the device for the
+   current session and leaves the persistent ruleset byte-for-byte unchanged.
+4. Restarting both USBGuard services restores persistent allow, and the GUI
+   reconnects and displays the refreshed state.
+
+The October 25 driver additionally observes actual system-bus calls and denials
+inside the VM. It asserts the synthetic device ID, block target and `permanent=false`,
+so unchanged device state alone cannot make a missing GUI action pass. The host
+verifier rejects incomplete/failed reports and mismatches between the installed
+binary and the reproducible-build receipt; eight driver tests cover isolation,
+input rejection, stale-report handling and receipt validation.
+
+The VM marker guards root setup; no physical USB device or host filesystem is
+passed through. Credentials stay in private ignored directories. Packaged
+Polkit action and bus-policy files are recorded separately from the explicit
+remote-test-user rule: reads are allowed and every write uses AUTH_SELF without
+cached authorization. This verifies real authentication, not distribution-default
+permission grants for a particular desktop seat. The app package never installs
+that test rule. The GUI/PAM evidence covers these virtual devices, agents and
+package versions; physical hotplug and other desktop environments are separate checks.
+
+Distribution-specific setup findings:
+
+- Debian's genericcloud kernel omits xHCI. The tested VM installed and booted the
+  distribution's standard kernel; use the generic image for future fresh tests.
+- Newly installed Polkit socket units need starting when sockets.target has
+  already been reached. The Arch fixture starts the supplied helper socket;
+  its helper keeps the distribution's non-SUID permissions.
+- Fedora 44 supplies mate-polkit rather than polkit-gnome. SELinux stayed enabled;
+  AT-SPI launcher/registry were started explicitly for the synthetic session.
+- Reload the daemon after generating fixture rules even if package installation
+  has already started it. Enable/start alone does not reload an active daemon.
+- Detach the document portal's mount inside the private test runtime before
+  removing it, so a cleanup error cannot mask an authentication result.
+
+Reproduce with the guarded scripts, a hash-verified official image and a fresh
+output directory (host tools: QEMU, qemu-img, genisoimage, OpenSSH and OpenSSL):
+
+```sh
+python3 scripts/verify-clean-install.py prepare --distro fedora \
+  --image /path/to/verified-fedora.qcow2 --sha256 VERIFIED_IMAGE_SHA256 \
+  --output target/clean-fedora
+python3 scripts/verify-clean-install.py copy --output target/clean-fedora \
+  scripts/clean-install-guest-setup.sh /home/usbguard-test/setup.sh
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  sudo bash /home/usbguard-test/setup.sh
+python3 scripts/verify-clean-install.py validate --output target/clean-fedora \
+  --package target/reproducible/first/usbguard-gui-0.1.2-1.x86_64.rpm
+python3 scripts/verify-clean-install.py collect --output target/clean-fedora
+python3 scripts/verify-clean-install.py stop --output target/clean-fedora
+```
+
+Select the native package produced by the measured build; its actual version may
+change. A failed run must be investigated before accepting a receipt. This is
+an explicit VM test, not part of `make verify` on a developer's live USBGuard system.
+
+Committed receipts are in
+[the Ubuntu checkpoint](validation/zbus6-checkpoint-2026-10-24/ubuntu.json) and
+[the completed October 25 runs](validation/zbus6-clean-install-2026-10-25/).
+See [verification scope](verification.md#post-012-zbus-6-validation-2026-10-2425)
+for the exact candidate artifact identity and reproducibility evidence.
