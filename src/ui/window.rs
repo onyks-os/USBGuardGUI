@@ -195,6 +195,7 @@ impl MainWindow {
             .tooltip_text(gettext("Main menu"))
             .primary(true)
             .build();
+        menu_button.update_property(&[gtk::accessible::Property::Label(&gettext("Main menu"))]);
 
         let header = adw::HeaderBar::new();
         header.set_title_widget(Some(

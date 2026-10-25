@@ -66,6 +66,37 @@ window and synthetic devices, with no real USBGuard or authentication request.
 The compositor-specific crash was observed locally on Wayland; headless Xvfb
 also exercises the explicit focus-preservation assertions.
 
+## Background memory check
+
+On a Wayland or X11 desktop, run:
+
+```bash
+scripts/measure-memory.sh
+```
+
+It builds the debug GUI and demo bridge, runs both on a private session bus,
+uses 20 invented USB devices and Cairo for a stable renderer baseline, then
+reads RSS and PSS from the GUI process's `/proc/<pid>/smaps_rollup` after ten
+minutes. It fails above 110 MiB RSS or 70 MiB PSS. No system USBGuard daemon,
+USB policy, authentication, or user settings are touched. The run takes about
+ten minutes; for a quick smoke check use `MEMORY_SECONDS=5`. Set
+`USBGUARD_GUI_DEMO_DEVICE_COUNT` (7–200) or `MEMORY_RENDERER` to vary the load
+or renderer; the RSS budget is enforced only for Cairo. These measurements are
+specific to the local kernel, GTK build, and desktop libraries, so compare
+them on the same machine and session type.
+
+`USBGUARD_GUI_ISOLATED_INSTANCE=1` gives development runs a separate
+GApplication ID so activating a demo cannot forward to the installed GUI. Pair
+it with `USBGUARD_GUI_BUS=session` to use the demo bridge; the instance option
+alone does not change which USBGuard bus the client connects to. Release builds
+ignore the instance option.
+
+**Measured 2026-10-25:** RSS 64,912 KiB (63.4 MiB), PSS 35,276 KiB (34.4 MiB),
+after 600 seconds with 20 demo devices. Environment: Fedora 44, GNOME Shell
+50.6 on Wayland, GTK 4.22.5, libadwaita 1.9.4, Linux 7.2.11, debug build,
+Cairo renderer. Both limits passed. This is a repeatable local baseline, not
+a GNOME/KDE comparison or a release-binary measurement.
+
 ## Reconnection regressions
 
 The supervisor is also tested with a bridge whose name stays owned while reads

@@ -42,6 +42,14 @@ use window::MainWindow;
 /// (§1.5). `onyks_os`, not `onyks-os`: GApplication rejects the hyphen.
 pub const APP_ID: &str = "io.github.onyks_os.UsbguardGui";
 
+fn application_id(isolated_instance: bool) -> String {
+    if cfg!(debug_assertions) && isolated_instance {
+        format!("{APP_ID}.Development")
+    } else {
+        APP_ID.to_owned()
+    }
+}
+
 /// The name the user sees: menu, window title, About dialog. Kept in one
 /// place; translations refer to it as `{app}`.
 pub(super) const APP_NAME: &str = "USBGuardGUI";
@@ -54,7 +62,9 @@ const CHANNEL_CAPACITY: usize = 64;
 #[must_use]
 pub fn run(background: bool) -> ExitCode {
     i18n::init();
-    let app = adw::Application::builder().application_id(APP_ID).build();
+    let isolated_instance = std::env::var_os("USBGUARD_GUI_ISOLATED_INSTANCE").is_some();
+    let app_id = application_id(isolated_instance);
+    let app = adw::Application::builder().application_id(&app_id).build();
     let config = Config::load();
     // The flag overrides the setting (docs/interfaces.md §2).
     let background = background || config.start_in_background();
@@ -87,6 +97,10 @@ pub fn run(background: bool) -> ExitCode {
     let status = app.run_with_args(&[std::env::args().next().unwrap_or_default()]);
     ExitCode::from(status)
 }
+
+#[cfg(test)]
+#[path = "../../tests/unit/ui_application.rs"]
+mod application_tests;
 
 /// Application-level actions: the targets of notification buttons and of
 /// the Quit menu item, which work whether or not the window is visible.
