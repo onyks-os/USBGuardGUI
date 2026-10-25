@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 18:59+0100\n"
+"POT-Creation-Date: 2026-10-25 19:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -62,103 +62,156 @@ msgstr ""
 msgid "Filter by name, ID, or serial"
 msgstr ""
 
-#: src/ui/device_view.rs:162
+#: src/ui/device_view.rs:163
 msgid "Connecting to USBGuard…"
 msgstr ""
 
-#: src/ui/device_view.rs:169
+#: src/ui/device_view.rs:170
 msgid "No USB devices"
 msgstr ""
 
-#: src/ui/device_view.rs:170
+#: src/ui/device_view.rs:171
 msgid "USBGuard reports no connected devices."
 msgstr ""
 
-#: src/ui/device_view.rs:236
+#: src/ui/device_view.rs:237
 msgid "Name"
 msgstr ""
 
-#: src/ui/device_view.rs:238
+#: src/ui/device_view.rs:239
 #, rust-format
 msgid "(unreadable) {rule}"
 msgstr ""
 
-#: src/ui/device_view.rs:243
+#: src/ui/device_view.rs:244
 msgid "ID"
 msgstr ""
 
-#: src/ui/device_view.rs:248
+#: src/ui/device_view.rs:249
 msgid "Serial"
 msgstr ""
 
-#: src/ui/device_view.rs:251
+#: src/ui/device_view.rs:252
 msgid "Port"
 msgstr ""
 
-#: src/ui/device_view.rs:259
+#: src/ui/device_view.rs:260
 #, rust-format
 msgid "Daemon device id: {id}"
 msgstr ""
 
-#: src/ui/device_view.rs:266
+#: src/ui/device_view.rs:267
 msgid "Could not be parsed:"
 msgstr ""
 
-#: src/ui/device_view.rs:340
+#: src/ui/device_view.rs:280 src/ui/device_view.rs:312 src/ui/window.rs:1071
+msgid "Details"
+msgstr ""
+
+#: src/ui/device_view.rs:317
+msgid "USBGuard device ID"
+msgstr ""
+
+#: src/ui/device_view.rs:319
+msgid "State reported by USBGuard"
+msgstr ""
+
+#: src/ui/device_view.rs:323
+msgid "USB ID"
+msgstr ""
+
+#: src/ui/device_view.rs:330
+msgid "Serial number"
+msgstr ""
+
+#: src/ui/device_view.rs:334
+msgid "Physical port path"
+msgstr ""
+
+#: src/ui/device_view.rs:338
+msgid "Connection type"
+msgstr ""
+
+#: src/ui/device_view.rs:342
+msgid "USB interfaces (class:subclass:protocol)"
+msgstr ""
+
+#: src/ui/device_view.rs:356
+msgid "Matched policy rule"
+msgstr ""
+
+#: src/ui/device_view.rs:357
+msgid "Not provided in the listDevices response."
+msgstr ""
+
+#: src/ui/device_view.rs:360
+msgid "Device rule reported by USBGuard"
+msgstr ""
+
+#: src/ui/device_view.rs:366
+msgid "Rule parsing issue"
+msgstr ""
+
+#: src/ui/device_view.rs:375
+#, rust-format
+msgid "{field}: {value}"
+msgstr ""
+
+#: src/ui/device_view.rs:447
 msgid "State"
 msgstr ""
 
-#: src/ui/device_view.rs:369 src/ui/rule_dialog.rs:196 src/ui/window.rs:838
+#: src/ui/device_view.rs:476 src/ui/rule_dialog.rs:196 src/ui/window.rs:838
 msgid "Cancel"
 msgstr ""
 
-#: src/ui/device_view.rs:371
+#: src/ui/device_view.rs:478
 msgid ""
 "Stop waiting. The daemon may already have acted; the list will show what it "
 "actually did."
 msgstr ""
 
-#: src/ui/device_view.rs:425
+#: src/ui/device_view.rs:532
 msgid "Actions"
 msgstr ""
 
-#: src/ui/device_view.rs:436
+#: src/ui/device_view.rs:543
 msgid "Allow"
 msgstr ""
 
-#: src/ui/device_view.rs:436
+#: src/ui/device_view.rs:543
 msgid "Allow this device"
 msgstr ""
 
-#: src/ui/device_view.rs:437
+#: src/ui/device_view.rs:544
 msgid "Block"
 msgstr ""
 
-#: src/ui/device_view.rs:437
+#: src/ui/device_view.rs:544
 msgid "Block this device"
 msgstr ""
 
-#: src/ui/device_view.rs:438 src/ui/window.rs:638
+#: src/ui/device_view.rs:545 src/ui/window.rs:638
 msgid "Reject"
 msgstr ""
 
-#: src/ui/device_view.rs:438
+#: src/ui/device_view.rs:545
 msgid "Reject this device"
 msgstr ""
 
-#: src/ui/device_view.rs:440 src/ui/preferences.rs:21
+#: src/ui/device_view.rs:547 src/ui/preferences.rs:21
 msgid "This session only"
 msgstr ""
 
-#: src/ui/device_view.rs:441
+#: src/ui/device_view.rs:548
 msgid "Undone when USBGuard restarts"
 msgstr ""
 
-#: src/ui/device_view.rs:442 src/ui/preferences.rs:22
+#: src/ui/device_view.rs:549 src/ui/preferences.rs:22
 msgid "Permanently"
 msgstr ""
 
-#: src/ui/device_view.rs:443
+#: src/ui/device_view.rs:550
 msgid "Written to the policy; survives a restart"
 msgstr ""
 
@@ -869,10 +922,6 @@ msgstr ""
 #: src/ui/window.rs:1068
 msgid ""
 "Connection to USBGuard lost. Retrying… The list below may be out of date."
-msgstr ""
-
-#: src/ui/window.rs:1071
-msgid "Details"
 msgstr ""
 
 #: src/ui/window.rs:1105

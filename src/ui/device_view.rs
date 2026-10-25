@@ -133,6 +133,7 @@ impl DeviceView {
         for (title, expand, text) in text_columns() {
             columns.append_column(&text_column(&title, expand, text));
         }
+        columns.append_column(&details_column());
         columns.append_column(&actions_column(config.clone(), handler, block));
 
         let toolbar = gtk::Box::builder()
@@ -268,6 +269,112 @@ fn tooltip(device: &Device) -> String {
         text.push_str(&super::i18n::parse_error(err.kind));
     }
     text
+}
+
+fn details_column() -> gtk::ColumnViewColumn {
+    let factory = gtk::SignalListItemFactory::new();
+    factory.connect_setup(|_, item| {
+        let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
+            return;
+        };
+        let details = gtk::MenuButton::builder().label(gettext("Details")).build();
+        let text = gtk::Label::builder()
+            .width_request(320)
+            .max_width_chars(48)
+            .wrap(true)
+            .selectable(true)
+            .use_markup(false)
+            .xalign(0.0)
+            .build();
+        let popover = gtk::Popover::builder().child(&text).build();
+        details.set_popover(Some(&popover));
+        item.set_child(Some(&details));
+    });
+    factory.connect_bind(|_, item| {
+        let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
+            return;
+        };
+        let (Some(details), Some(device)) = (
+            item.child().and_downcast::<gtk::MenuButton>(),
+            bound_device(item),
+        ) else {
+            return;
+        };
+        let Some(text) = details
+            .popover()
+            .and_then(|popover| popover.child())
+            .and_downcast::<gtk::Label>()
+        else {
+            return;
+        };
+        text.set_text(&details_text(&device));
+    });
+    gtk::ColumnViewColumn::new(Some(&gettext("Details")), Some(factory))
+}
+
+fn details_text(device: &Device) -> String {
+    let mut lines = vec![
+        detail_line(&gettext("USBGuard device ID"), &device.id.to_string()),
+        detail_line(
+            &gettext("State reported by USBGuard"),
+            &state_presentation(device.target).1,
+        ),
+        detail_line(
+            &gettext("USB ID"),
+            &device
+                .attrs
+                .usb_id
+                .map_or_else(|| "—".to_owned(), |id| id.to_string()),
+        ),
+        detail_line(
+            &gettext("Serial number"),
+            &dash(device.attrs.serial.as_deref()),
+        ),
+        detail_line(
+            &gettext("Physical port path"),
+            &dash(device.attrs.via_port.as_deref()),
+        ),
+        detail_line(
+            &gettext("Connection type"),
+            &dash(device.attrs.with_connect_type.as_deref()),
+        ),
+        detail_line(
+            &gettext("USB interfaces (class:subclass:protocol)"),
+            &if device.attrs.with_interface.is_empty() {
+                "—".to_owned()
+            } else {
+                device
+                    .attrs
+                    .with_interface
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            },
+        ),
+        detail_line(
+            &gettext("Matched policy rule"),
+            &gettext("Not provided in the listDevices response."),
+        ),
+        detail_line(
+            &gettext("Device rule reported by USBGuard"),
+            &device.rule_text,
+        ),
+    ];
+    if let Some(error) = device.parse_error {
+        lines.push(detail_line(
+            &gettext("Rule parsing issue"),
+            &super::i18n::parse_error(error.kind),
+        ));
+    }
+    lines.join("\n")
+}
+
+fn detail_line(field: &str, value: &str) -> String {
+    fill(
+        &gettext("{field}: {value}"),
+        &[("field", field), ("value", value)],
+    )
 }
 
 /// The device bound to a list item right now, if any.

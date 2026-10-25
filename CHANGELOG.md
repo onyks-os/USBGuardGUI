@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A per-device details popover with USB interfaces, physical port path,
+  connection type and daemon-reported state. It distinguishes the device rule
+  text from the effective policy rule, which `listDevices` does not report.
 - A read-only preview in both new-rule editor modes showing connected devices
   matching the rule's attributes. Conditions and earlier-rule precedence are
   called out as factors the preview cannot simulate; edits, cancellation and

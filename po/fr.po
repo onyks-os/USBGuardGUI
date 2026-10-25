@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: USBGuardGUI\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 18:59+0100\n"
+"POT-Creation-Date: 2026-10-25 19:38+0100\n"
 "PO-Revision-Date: 2026-10-24 18:00+0200\n"
 "Last-Translator: USBGuardGUI project\n"
 "Language-Team: French\n"
@@ -60,57 +60,110 @@ msgstr "Afficher uniquement les périphériques non autorisés"
 msgid "Filter by name, ID, or serial"
 msgstr "Filtrer par nom, identifiant ou numéro de série"
 
-#: src/ui/device_view.rs:162
+#: src/ui/device_view.rs:163
 msgid "Connecting to USBGuard…"
 msgstr "Connexion à USBGuard…"
 
-#: src/ui/device_view.rs:169
+#: src/ui/device_view.rs:170
 msgid "No USB devices"
 msgstr "Aucun périphérique USB"
 
-#: src/ui/device_view.rs:170
+#: src/ui/device_view.rs:171
 msgid "USBGuard reports no connected devices."
 msgstr "USBGuard ne signale aucun périphérique connecté."
 
-#: src/ui/device_view.rs:236
+#: src/ui/device_view.rs:237
 msgid "Name"
 msgstr "Nom"
 
-#: src/ui/device_view.rs:238
+#: src/ui/device_view.rs:239
 #, rust-format
 msgid "(unreadable) {rule}"
 msgstr "(illisible) {rule}"
 
-#: src/ui/device_view.rs:243
+#: src/ui/device_view.rs:244
 msgid "ID"
 msgstr "Identifiant"
 
-#: src/ui/device_view.rs:248
+#: src/ui/device_view.rs:249
 msgid "Serial"
 msgstr "Numéro de série"
 
-#: src/ui/device_view.rs:251
+#: src/ui/device_view.rs:252
 msgid "Port"
 msgstr "Port"
 
-#: src/ui/device_view.rs:259
+#: src/ui/device_view.rs:260
 #, rust-format
 msgid "Daemon device id: {id}"
 msgstr "Identifiant du périphérique dans le démon : {id}"
 
-#: src/ui/device_view.rs:266
+#: src/ui/device_view.rs:267
 msgid "Could not be parsed:"
 msgstr "Impossible d’analyser :"
 
-#: src/ui/device_view.rs:340
+#: src/ui/device_view.rs:280 src/ui/device_view.rs:312 src/ui/window.rs:1071
+msgid "Details"
+msgstr "Détails"
+
+#: src/ui/device_view.rs:317
+msgid "USBGuard device ID"
+msgstr "Identifiant du périphérique USBGuard"
+
+#: src/ui/device_view.rs:319
+msgid "State reported by USBGuard"
+msgstr "État indiqué par USBGuard"
+
+#: src/ui/device_view.rs:323
+msgid "USB ID"
+msgstr "Identifiant USB"
+
+#: src/ui/device_view.rs:330
+msgid "Serial number"
+msgstr "Numéro de série"
+
+#: src/ui/device_view.rs:334
+msgid "Physical port path"
+msgstr "Chemin du port physique"
+
+#: src/ui/device_view.rs:338
+msgid "Connection type"
+msgstr "Type de connexion"
+
+#: src/ui/device_view.rs:342
+msgid "USB interfaces (class:subclass:protocol)"
+msgstr "Interfaces USB (classe:sous-classe:protocole)"
+
+#: src/ui/device_view.rs:356
+msgid "Matched policy rule"
+msgstr "Règle de stratégie correspondante"
+
+#: src/ui/device_view.rs:357
+msgid "Not provided in the listDevices response."
+msgstr "Non indiqué dans la réponse listDevices."
+
+#: src/ui/device_view.rs:360
+msgid "Device rule reported by USBGuard"
+msgstr "Règle du périphérique indiquée par USBGuard"
+
+#: src/ui/device_view.rs:366
+msgid "Rule parsing issue"
+msgstr "Problème d’analyse de la règle"
+
+#: src/ui/device_view.rs:375
+#, rust-format
+msgid "{field}: {value}"
+msgstr "{field} : {value}"
+
+#: src/ui/device_view.rs:447
 msgid "State"
 msgstr "État"
 
-#: src/ui/device_view.rs:369 src/ui/rule_dialog.rs:196 src/ui/window.rs:838
+#: src/ui/device_view.rs:476 src/ui/rule_dialog.rs:196 src/ui/window.rs:838
 msgid "Cancel"
 msgstr "Annuler"
 
-#: src/ui/device_view.rs:371
+#: src/ui/device_view.rs:478
 msgid ""
 "Stop waiting. The daemon may already have acted; the list will show what it "
 "actually did."
@@ -118,47 +171,47 @@ msgstr ""
 "Cesser d’attendre. Le démon a peut-être déjà agi ; la liste indiquera ce "
 "qu’il a réellement fait."
 
-#: src/ui/device_view.rs:425
+#: src/ui/device_view.rs:532
 msgid "Actions"
 msgstr "Actions"
 
-#: src/ui/device_view.rs:436
+#: src/ui/device_view.rs:543
 msgid "Allow"
 msgstr "Autoriser"
 
-#: src/ui/device_view.rs:436
+#: src/ui/device_view.rs:543
 msgid "Allow this device"
 msgstr "Autoriser ce périphérique"
 
-#: src/ui/device_view.rs:437
+#: src/ui/device_view.rs:544
 msgid "Block"
 msgstr "Bloquer"
 
-#: src/ui/device_view.rs:437
+#: src/ui/device_view.rs:544
 msgid "Block this device"
 msgstr "Bloquer ce périphérique"
 
-#: src/ui/device_view.rs:438 src/ui/window.rs:638
+#: src/ui/device_view.rs:545 src/ui/window.rs:638
 msgid "Reject"
 msgstr "Rejeter"
 
-#: src/ui/device_view.rs:438
+#: src/ui/device_view.rs:545
 msgid "Reject this device"
 msgstr "Rejeter ce périphérique"
 
-#: src/ui/device_view.rs:440 src/ui/preferences.rs:21
+#: src/ui/device_view.rs:547 src/ui/preferences.rs:21
 msgid "This session only"
 msgstr "Pour cette session uniquement"
 
-#: src/ui/device_view.rs:441
+#: src/ui/device_view.rs:548
 msgid "Undone when USBGuard restarts"
 msgstr "Annulé au redémarrage d’USBGuard"
 
-#: src/ui/device_view.rs:442 src/ui/preferences.rs:22
+#: src/ui/device_view.rs:549 src/ui/preferences.rs:22
 msgid "Permanently"
 msgstr "De façon permanente"
 
-#: src/ui/device_view.rs:443
+#: src/ui/device_view.rs:550
 msgid "Written to the policy; survives a restart"
 msgstr "Enregistré dans la politique ; conservé après un redémarrage"
 
@@ -929,10 +982,6 @@ msgid ""
 msgstr ""
 "Connexion à USBGuard perdue. Nouvelle tentative… La liste ci-dessous peut "
 "être obsolète."
-
-#: src/ui/window.rs:1071
-msgid "Details"
-msgstr "Détails"
 
 #: src/ui/window.rs:1105
 #, rust-format
