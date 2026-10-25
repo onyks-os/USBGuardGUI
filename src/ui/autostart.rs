@@ -52,3 +52,7 @@ pub(super) fn set(enabled: bool) -> std::io::Result<()> {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "../../tests/gui/autostart.rs"]
+pub(super) mod tests;

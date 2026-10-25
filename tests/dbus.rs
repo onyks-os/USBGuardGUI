@@ -720,3 +720,139 @@ async fn real_bus_name_replacement_resynchronizes_and_then_stays_connected() {
             .is_err()
     );
 }
+
+#[tokio::test]
+async fn malformed_signals_are_ignored_without_losing_the_next_valid_event() {
+    let mock = Mock::start(vec![], vec![]).await;
+    let rx = start_worker(&mock).await;
+    for (path, interface, member) in [
+        (
+            "/org/usbguard1/Devices",
+            "org.usbguard.Devices1",
+            "DevicePresenceChanged",
+        ),
+        (
+            "/org/usbguard1/Devices",
+            "org.usbguard.Devices1",
+            "DevicePolicyChanged",
+        ),
+        (
+            "/org/usbguard1/Devices",
+            "org.usbguard.Devices1",
+            "DevicePolicyApplied",
+        ),
+        ("/org/usbguard1", "org.usbguard1", "ExceptionMessage"),
+        (
+            "/org/usbguard1",
+            "org.usbguard1",
+            "PropertyParameterChanged",
+        ),
+    ] {
+        mock.server
+            .emit_signal(
+                None::<&str>,
+                path,
+                interface,
+                member,
+                &("wrong wire signature",),
+            )
+            .await
+            .unwrap();
+    }
+    mock.presence(7, 1, 1, &device_rule("block", 7), "test")
+        .await;
+    let UiEvent::DeviceBatch(batch) = recv(&rx).await else {
+        panic!("expected a valid batch");
+    };
+    assert_eq!(batch.len(), 1);
+    assert_eq!(batch[0].id, DeviceId::new(7));
+    let emitter =
+        zbus::object_server::SignalEmitter::new(&mock.server, "/org/usbguard1/Devices").unwrap();
+    support::Devices::device_policy_applied(
+        &emitter,
+        7,
+        0,
+        "allow",
+        0,
+        std::collections::HashMap::new(),
+    )
+    .await
+    .unwrap();
+    let UiEvent::DeviceBatch(batch) = recv(&rx).await else {
+        panic!("expected applied policy");
+    };
+    assert_eq!(batch[0].target, Some(Target::Allow));
+    let emitter = zbus::object_server::SignalEmitter::new(&mock.server, "/org/usbguard1").unwrap();
+    support::Root::property_parameter_changed(&emitter, "ImplicitPolicyTarget", "block", "reject")
+        .await
+        .unwrap();
+    assert_eq!(
+        recv(&rx).await,
+        UiEvent::ParameterChanged {
+            name: "ImplicitPolicyTarget".into(),
+            value: "reject".into()
+        }
+    );
+}
+
+#[tokio::test]
+async fn duplicate_insertion_anchors_and_mutation_failures_are_explicit() {
+    use usbguard_gui::model::Parameter;
+    let mock = Mock::start(vec![], rules(&["allow", "block", "allow"])).await;
+    let client = mock.client().await;
+    let anchors = client.list_rules().await.unwrap();
+    let new = parse_rule("reject id 1111:2222").unwrap();
+    client
+        .append_rule_after(&new, Some(&anchors[2]), Persistence::RuntimeOnly)
+        .await
+        .unwrap();
+    assert!(
+        mock.calls()
+            .iter()
+            .any(|c| c == "appendRule reject id 1111:2222 3 true")
+    );
+    let mut stale = anchors[2].clone();
+    stale.position = 99;
+    assert_eq!(
+        client
+            .append_rule_after(&new, Some(&stale), Persistence::RuntimeOnly)
+            .await,
+        Err(AppError::Stale)
+    );
+    mock.deny("getParameter");
+    assert!(matches!(
+        client.get_parameter(Parameter::InsertedDevicePolicy).await,
+        Err(AppError::Denied(_))
+    ));
+    for method in ["appendRule", "removeRule"] {
+        mock.state.lock().unwrap().denied.insert(method);
+    }
+    assert!(matches!(
+        client
+            .append_rule(&new, RuleId::APPEND_LAST, Persistence::Permanent)
+            .await,
+        Err(AppError::Denied(_))
+    ));
+    assert!(matches!(
+        client.remove_rule(&anchors[1]).await,
+        Err(AppError::Denied(_))
+    ));
+    assert!(matches!(
+        client.remove_rule_at(&anchors[0]).await,
+        Err(AppError::Denied(_))
+    ));
+}
+
+#[tokio::test]
+async fn a_broken_watch_falls_back_to_a_timed_wait() {
+    use usbguard_gui::dbus::supervisor::wait_for_bridge;
+    let bus = support::PrivateBus::start();
+    let connection = bus.connect().await;
+    connection.clone().close().await.unwrap();
+    let started = Instant::now();
+    assert_eq!(
+        wait_for_bridge(&connection, Duration::from_millis(20)).await,
+        ServiceWait::TimedOut
+    );
+    assert!(started.elapsed() >= Duration::from_millis(20));
+}

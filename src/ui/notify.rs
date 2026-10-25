@@ -179,3 +179,7 @@ async fn server_supports_actions() -> Option<bool> {
     let caps: Vec<String> = proxy.call("GetCapabilities", &()).await.ok()?;
     Some(caps.iter().any(|c| c == "actions"))
 }
+
+#[cfg(test)]
+#[path = "../../tests/gui/notify.rs"]
+pub(super) mod tests;

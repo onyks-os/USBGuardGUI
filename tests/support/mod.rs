@@ -448,18 +448,27 @@ pub fn device_rule(target: &str, n: u32) -> String {
 pub struct PrivateBus {
     child: std::process::Child,
     pub address: String,
+    config: std::path::PathBuf,
 }
 
 impl PrivateBus {
     pub fn start() -> Self {
         use std::io::BufRead as _;
+        static NEXT_BUS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+        let serial = NEXT_BUS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let config = std::env::temp_dir().join(format!(
+            "usbguard-gui-bus-{}-{serial}.conf",
+            std::process::id()
+        ));
+        std::fs::write(&config,r#"<busconfig><type>session</type><listen>unix:tmpdir=/tmp</listen><auth>EXTERNAL</auth><policy context="default"><allow own="*"/><allow send_destination="*"/><allow receive_sender="*"/></policy></busconfig>"#).unwrap();
         let mut child = std::process::Command::new("dbus-daemon")
             .args([
-                "--session",
                 "--nofork",
                 "--print-address=1",
                 "--address=unix:tmpdir=/tmp",
             ])
+            .arg("--config-file")
+            .arg(&config)
             .stdout(std::process::Stdio::piped())
             .spawn()
             .expect("dbus-daemon is required for private-bus tests");
@@ -471,6 +480,7 @@ impl PrivateBus {
         Self {
             child,
             address: address.trim().to_owned(),
+            config,
         }
     }
 
@@ -486,6 +496,7 @@ impl Drop for PrivateBus {
     fn drop(&mut self) {
         let _ = self.child.kill();
         let _ = self.child.wait();
+        let _ = std::fs::remove_file(&self.config);
     }
 }
 

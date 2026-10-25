@@ -81,13 +81,5 @@ pub enum UiEvent {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::UiEvent;
-
-    fn assert_send<T: Send + 'static>() {}
-
-    #[test]
-    fn ui_event_crosses_threads() {
-        assert_send::<UiEvent>();
-    }
-}
+#[path = "../../tests/unit/model_event.rs"]
+mod tests;

@@ -134,25 +134,5 @@ impl fmt::Display for AccessState {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::{AccessState, Capabilities};
-
-    #[test]
-    fn writes_start_optimistic_reads_pessimistic() {
-        let caps = Capabilities::default();
-        assert!(caps.modify_devices && caps.modify_rules && caps.set_parameters);
-        assert!(!caps.list_devices && !caps.list_rules && !caps.get_parameters);
-    }
-
-    #[test]
-    fn denied_classification() {
-        assert!(AccessState::DeniedByIpcAcl.is_denied());
-        assert!(!AccessState::BridgeNotInstalled.is_denied());
-        assert!(
-            !AccessState::Ok {
-                caps: Capabilities::default()
-            }
-            .is_denied()
-        );
-    }
-}
+#[path = "../../tests/unit/model_access.rs"]
+mod tests;

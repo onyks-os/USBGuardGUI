@@ -110,3 +110,7 @@ pub(super) fn present_about(parent: &impl IsA<gtk::Widget>) {
         .build();
     about.present(Some(parent));
 }
+
+#[cfg(test)]
+#[path = "../../tests/gui/preferences.rs"]
+pub(super) mod tests;

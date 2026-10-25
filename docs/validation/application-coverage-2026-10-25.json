@@ -1,0 +1,265 @@
+{
+  "date": "2026-10-25",
+  "command": "make coverage-app",
+  "metric": "LLVM production line coverage",
+  "scope": "All executable src/ files, GUI and headless configurations; test bodies excluded by location",
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "gtk": "4.22.5",
+  "libadwaita": "1.9.4",
+  "cargo_llvm_cov": "0.9.1",
+  "source_sha256": "9f7aa2928cc35d603d7cd95796d1f76f6c8c91cf6487f9993f1c9fd16e104592",
+  "rust_tests_sha256": "a478742d2d625b15798079ff6ab5bea01a9509945df1d838c9272e6ade7fae1c",
+  "digest_format": "Sorted relative POSIX path + NUL + file bytes + NUL, concatenated; SHA-256",
+  "lines": {
+    "count": 4928,
+    "covered": 4841,
+    "percent": 98.23457792207793
+  },
+  "functions": {
+    "count": 634,
+    "covered": 624,
+    "percent": 98.42271293375394
+  },
+  "regions": {
+    "count": 7637,
+    "covered": 7397,
+    "notcovered": 240,
+    "percent": 96.8574047400812
+  },
+  "files": [
+    {
+      "path": "src/cli.rs",
+      "count": 184,
+      "covered": 180,
+      "percent": 97.82608695652173
+    },
+    {
+      "path": "src/dbus/bus.rs",
+      "count": 10,
+      "covered": 10,
+      "percent": 100.0
+    },
+    {
+      "path": "src/dbus/client.rs",
+      "count": 135,
+      "covered": 132,
+      "percent": 97.77777777777777
+    },
+    {
+      "path": "src/dbus/coalesce.rs",
+      "count": 78,
+      "covered": 78,
+      "percent": 100.0
+    },
+    {
+      "path": "src/dbus/commands.rs",
+      "count": 49,
+      "covered": 49,
+      "percent": 100.0
+    },
+    {
+      "path": "src/dbus/diagnostics.rs",
+      "count": 141,
+      "covered": 129,
+      "percent": 91.48936170212765
+    },
+    {
+      "path": "src/dbus/errors.rs",
+      "count": 82,
+      "covered": 82,
+      "percent": 100.0
+    },
+    {
+      "path": "src/dbus/proxies.rs",
+      "count": 3,
+      "covered": 3,
+      "percent": 100.0
+    },
+    {
+      "path": "src/dbus/supervisor.rs",
+      "count": 86,
+      "covered": 72,
+      "percent": 83.72093023255815
+    },
+    {
+      "path": "src/dbus/worker.rs",
+      "count": 224,
+      "covered": 222,
+      "percent": 99.10714285714286
+    },
+    {
+      "path": "src/device_store.rs",
+      "count": 94,
+      "covered": 94,
+      "percent": 100.0
+    },
+    {
+      "path": "src/main.rs",
+      "count": 40,
+      "covered": 40,
+      "percent": 100.0
+    },
+    {
+      "path": "src/model/access.rs",
+      "count": 37,
+      "covered": 37,
+      "percent": 100.0
+    },
+    {
+      "path": "src/model/device.rs",
+      "count": 120,
+      "covered": 120,
+      "percent": 100.0
+    },
+    {
+      "path": "src/model/error.rs",
+      "count": 24,
+      "covered": 24,
+      "percent": 100.0
+    },
+    {
+      "path": "src/model/ids.rs",
+      "count": 122,
+      "covered": 122,
+      "percent": 100.0
+    },
+    {
+      "path": "src/model/parameter.rs",
+      "count": 17,
+      "covered": 17,
+      "percent": 100.0
+    },
+    {
+      "path": "src/model/rule.rs",
+      "count": 95,
+      "covered": 95,
+      "percent": 100.0
+    },
+    {
+      "path": "src/model/target.rs",
+      "count": 47,
+      "covered": 46,
+      "percent": 97.87234042553192
+    },
+    {
+      "path": "src/remedy.rs",
+      "count": 105,
+      "covered": 104,
+      "percent": 99.04761904761905
+    },
+    {
+      "path": "src/rules/builder.rs",
+      "count": 56,
+      "covered": 54,
+      "percent": 96.42857142857143
+    },
+    {
+      "path": "src/rules/lexer.rs",
+      "count": 97,
+      "covered": 96,
+      "percent": 98.96907216494846
+    },
+    {
+      "path": "src/rules/mod.rs",
+      "count": 13,
+      "covered": 13,
+      "percent": 100.0
+    },
+    {
+      "path": "src/rules/parser.rs",
+      "count": 245,
+      "covered": 245,
+      "percent": 100.0
+    },
+    {
+      "path": "src/rules/render.rs",
+      "count": 91,
+      "covered": 90,
+      "percent": 98.9010989010989
+    },
+    {
+      "path": "src/runtime.rs",
+      "count": 11,
+      "covered": 11,
+      "percent": 100.0
+    },
+    {
+      "path": "src/ui/autostart.rs",
+      "count": 22,
+      "covered": 21,
+      "percent": 95.45454545454545
+    },
+    {
+      "path": "src/ui/config.rs",
+      "count": 69,
+      "covered": 68,
+      "percent": 98.55072463768117
+    },
+    {
+      "path": "src/ui/device_view.rs",
+      "count": 361,
+      "covered": 350,
+      "percent": 96.9529085872576
+    },
+    {
+      "path": "src/ui/diagnostic_dialog.rs",
+      "count": 82,
+      "covered": 81,
+      "percent": 98.78048780487805
+    },
+    {
+      "path": "src/ui/i18n.rs",
+      "count": 81,
+      "covered": 80,
+      "percent": 98.76543209876544
+    },
+    {
+      "path": "src/ui/mod.rs",
+      "count": 123,
+      "covered": 117,
+      "percent": 95.1219512195122
+    },
+    {
+      "path": "src/ui/notify.rs",
+      "count": 122,
+      "covered": 122,
+      "percent": 100.0
+    },
+    {
+      "path": "src/ui/policy_view.rs",
+      "count": 244,
+      "covered": 243,
+      "percent": 99.59016393442623
+    },
+    {
+      "path": "src/ui/preferences.rs",
+      "count": 85,
+      "covered": 84,
+      "percent": 98.82352941176472
+    },
+    {
+      "path": "src/ui/rule_dialog.rs",
+      "count": 366,
+      "covered": 360,
+      "percent": 98.36065573770492
+    },
+    {
+      "path": "src/ui/tray.rs",
+      "count": 317,
+      "covered": 312,
+      "percent": 98.42271293375394
+    },
+    {
+      "path": "src/ui/window.rs",
+      "count": 850,
+      "covered": 838,
+      "percent": 98.58823529411764
+    }
+  ],
+  "limits": [
+    "Line coverage is not branch coverage or proof of no bugs.",
+    "GTK uses Xvfb; USBGuard, notifications and watcher are private D-Bus mocks.",
+    "20/180-second GTK notices use wall-clock time; this run does not test real PAM.",
+    "Real Polkit/PAM clean-install evidence remains separately documented."
+  ]
+}

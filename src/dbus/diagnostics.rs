@@ -273,43 +273,5 @@ pub fn state_from_error(err: &AppError) -> Option<AccessState> {
 }
 
 #[cfg(test)]
-mod tests {
-    use std::fs;
-
-    use super::{exit_code, polkit_agent_present};
-    use crate::model::{AccessState, Capabilities};
-
-    #[test]
-    fn exit_codes_match_the_interface_document() {
-        assert_eq!(
-            exit_code(&AccessState::Ok {
-                caps: Capabilities::default()
-            }),
-            0
-        );
-        assert_eq!(exit_code(&AccessState::DeniedByIpcAcl), 3);
-        assert_eq!(exit_code(&AccessState::BridgeNotInstalled), 4);
-        assert_eq!(
-            exit_code(&AccessState::BridgeNotRunning {
-                daemon_running: None
-            }),
-            4
-        );
-        assert_eq!(exit_code(&AccessState::BusUnavailable), 5);
-    }
-
-    #[test]
-    fn agent_heuristic_reads_comm() {
-        let dir = std::env::temp_dir().join(format!("usbguard-gui-proc-{}", std::process::id()));
-        let _ = fs::remove_dir_all(&dir);
-        fs::create_dir_all(dir.join("42")).unwrap();
-        fs::write(dir.join("42/comm"), "bash\n").unwrap();
-        fs::create_dir_all(dir.join("self")).unwrap();
-        assert_eq!(polkit_agent_present(&dir), Some(false));
-        fs::create_dir_all(dir.join("77")).unwrap();
-        fs::write(dir.join("77/comm"), "polkit-kde-auth\n").unwrap();
-        assert_eq!(polkit_agent_present(&dir), Some(true));
-        fs::remove_dir_all(&dir).unwrap();
-        assert_eq!(polkit_agent_present(&dir), None);
-    }
-}
+#[path = "../../tests/unit/dbus_diagnostics.rs"]
+mod tests;

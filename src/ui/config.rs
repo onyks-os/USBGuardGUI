@@ -104,3 +104,7 @@ fn development_schema() -> Option<gio::SettingsSchema> {
     .ok()?;
     source.lookup(APP_ID, false)
 }
+
+#[cfg(test)]
+#[path = "../../tests/gui/config.rs"]
+pub(super) mod tests;
