@@ -430,19 +430,28 @@ pub(in crate::ui) fn exercise(app: &adw::Application, backend: &Backend) {
     assert!(!backend.desktop.registrations.lock().unwrap().is_empty());
     config.settings().unwrap().reset("tray-notice-shown");
     window.0.window.close();
+    assert!(
+        window.0.window.is_visible(),
+        "close must finish before unmapping"
+    );
     pump();
     assert!(!window.0.window.is_visible());
     window.start_hidden();
     assert!(window.0.hold.borrow().is_some());
     window.present();
     assert!(window.0.hold.borrow().is_none());
+    // A preference changed before the deferred close runs must still decide
+    // whether to keep the window alive in the background.
+    window.0.window.close();
+    assert!(window.0.window.is_visible());
     config
         .settings()
         .unwrap()
         .set_boolean("run-in-background", false)
         .unwrap();
-    window.0.window.close();
     pump();
+    assert!(window.0.window.application().is_none());
+    assert!(window.0.hold.borrow().is_none());
     // Unknown operation IDs cannot update the UI after cancellation.
     window.apply(UiEvent::OperationFinished {
         op: OperationId(u64::MAX),

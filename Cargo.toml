@@ -13,7 +13,7 @@ keywords = ["usbguard", "usb", "security", "gtk4", "linux"]
 categories = ["gui"]
 exclude = [
     "docs/", ".github/", "SESSION_HANDOFF.md",
-    "scripts/clean-install-*", "scripts/verify-clean-install.py", "tests/test_clean_install.py",
+    "scripts/clean-install-*", "scripts/verify-clean-install.py", "tests/test_clean_install*.py",
 ]
 
 # ---------------------------------------------------------------------------

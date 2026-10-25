@@ -288,7 +288,16 @@ impl MainWindow {
                 let (width, height) = w.default_size();
                 this.0.config.save_window(width, height, w.is_maximized());
                 if this.0.config.run_in_background() {
-                    this.hide_to_background();
+                    // Let GTK finish the close button's activation before
+                    // unmapping its headerbar and notifying its children.
+                    let this = this.clone();
+                    glib::idle_add_local_once(move || {
+                        if this.0.config.run_in_background() {
+                            this.hide_to_background();
+                        } else {
+                            this.0.window.close();
+                        }
+                    });
                     glib::Propagation::Stop
                 } else {
                     glib::Propagation::Proceed

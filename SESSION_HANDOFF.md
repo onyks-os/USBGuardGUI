@@ -1,3 +1,109 @@
+# Development handoff — paused at user request, 2026-10-26
+
+Resume the desktop-quality milestone, then prepare 0.2.0. The user explicitly
+requested saving and stopping within two minutes. No 0.2.0 tag or publication
+has started. DCO sign-offs and ordinary project PR/tag/release work remain
+previously authorized; do not ask for that consent again.
+
+**Privacy constraint:** never inspect the real host's desktop, application,
+service or physical-device inventory. Desktop testing stays inside the marked,
+headless Fedora VM with synthetic USB and private session buses/XDG directories.
+Do not launch or inspect the user's actual desktop for these tests.
+
+Current branch: `feat/desktop-quality`; PR #61 remains draft. Last pushed commit
+is `41d0c2b`; CI run `40238388857` is entirely green, including application coverage
+and reproducible packages. This pause creates a NEW LOCAL checkpoint commit;
+its experimental changes are not yet published or CI validated.
+
+Completed this session:
+
+- Both GNOME Shell 50.6 and KWin/Plasma 6.7.5 passed six functional checks in the
+  disposable guest: native Wayland frame, AT-SPI controls/filter, preferences,
+  background notice/liveness, same-process relaunch, and GNOME no-watcher Quit
+  or real Plasma tray registration/Activate/menu Quit.
+- The baseline reports and raw app logs are under
+  `target/clean-install-fedora-pr61/desktop-{gnome,kde}-{report.json,app.log}`.
+  They match executable SHA256
+  `71b56efffc9d97c6ad9228d8ae03356453c24a40f604d7e6977d6e27ca9fbbbd`
+  (the feature candidate still identifies as 0.1.2). These new desktop reports
+  are preliminary; do NOT treat them as clean final release receipts.
+- New `scripts/clean-install-guest-desktop.py` records the repeatable test. It
+  uses private dconf, a virtual output and software renderers; AT-SPI roots are
+  restricted to the exact GUI PID. Native switch actions must target the inner
+  actionable switch, not a similarly named label/wrapper. Both `button` and
+  `push button` role names are accepted.
+- `make test-clean-install-driver`: 17 tests passed, including the new guard
+  proving host execution stops before GUI imports/process launch. Ruff passes.
+- Cargo excludes `tests/test_clean_install*.py` alongside VM-only scripts, with
+  a strengthened crate-content regression; these tests otherwise import helpers
+  deliberately absent from published crates.
+- README and user guides now explain details, attribute-only rule previews and
+  private event history. `make docs-sync` updated the generated changelog page.
+  Pinned MkDocs strict build passed using `target/release-docs-venv/bin/mkdocs
+  build --strict --site-dir target/docs-desktop-quality-pinned`.
+  Default `make docs-build` targets a sibling website checkout; use an explicit
+  output INSIDE this repository. No outside write was made.
+
+Open investigation before calling the milestone complete:
+
+- GNOME emitted intermittent `GLib-GObject-CRITICAL: g_object_notify_by_pspec:
+  assertion G_IS_OBJECT failed` despite successful functional cases. No matching
+  critical was found in the collected KDE baseline log.
+- GDB in the VM, attached only to the GUI PID with `G_DEBUG=fatal-criticals`,
+  captured GTK `button_activate_timeout -> g_signal_emit -> g_log` on thread 1.
+  See `docs/validation/desktop-quality-2026-10-26/investigation.md` and raw
+  `target/desktop-gobject-backtrace.log`. The first debugger run passed cleanly;
+  a later attempted stress run caught the critical.
+- IMPORTANT newest finding: the draft stress loop calls AT-SPI
+  `search.queryComponent().grabFocus()`, which raises an unsupported-operation
+  error. GTK's inspected 4.22.5 AT-SPI component implementation explicitly rejects
+  GrabFocus. Remove that unsupported call before interpreting stress failures;
+  they may include cleanup after the automation aborts. Query the exact guest
+  GTK package version before attributing the warning to a particular upstream
+  version. No upstream defect or first-party cause is yet established.
+- An EXPERIMENTAL, unproven source change currently defers background close to
+  GLib idle and rechecks the latest preference. Its GUI regression is in
+  `tests/gui/window.rs`. `make lint` passed, and a diagnostic release binary
+  built. GUI contracts/coverage for this experiment have NOT been rerun. Keep
+  it only if a controlled native before/after test demonstrates the fix; otherwise
+  revert this experiment, preserving the unrelated tooling/docs changes.
+- Pilot executable: `target/release/usbguard-gui`, copied only into guest home as
+  `usbguard-gui-patched`; the installed original package was retained. Diagnostic
+  scripts are `target/desktop-debug-test.py` and
+  `target/desktop-debug-patched-test.py`. Both stress attempts stopped at the
+  unsupported GrabFocus operation before completing any of the planned ten
+  cycles. Do not describe those cycles as passed or the patch as validated.
+- Formal desktop driver has not yet been run as its final typed source or had
+  a strict critical-message gate added. Final receipts must identify the actual
+  executed driver/helper/binary hashes. The earlier app coverage remains
+  5491/5598 = 98.0886%; it is not a new measurement for the experimental code.
+
+VM and artifacts:
+
+`target/clean-install-fedora-pr61` has the reusable private disk, SSH metadata and
+QMP socket. It was booted with 4 GiB/4 vCPUs TCG, no host passthrough/display.
+Shutdown completed for this pause and the dedicated QMP endpoint was verified closed.
+`target/start-desktop-test-vm.py` resumes that exact disk and refuses a concurrent
+writer. New guest packages (GNOME, Plasma, Mesa, portal backends, GDB) were only
+installed inside this VM; SELinux was not disabled. Credentials stay private
+and uncommitted. Latest extra logs/scripts were archived successfully as
+`target/clean-install-fedora-pr61/desktop-final-evidence.tar.gz` before shutdown.
+A detailed working note is `target/desktop-quality-progress.md`; this handoff
+supersedes its older experimental conclusions.
+
+Next steps after the investigation: finalize desktop driver/receipts and accurate
+ROADMAP/testing/verification status, update the stale scripts catalog, run required
+checks with no real-host inventory access, commit/sign/push and finish PR #61 only
+when green. Then prepare 0.2.0 metadata (Cargo.toml/lock, Arch pkgver, changelog and
+its stale comparison links, AppStream input/generated metadata), CI and release
+candidate `v0.2.0-rc.1` per docs/releasing.md. Verify packages, installed pinned
+Flatpak and signatures before stable publication at the same verified commit.
+No translation expansion or AUR work. Never move a published tag.
+
+---
+
+## Previous completed checkpoint (historical)
+
 # Development handoff — 2026-10-25
 
 Completed implementation follow-up: the user explicitly requested **98% coverage across the entire

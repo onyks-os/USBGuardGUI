@@ -120,6 +120,7 @@ class CleanInstallTests(unittest.TestCase):
         self.assertNotIn("SESSION_HANDOFF.md", files)
         self.assertNotIn("scripts/verify-clean-install.py", files)
         self.assertFalse(any(name.startswith("scripts/clean-install-") for name in files))
+        self.assertFalse(any(name.startswith("tests/test_clean_install") for name in files))
 
     def test_ssh_pins_identity_and_known_hosts_inside_output(self):
         with tempfile.TemporaryDirectory() as temporary:

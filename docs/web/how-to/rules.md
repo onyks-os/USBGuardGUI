@@ -21,6 +21,15 @@ Click **Add Rule…**.
 **Will be sent as** shows the exact text USBGuard will receive. An invalid rule never leaves the
 program and never raises a password prompt.
 
+Once the rule is valid, click **Preview matching devices** in either editor mode. USBGuard returns
+a snapshot of connected devices matching its attributes, or an explicit no-matches result.
+The query is read-only and leaves the policy and device states unchanged. **Cancel preview**
+stops waiting; editing the rule or closing the dialog invalidates pending results.
+
+This snapshot does not evaluate rule conditions or earlier-rule precedence. A device shown in
+the preview may receive a different final decision when the policy runs. Preview again when
+you edit the attributes or the connected devices change.
+
 **Position** decides where the rule goes: at the end, or after a specific rule. **Keep after
 USBGuard restarts** decides whether it is written to the policy or kept in memory only.
 
