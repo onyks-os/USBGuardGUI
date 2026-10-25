@@ -467,6 +467,12 @@ synthetic USB disk, requests Block / This session only, and checks:
 4. Restarting both USBGuard services restores persistent allow, and the GUI
    reconnects and displays the refreshed state.
 
+The guest driver now performs an additional AT-SPI assertion that the device
+filter, device list, device details action and main menu expose screen-reader
+names. It runs only inside the disposable Xvfb guest; the host desktop is not
+queried. The recorded October 24–25 runs predate this assertion and remain
+evidence for the four daemon/Polkit cases above.
+
 The October 25 driver additionally observes actual system-bus calls and denials
 inside the VM. It asserts the synthetic device ID, block target and `permanent=false`,
 so unchanged device state alone cannot make a missing GUI action pass. The host

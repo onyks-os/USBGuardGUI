@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and icon-only main menu; a repeatable 20-device background memory check.
 - A development-only `USBGUARD_GUI_ISOLATED_INSTANCE=1` option for running a
   demo/test GUI without forwarding activation to the installed application.
+- AT-SPI name assertions in the disposable clean-install UI test for the device
+  filter/list/details and main menu.
 - A local event history for observed device insertions/removals, authorization
   outcomes, daemon reconnections and resynchronization gaps. It is capped at 200
   entries, stores only categories and timestamps, persists only by opt-in, and

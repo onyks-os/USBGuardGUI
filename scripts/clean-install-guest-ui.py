@@ -149,6 +149,11 @@ try:
     processes.append(app)
     wait(lambda: find(role='entry') or find(role='text'))
     print('GUI registered on accessibility bus', flush=True)
+    for name in ('Filter devices by name, ID, or serial', 'Connected USB devices',
+                 'Show device details', 'Main menu'):
+        wait(lambda name=name: find(name=name))
+    report['cases'].append('screen-reader labels: device filter/list/details and main menu exposed')
+    print('Passed checkpoint: screen-reader labels', flush=True)
     if os.environ.get('USBGUI_DUMP_TREE'):
         time.sleep(10)
         for item in tree():
