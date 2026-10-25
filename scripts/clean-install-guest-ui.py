@@ -53,6 +53,27 @@ def find(name=None, role=None):
     return None
 
 
+def verify_keyboard_focus(search):
+    editable = search.queryEditableText()
+    bounds = search.queryComponent().getExtents(pyatspi.DESKTOP_COORDS)
+    assert bounds.width > 0 and bounds.height > 0
+    print('Keyboard test target:', search.getRoleName(), repr(search.name),
+          (bounds.x, bounds.y, bounds.width, bounds.height), flush=True)
+    click(search)
+    print('Active window:', subprocess.check_output(
+        ['xdotool', 'getactivewindow', 'getwindowname'], text=True).strip(), flush=True)
+    subprocess.run(['xdotool', 'key', 'ctrl+a'], check=True)
+    subprocess.run(['xdotool', 'type', '--clearmodifiers', 'keyboard-before-tab'], check=True)
+    wait(lambda: editable.getText(0, 128) == 'keyboard-before-tab', timeout=5)
+    subprocess.run(['xdotool', 'key', 'Tab'], check=True)
+    subprocess.run(['xdotool', 'type', '--clearmodifiers', 'keyboard-after-tab'], check=True)
+    assert editable.getText(0, 128) == 'keyboard-before-tab', 'Tab did not move focus out of the filter'
+    subprocess.run(['xdotool', 'key', 'shift+Tab'], check=True)
+    subprocess.run(['xdotool', 'key', 'ctrl+a'], check=True)
+    subprocess.run(['xdotool', 'type', '--clearmodifiers', 'keyboard-returned'], check=True)
+    wait(lambda: editable.getText(0, 128) == 'keyboard-returned', timeout=5)
+
+
 def click(item):
     actions = item.queryAction()
     if not actions.nActions:
@@ -152,14 +173,16 @@ try:
     for name in ('Filter devices by name, ID, or serial', 'Connected USB devices',
                  'Show device details', 'Main menu'):
         wait(lambda name=name: find(name=name))
-    report['cases'].append('screen-reader labels: device filter/list/details and main menu exposed')
     print('Passed checkpoint: screen-reader labels', flush=True)
     if os.environ.get('USBGUI_DUMP_TREE'):
         time.sleep(10)
         for item in tree():
             print(item.getRoleName(), repr(item.name), flush=True)
     else:
-        search = wait(lambda: find(role='entry') or find(role='text'))
+        search = wait(lambda: find(name='Filter devices by name, ID, or serial'))
+        verify_keyboard_focus(search)
+        report['cases'].append('accessibility and keyboard: labels exposed; Tab/Shift+Tab moves focus')
+        print('Passed checkpoint: keyboard focus', flush=True)
         print('Search located', flush=True)
         search.queryEditableText().setTextContents('usbguard-clean-test')
         time.sleep(3)

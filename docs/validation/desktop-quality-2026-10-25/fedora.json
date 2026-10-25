@@ -4,12 +4,12 @@
   "image_sha256": "28680fe5b371a5a82ebf43a31926e086a168e59949d03969c5093e7071f90b7f",
   "serial": "usbguard-clean-test",
   "acceleration": "tcg",
-  "validated_at": "2026-10-25T21:22:42.042257+00:00",
+  "validated_at": "2026-10-25T21:41:10.478250+00:00",
   "package": "usbguard-gui-0.1.2-1.x86_64.rpm",
   "package_sha256": "91bfe83f045d825c2be8ecea69dbabe1f4cc5a501df96b596dc191d8be82c74b",
   "ui": {
     "cases": [
-      "screen-reader labels: device filter/list/details and main menu exposed",
+      "accessibility and keyboard: labels exposed; Tab/Shift+Tab moves focus",
       "no-agent: refused; GUI alive; device unchanged",
       "agent-cancel: refused; GUI alive; device unchanged",
       "agent-password: runtime block; persistent rules unchanged",

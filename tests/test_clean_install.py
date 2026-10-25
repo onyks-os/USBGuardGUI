@@ -70,7 +70,7 @@ class CleanInstallTests(unittest.TestCase):
         package = output / "first/candidate.rpm"
         package.write_bytes(b"test package")
         (output / "report.json").write_text(json.dumps({"binary_sha256": "a" * 64}))
-        ui = {"passed": True, "cases": ["a11y", "no-agent", "cancel", "password", "restart"], "binary_sha256": "a" * 64}
+        ui = {"passed": True, "cases": ["accessibility and keyboard: focus verified", "no-agent", "cancel", "password", "restart"], "binary_sha256": "a" * 64}
         return argparse.Namespace(output=directory, package=package), ui
 
     def test_successful_validation_checks_installed_bytes_and_records_receipt(self):
@@ -89,7 +89,8 @@ class CleanInstallTests(unittest.TestCase):
     def test_incomplete_failed_or_wrong_binary_validation_cannot_publish_receipt(self):
         for changes in (
             {"passed": False},
-            {"cases": ["a11y", "no-agent", "cancel", "password"]},
+            {"cases": ["accessibility and keyboard: focus verified", "no-agent", "cancel", "password"]},
+            {"cases": ["a11y", "no-agent", "cancel", "password", "restart"]},
             {"cases": ["no-agent"]},
             {"binary_sha256": "b" * 64},
         ):

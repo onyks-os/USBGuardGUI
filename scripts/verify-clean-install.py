@@ -117,8 +117,11 @@ def validate(args):
         command([*ssh_args(directory), "bash -c " + shlex.quote(script)], stdout=log, stderr=subprocess.STDOUT)
     result = subprocess.check_output([*ssh_args(directory), "cat ui-report.json"], text=True)
     ui = json.loads(result)
-    if ui.get("passed") is not True or len(ui.get("cases", [])) != 5:
-        raise ValueError("Guest did not complete all five desktop/GUI/PAM checks")
+    cases = ui.get("cases", [])
+    if (ui.get("passed") is not True or len(cases) != 5
+            or not any(case.startswith("accessibility and keyboard:") for case in cases
+                       if isinstance(case, str))):
+        raise ValueError("Guest did not complete all five desktop/GUI/PAM checks, including accessibility and keyboard focus")
     receipt = package.parent.parent / "report.json"
     if receipt.is_file():
         expected = json.loads(receipt.read_text())["binary_sha256"]
