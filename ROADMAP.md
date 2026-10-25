@@ -218,20 +218,22 @@ explicit at every step.
 | **0.1.0** | Released | Device list/search/filter; runtime or permanent allow/block/reject; policy editor and safe removal; diagnostics; preferences; notifications, background/tray, autostart; English/Italian; native and Flatpak packages. |
 | **0.1.1** | Released | Flatpak status-icon correction. |
 | **0.1.2** | Current stable | Authentication-cancellation crash fix, reconnect backoff, inconclusive-write handling, log privacy, per-file core coverage, reproducible binaries and all package formats. |
-| **0.2.0** | Next feature target, not released | French interface/notifications/desktop/store metadata, validated catalogues and packaging for every registered language, graphical regression in English and French; includes the license/source and CI-action maintenance already merged after 0.1.2. |
-| **Later versions, unassigned** | Candidates with external prerequisites | Further translations; coordinated zbus/ksni and compiler/builder migration; AUR publication when registration is available. |
+| **0.2.0** | Next feature target, not released | zbus 6.1, direct SNI/menu implementation and Rust 1.89 compiler/builder baseline; clean-system daemon/Polkit verification. Includes the already-merged French catalogues and license/source/CI maintenance. |
+| **Later versions, unassigned** | Candidates with external prerequisites | Further translations and AUR publication; deferred, outside the current implementation work. |
 
 The old “v0.2.0 scope” above is historical: those policy actions shipped in
-0.1.0. The new 0.2.0 target adds localization and its validation, rather than
-counting existing functionality as new. No release date is promised; a tag
+0.1.0. The new 0.2.0 target contains the post-0.1.2 dependency and validation work. No release date is promised; a tag
 requires the usual CI, coverage, reproducibility and installed-runtime gates.
 
-Real-daemon/Polkit checks on clean installations
-remain complementary to the new mock tests; those tests do not exercise a real authentication agent.
+Real-daemon/Polkit checks now pass on disposable Ubuntu, Debian, Fedora and Arch
+installations, including cancelled and successful real PAM authentication and
+GUI reconnection. [Testing evidence](docs/testing.md#zbus-6-and-real-clean-system-validation-2026-10-2425)
+records the exact virtual-device/agent scope and package versions.
 
 | Item | Description |
 | :--- | :---------- |
-| **D-Bus dependency migration** | Coordinate zbus 6 with a compatible ksni release and compiler/builder updates: zbus 6 requires Rust 1.89 while ksni 0.3.7 still requires zbus 5. Preserve wire compatibility and tray behavior; see the audit follow-up in DEPENDENCIES.md. |
+| **D-Bus dependency migration** | Implemented: zbus 6.1 with Rust 1.89 in the application, CI and pinned builder. The fixed SNI/menu interfaces run directly on zbus, replacing ksni and the deprecated stack; wire, watcher-restart and GTK regression tests pass. See DEPENDENCIES.md. |
+| **Clean-install verification** | Complete for the four reference guests: native package installation, real daemon/Polkit/PAM, denial/cancellation/success and restart/reconnection; receipts are linked from docs/testing.md. |
 | **Translations** | French is implemented for the next feature target. Open issues invite Spanish, Russian, Chinese, German, Brazilian Portuguese, and Japanese; [docs/translating.md](docs/translating.md) explains how. |
 | **Arch User Repository** | A `usbguard-gui` package, when AUR registrations reopen. |
 

@@ -181,10 +181,10 @@ fn reload_rules(ui_tx: async_channel::Sender<UiEvent>) {
 /// unknown (§5.7).
 fn reload_devices(ui_tx: async_channel::Sender<UiEvent>) {
     runtime().spawn(async move {
-        if let Ok(client) = Client::connect_system().await {
-            if let Ok(devices) = client.list_devices().await {
-                let _ = ui_tx.send(UiEvent::DeviceSnapshot(devices)).await;
-            }
+        if let Ok(client) = Client::connect_system().await
+            && let Ok(devices) = client.list_devices().await
+        {
+            let _ = ui_tx.send(UiEvent::DeviceSnapshot(devices)).await;
         }
     });
 }

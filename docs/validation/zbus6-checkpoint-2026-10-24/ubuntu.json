@@ -1,0 +1,23 @@
+{
+  "distro": "ubuntu",
+  "image": "ubuntu-24.04.qcow2",
+  "image_sha256": "04e8f2461a16a44e78a370284471f29616cdd9baf1893df25807b71f985b6c94",
+  "serial": "usbguard-clean-test",
+  "acceleration": "tcg",
+  "package": "usbguard-gui_0.1.2-1_amd64.deb",
+  "package_sha256": "af684d01c8a5304c89dbb6b522134f4be4c14dc4d83f6bebeaa6c68d6c0019ef",
+  "ui": {
+    "cases": [
+      "no-agent: refused; GUI alive; device unchanged",
+      "agent-cancel: refused; GUI alive; device unchanged",
+      "agent-password: runtime block; persistent rules unchanged",
+      "daemon-restart: GUI reconnected; persistent allow restored"
+    ],
+    "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+    "kernel": "6.8.0-147-generic",
+    "usbguard_package": "1.1.2+ds-6build2",
+    "binary_sha256": "e6f620ab6756d34849a15357b9967fe1b07541a0b509686f3d930484ff53cf82",
+    "policy": "Explicit remote-user fixture; real PAM AUTH_SELF, no cached authorization",
+    "passed": true
+  }
+}

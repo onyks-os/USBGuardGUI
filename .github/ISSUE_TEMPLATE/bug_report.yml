@@ -34,7 +34,7 @@ body:
     attributes:
       label: Environment
       description: Operating system, distribution, and Rust version.
-      placeholder: "Fedora 43, Rust 1.85"
+      placeholder: "Fedora 43, Rust 1.89"
     validations:
       required: true
 

@@ -15,7 +15,7 @@ SPDX-License-Identifier: MIT
 <p align="center">
   <a href="https://github.com/sponsors/onyks-os"><img src="https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff69b4?style=for-the-badge&logo=githubsponsors" alt="Sponsor"></a>
   <img src="https://img.shields.io/badge/OS-Linux-blue?style=for-the-badge&logo=linux" alt="Linux">
-  <img src="https://img.shields.io/badge/Rust-1.85+-orange?style=for-the-badge&logo=rust" alt="Rust 1.85+">
+  <img src="https://img.shields.io/badge/Rust-1.89+-orange?style=for-the-badge&logo=rust" alt="Rust 1.89+">
   <img src="https://img.shields.io/badge/GTK-4%20%2B%20libadwaita-4a86cf?style=for-the-badge&logo=gnome&logoColor=white" alt="GTK 4 + libadwaita">
   <a href="https://github.com/onyks-os/USBGuardGUI/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/onyks-os/USBGuardGUI/ci.yml?style=for-the-badge&logo=github" alt="CI Status"></a>
   <a href="https://onyks-os.github.io/usbguard-gui/"><img src="https://img.shields.io/badge/docs-mkdocs-526CFE?style=for-the-badge&logo=materialformkdocs&logoColor=white" alt="Documentation"></a>

@@ -15,12 +15,12 @@ versions are pinned by the committed `Cargo.lock`.
 | :------ | :------ | :------ | :------ |
 | `gtk4` | 0.10, feature `v4_14` | MIT | GTK 4 bindings. Optional: Cargo feature `gui`. |
 | `libadwaita` | 0.8, feature `v1_5` | MIT | Adwaita widgets, toasts, dialogs. Optional: `gui`. |
-| `ksni` | 0.3, feature `tokio` | Unlicense | `StatusNotifierItem` tray icon, built on zbus. Optional: `gui`. |
-| `zbus` | 5, feature `tokio` | MIT | D-Bus client and the `#[proxy]` macro. |
+| `zbus` | 6.1, features `tokio`, `proxy`, `service` | MIT | D-Bus client and the `#[proxy]` macro. |
 | `tokio` | 1 | MIT | The I/O runtime that owns every D-Bus call. |
 | `async-channel` | 2 | Apache-2.0 OR MIT | Executor-agnostic bridge between Tokio and the GLib main loop. |
 | `futures-util` | 0.3 | MIT OR Apache-2.0 | Stream combinators for event coalescing. |
 | `tracing`, `tracing-subscriber` | 0.1, 0.3 | MIT | Structured logging, driven by `USBGUARD_GUI_LOG`. |
+| `serde` | 1, feature `derive` | MIT OR Apache-2.0 | Standard D-Bus menu serialization. Optional: `gui`. |
 | `thiserror` | 2 | MIT OR Apache-2.0 | The error taxonomy that crosses layers. |
 | `gettext-rs` | 0.8, feature `gettext-system` | MIT | Translation catalogue lookup. Optional: `gui`. |
 
@@ -35,7 +35,7 @@ protocol and the Flatpak notification portal, so no notification crate is needed
 | Package | Version | Purpose |
 | :------ | :------ | :------ |
 | `proptest` | 1 | Property tests for the rule parser and renderer. |
-| `zbus` feature `p2p` | 5 | The mock USBGuard bridge the D-Bus tests run against. |
+| `zbus` feature `p2p` | 6.1 | The mock USBGuard bridge the D-Bus tests run against. |
 | `cargo-fuzz` / `libfuzzer-sys` | Toolchain (nightly) | Parser fuzzing: `make fuzz-parser`. |
 | `cargo-audit` | Toolchain | RustSec advisory scanning (`make audit`). |
 | Clippy, rustfmt | Toolchain | `make lint`; Clippy enforces the no-panic and runtime-boundary rules. |

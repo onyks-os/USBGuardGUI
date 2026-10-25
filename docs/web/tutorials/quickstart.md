@@ -46,7 +46,7 @@ To check a download before installing it, see the
 
 ??? note "Building from source instead"
 
-    With a [Rust toolchain](https://rustup.rs/) (1.85 or newer) and the build dependencies:
+    With a [Rust toolchain](https://rustup.rs/) (1.89 or newer) and the build dependencies:
 
     ```bash
     sudo dnf install usbguard usbguard-dbus gtk4-devel libadwaita-devel gcc gettext   # Fedora

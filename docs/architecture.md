@@ -1517,7 +1517,8 @@ insertion produces one summary notification, not thirty.
 
 ### 9.6 System Tray and Background Mode
 
-`ksni` implements `StatusNotifierItem`. It performs **no fallback of any kind**:
+The fixed first-party `StatusNotifierItem` and D-Bus menu interfaces run on
+`zbus` 6. They perform **no fallback of any kind**:
 where no watcher exists, registration simply fails.
 
 Detection is therefore explicit — query the session bus for an owner of
@@ -1529,12 +1530,17 @@ once in its preferences. It does not log an error per attempt.
 **As implemented:** the tray exists while `run-in-background` is on; closing
 the window then hides it and keeps the program running. Where no watcher
 exists, the first close says so once, in a notification, and names the way
-back (launching the program again). `ksni` 0.3 is built on zbus, so the
-duplication described next no longer applies.
+back (launching the program again). Native installs register a standard SNI
+service name; Flatpak uses the connection's unique name. Tooltip changes emit
+both `NewToolTip` and `PropertiesChanged`. A watcher restart registers the same
+exported item again. The fixed menu exposes Show, a separator and Quit; callbacks
+send channel commands to GTK without crossing the thread boundary with widgets.
 
-`ksni` brings a second D-Bus stack alongside zbus. The duplication is acceptable
-but is a real cost in build time and binary size, and if it grows, implementing
-`StatusNotifierItem` directly on zbus is the alternative.
+The direct implementation is the alternative originally reserved here for
+avoiding a second D-Bus stack. It replaces ksni because its published release
+still requires zbus 5, retaining the deprecated zvariant dependencies. The
+application and reproducible builder require Rust 1.89. Flatpak hosts require
+xdg-dbus-proxy 0.1.6 or newer.
 
 ### 9.7 Accessibility and Presentation
 
@@ -1701,7 +1707,7 @@ raised only deliberately.
 | `async-channel` | The executor-agnostic bridge of §5.3 |
 | `futures-util` | Stream combinators for §5.4 |
 | `notify-rust` | §9.5 |
-| `ksni` | §9.6 |
+| `serde` | Fixed D-Bus menu serialization (§9.6) |
 | `tracing`, `tracing-subscriber` | §10.2 |
 | `thiserror` | §6.3 |
 | `gettext-rs` | §9.7 |

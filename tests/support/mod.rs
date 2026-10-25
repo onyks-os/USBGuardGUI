@@ -74,7 +74,7 @@ fn check(
     let interactive = header
         .primary()
         .flags()
-        .contains(zbus::message::Flags::AllowInteractiveAuth);
+        .contains(zbus::message::Flags::ALLOW_INTERACTIVE_AUTH);
     s.interactive.push((method, interactive));
     if let Some(detail) = s.failures.get(method) {
         return Err(fdo::Error::Failed(detail.clone()));
@@ -186,10 +186,10 @@ impl Devices {
             format!("applyDevicePolicy {id} {target} {permanent}"),
         )?;
         let gate = self.0.lock().unwrap().apply_gate.clone();
-        if let Some(gate) = &gate {
-            if !gate.after_apply {
-                gate.wait().await;
-            }
+        if let Some(gate) = &gate
+            && !gate.after_apply
+        {
+            gate.wait().await;
         }
         let (old, text, rule_id) = {
             let mut s = self.0.lock().unwrap();
@@ -229,10 +229,10 @@ impl Devices {
         if target == 2 {
             let _ = Self::device_presence_changed(&emitter, id, 3, 2, &text, HashMap::new()).await;
         }
-        if let Some(gate) = &gate {
-            if gate.after_apply {
-                gate.wait().await;
-            }
+        if let Some(gate) = &gate
+            && gate.after_apply
+        {
+            gate.wait().await;
         }
         Ok(rule_id)
     }
@@ -368,18 +368,14 @@ impl Mock {
     pub async fn serve(state: Shared) -> Self {
         let (server_stream, client_stream) = UnixStream::pair().unwrap();
         let guid = zbus::Guid::generate();
-        let server = zbus::connection::Builder::unix_stream(server_stream)
+        let server = zbus::connection::Builder::unix_stream(server_stream.into_std().unwrap())
             .server(guid)
-            .unwrap()
             .p2p()
             .serve_at("/org/usbguard1", Root(state.clone()))
-            .unwrap()
             .serve_at("/org/usbguard1/Devices", Devices(state.clone()))
-            .unwrap()
             .serve_at("/org/usbguard1/Policy", Policy(state.clone()))
-            .unwrap()
             .build();
-        let client = zbus::connection::Builder::unix_stream(client_stream)
+        let client = zbus::connection::Builder::unix_stream(client_stream.into_std().unwrap())
             .p2p()
             .build();
         let (server, client_connection) = tokio::join!(server, client);
@@ -480,7 +476,6 @@ impl PrivateBus {
 
     pub async fn connect(&self) -> Connection {
         zbus::connection::Builder::address(self.address.as_str())
-            .unwrap()
             .build()
             .await
             .unwrap()
@@ -497,15 +492,10 @@ impl Drop for PrivateBus {
 impl Mock {
     pub async fn serve_on_bus(bus: &PrivateBus, state: Shared) -> Self {
         let server = zbus::connection::Builder::address(bus.address.as_str())
-            .unwrap()
             .name("org.usbguard1")
-            .unwrap()
             .serve_at("/org/usbguard1", Root(state.clone()))
-            .unwrap()
             .serve_at("/org/usbguard1/Devices", Devices(state.clone()))
-            .unwrap()
             .serve_at("/org/usbguard1/Policy", Policy(state.clone()))
-            .unwrap()
             .build()
             .await
             .unwrap();

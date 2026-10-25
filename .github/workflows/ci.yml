@@ -58,7 +58,7 @@ jobs:
       fail-fast: false
       matrix:
         # MSRV is tested explicitly so that rust-version in Cargo.toml stays honest.
-        toolchain: ["stable", "beta", "1.85"]
+        toolchain: ["stable", "beta", "1.89.0"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -179,7 +179,7 @@ jobs:
       - name: Install the pinned policy checker
         run: cargo install cargo-deny --version 0.20.2 --locked
       - name: Check the full dependency graph and rejection regressions
-        run: make dependency-policy test-dependency-policy
+        run: make dependency-policy test-dependency-policy test-clean-install-driver
 
   build:
     name: Release build

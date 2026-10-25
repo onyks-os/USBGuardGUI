@@ -157,9 +157,7 @@ pub async fn probe_on(connection: &Connection) -> ProbeReport {
 pub async fn api_level(connection: &Connection) -> Option<ApiLevel> {
     let proxy = IntrospectableProxy::builder(connection)
         .destination(BRIDGE_NAME)
-        .ok()?
         .path("/org/usbguard1/Policy")
-        .ok()?
         .build()
         .await
         .ok()?;
@@ -182,7 +180,7 @@ async fn unit_active(connection: &Connection, unit: &str) -> Option<bool> {
     )
     .await
     .ok()?;
-    let path: zbus::zvariant::OwnedObjectPath = match manager.call("GetUnit", &(unit,)).await {
+    let path: zbus::OwnedObjectPath = match manager.call("GetUnit", &(unit,)).await {
         Ok(path) => path,
         // NoSuchUnit: the unit is not loaded, which means it is not running.
         Err(zbus::Error::MethodError(name, _, _))

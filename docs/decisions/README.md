@@ -39,3 +39,5 @@ make adr TITLE="Short decision title"
 ## Index of Decisions
 
 1. [0001-record-architecture-decisions.md](0001-record-architecture-decisions.md) — Record architectural decisions as ADRs.
+
+2. [0002-direct-status-notifier-on-zbus.md](0002-direct-status-notifier-on-zbus.md) — Use one zbus 6 stack for USBGuard and the fixed tray/menu interfaces.

@@ -1,0 +1,12 @@
+{
+  "runtime_ref": "runtime/org.gnome.Platform/x86_64/50",
+  "runtime_commit": "7e410fa0d429fcc34f2ddd0d9b6224f1435d8640fb9759801db4f02700542353",
+  "bundle_sha256": "8b180ea83decabd7f44e639ea104e1248ead37ba896ad35e67418ed9de471bed",
+  "installed_cli": true,
+  "installed_schema": true,
+  "installed_assets": true,
+  "installed_languages": [
+    "fr",
+    "it"
+  ]
+}

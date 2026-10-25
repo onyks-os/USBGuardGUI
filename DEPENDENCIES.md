@@ -25,14 +25,14 @@ policies governing how dependencies are selected, pinned, monitored, and upgrade
 | :------ | :----------------- | :------ | :------ | :--------------------- |
 | `gtk4` | 0.10, feature `v4_14`; optional, behind the Cargo feature `gui` | MIT | GTK 4 bindings — every widget in the interface. | The canonical Rust binding, maintained by the GNOME Rust team. A hand-rolled FFI layer to GTK would be a far larger unsafe surface than the binding it replaced. |
 | `libadwaita` | 0.8, feature `v1_5`; optional, behind `gui` | MIT | Adaptive layout, `AdwToastOverlay`, `AdwAlertDialog`, `AdwApplication`. | Same maintainers as `gtk4`; avoids reimplementing the platform's dialog and toast semantics, which is where inconsistent confirmation UX would otherwise creep in. |
-| `zbus` | 5, default features off, feature `tokio` | MIT | D-Bus client, and the `#[proxy]` macro that generates the typed proxies. | Pure Rust, no `libdbus` FFI. The proxy macro keeps raw D-Bus signatures in exactly one file, which is what makes the boundary auditable. |
+| `zbus` | 6.1, default features off, features `tokio`, `proxy`; `service` behind `gui` | MIT | D-Bus client, and the `#[proxy]` macro that generates the typed proxies. | Pure Rust, no `libdbus` FFI. The proxy macro keeps raw D-Bus signatures in exactly one file, which is what makes the boundary auditable. |
 | `tokio` | 1.53.3, features `rt-multi-thread`, `time`, `macros`, `sync` | MIT | The I/O runtime that owns every D-Bus interaction. | This crate enables only the features listed. `zbus`'s `tokio` backend additionally enables `net`, `fs`, and `process` (verified with `cargo tree -e features -i tokio`): it needs `net` for the bus socket, and the others for address discovery and authentication. The earlier claim that the dependency *cannot* open a socket or touch the filesystem was therefore wrong; the guarantee comes from the program's own code, verified by the `strace` target of `docs/architecture.md` §13.2, not from feature flags. |
 | `async-channel` | 2 | Apache-2.0 OR MIT | The executor-agnostic bridge between the Tokio runtime and the GLib main loop. | Executor-agnostic by design, which is the whole requirement: a Tokio-specific channel would couple the two loops the architecture keeps apart. |
 | `futures-util` | 0.3 | MIT OR Apache-2.0 | Stream combinators for the event worker's coalescing window. | Ecosystem-standard, minimal transitive tree. |
 | ~~`notify-rust`~~ | not used | — | Replaced by GIO's `GNotification`, already part of the GTK stack. | GIO speaks both the session-bus protocol and the Flatpak notification portal, and routes button presses to application actions. One dependency fewer; capabilities are still queried (`GetCapabilities`) before buttons are offered. |
-| `ksni` | 0.3, feature `tokio`; optional, behind `gui` | Unlicense | `StatusNotifierItem` tray icon. | The only maintained Rust implementation of the SNI protocol. Since 0.3 it is built on `zbus`: it shares the program's D-Bus stack and Tokio runtime instead of adding a second one (the cost the architecture anticipated in §9.6). Optional at runtime: see §1.4. |
 | `tracing` | 0.1 | MIT | Structured logging and the spans that measure the latency targets. | Span-based rather than line-based, which is what makes the identifier-redaction policy enforceable per target instead of per call site. |
 | `tracing-subscriber` | 0.3, feature `env-filter` | MIT | `EnvFilter`, driven by `USBGUARD_GUI_LOG`. | Same. |
+| `serde` | 1, feature `derive`; optional, behind `gui` | MIT OR Apache-2.0 | Serialize the standard D-Bus menu layout. | Used by the fixed first-party SNI/menu interfaces on zbus, without a second protocol dependency. |
 | `thiserror` | 2 | MIT OR Apache-2.0 | Derives the error taxonomy that crosses layers. | Compile-time only in effect; adds no runtime behaviour to get wrong. |
 | `gettext-rs` | 0.8, default features off, feature `gettext-system`; optional, behind `gui` | MIT | Translation catalogue lookup. | The platform's own i18n mechanism, so translations integrate with the distribution's tooling rather than a bespoke format. |
 
@@ -42,7 +42,7 @@ Reproducibility tooling additionally uses Python 3.11+ and rootless Podman (or
 Docker). Its compiler and native build inputs are pinned by
 [`packaging/reproducible/Containerfile`](packaging/reproducible/Containerfile),
 [`rust-toolchain.toml`](packaging/reproducible/rust-toolchain.toml), and the Rust
-archive checksum: Ubuntu 24.04 digest, snapshot `20261001T000000Z`, Rust 1.88.0.
+archive checksum: Ubuntu 24.04 digest, snapshot `20261001T000000Z`, Rust 1.89.0.
 The snapshot also pins native packaging tools: RPM, dpkg, makepkg/pacman,
 fakeroot, libarchive, zstd, Flatpak, OSTree, SVG validation, gettext, cpio and Python.
 The reproducibility unit suite additionally requires PyYAML.
@@ -167,11 +167,15 @@ the advisories are recorded, not globally suppressed. A coordinated zbus/ksni
 migration needs its own D-Bus compatibility, MSRV and tray tests rather than an
 unchecked major dependency change during this patch release.
 
-Migration feasibility was checked after the release: published zbus 6.0.0 and
-6.1.0 require Rust 1.89, above both the application's Rust 1.85 baseline and the
-reproducible builder's Rust 1.88.0. Published ksni 0.3.7 still requires zbus 5,
-as does its [upstream manifest](https://github.com/iovxw/ksni/blob/master/Cargo.toml).
-Updating only the direct zbus dependency would therefore retain the deprecated
-stack through the tray dependency. The coordinated migration remains pending a
-compatible ksni release and an explicit compiler/builder baseline update; the
-three informational notices remain visible in cargo-audit.
+The post-0.1.2 migration uses zbus 6.1 with a Rust 1.89 minimum and the
+same pinned Rust 1.89.0 reproducible builder. Published ksni 0.3.7 still uses
+zbus 5, so the tray now implements its fixed StatusNotifierItem and D-Bus menu
+interfaces directly on zbus, the alternative already described in architecture
+§9.6. There is no Git dependency or upstream fork. The deprecated zvariant,
+zvariant_derive and zbus_names crates are absent from the lockfile.
+
+Private-bus wire tests cover native and Flatpak unique-name registration, menu
+layouts/actions, tooltip changes, watcher restart, failure without a host and
+shutdown. The USBGuard mock tests retain interactive-authorization flags,
+transport-loss classification and reconnection checks with zbus 6. Flatpak
+requires xdg-dbus-proxy 0.1.6 or newer, as required by zbus 6.

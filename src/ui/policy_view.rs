@@ -117,14 +117,14 @@ impl PolicyView {
                         .get(row.selected() as usize)
                         .map(|v| (*v).to_owned());
                     let old = p.value.borrow().clone();
-                    if let (Some(new), Some(old)) = (chosen, old) {
-                        if new != old {
-                            handler(PolicyAction::SetParameter {
-                                parameter: p.parameter,
-                                old,
-                                new,
-                            });
-                        }
+                    if let (Some(new), Some(old)) = (chosen, old)
+                        && new != old
+                    {
+                        handler(PolicyAction::SetParameter {
+                            parameter: p.parameter,
+                            old,
+                            new,
+                        });
                     }
                 }
             });

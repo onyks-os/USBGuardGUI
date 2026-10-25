@@ -30,6 +30,10 @@ impl From<&zbus::Error> for ErrorShape {
                 name: Some(name.to_string()),
                 detail: detail.clone().unwrap_or_default(),
             },
+            zbus::Error::DBus(error) => Self {
+                name: Some(error.name().to_string()),
+                detail: error.description().unwrap_or_default().to_owned(),
+            },
             zbus::Error::FDO(fdo) => Self {
                 name: Some(fdo.name().to_string()),
                 detail: fdo.description().unwrap_or_default().to_owned(),
@@ -176,6 +180,15 @@ mod tests {
     }
 
     const DENIED: &str = "org.freedesktop.DBus.Error.AccessDenied";
+
+    #[test]
+    fn typed_zbus_error_keeps_its_denial_identity() {
+        let error = zbus::Error::DBus(std::sync::Arc::new(zbus::fdo::Error::AccessDenied(
+            "Not authorized.".into(),
+        )));
+        assert_eq!(ErrorShape::from(&error), shape(DENIED, "Not authorized."));
+        assert!(matches!(super::mutation_error(&error), AppError::Denied(_)));
+    }
 
     #[test]
     fn polkit_refusal_as_the_bridge_sends_it() {

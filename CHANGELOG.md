@@ -21,8 +21,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tests for forbidden licenses across dependency kinds, optional/target-specific
   dependencies, SPDX AND/OR expressions and unapproved pinned Git sources.
 
+### Changed
+
+- Migrate to zbus 6.1 and Rust 1.89, including the CI minimum and pinned
+  reproducible builder. Replace ksni with fixed SNI/D-Bus menu interfaces on
+  zbus; preserve native/Flatpak registration, actions and watcher reconnection.
+  The deprecated zvariant/zvariant_derive/zbus_names dependency stack is removed.
+- Add disposable QEMU clean-install validation with synthetic USB storage,
+  native packages and real Polkit/PAM. Ubuntu, Debian, Fedora and Arch pass
+  denial, cancellation, runtime authorization and daemon-restart/reconnection
+  checks. The verifier validates observed calls, installed hashes and complete
+  receipts; isolation and failure guards are regression-tested.
+
 ### Fixed
 
+- Source crates exclude privileged VM-only tools while retaining required build inputs; a packaging regression enforces this boundary.
+- Installed Flatpak headless checks avoid starting the unrelated document portal.
 - Reproducible builds compile every language registered in `po/LINGUAS`, and
   installed Flatpak validation checks every registered catalogue.
 

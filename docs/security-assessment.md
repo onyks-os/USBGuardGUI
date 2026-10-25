@@ -237,3 +237,24 @@ project; a report about one will be closed with a pointer to this section.
 - **Kernel and USB-stack vulnerabilities**, and anything reachable before the daemon makes an
   authorization decision.
 - **Non-Linux platforms.** USBGuard is Linux-only, and so is this.
+
+
+### Post-0.1.2 D-Bus migration and clean-system validation
+
+The zbus 6.1 migration removes ksni and the unmaintained standalone
+zvariant/zvariant_derive/zbus_names stack, without a Git dependency or fork.
+The direct SNI/menu implementation accepts only a fixed set of menu IDs and
+routes Show/Quit commands through the existing channel; GTK widgets stay on
+GLib. Unknown IDs/properties are rejected, and action callbacks tolerate a
+closed channel. Session-bus peers can request Show/Quit as with the previous
+tray implementation; this interface grants no USB-policy authority.
+
+Disposable-system scripts are test tooling, excluded from release payloads.
+Root guest setup and Polkit fixtures require the explicit VM marker. QEMU uses
+immutable hash-verified base images, private overlay/seed disks and synthetic
+USB storage, without host filesystem or physical USB passthrough. SSH binds to
+loopback and pins its identity/known-hosts file inside a mode-0700 directory.
+Generated credentials stay private and are omitted from validation reports.
+The test-user Polkit fixture grants reads and requires real PAM authentication
+for each write; it is never installed on the host or by product packages.
+Distribution defaults are recorded separately from that explicit test fixture.

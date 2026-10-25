@@ -140,10 +140,10 @@ pub(super) fn present(
         let (form, refresh) = (form.clone(), refresh.clone());
         move |_| {
             // Carry the guided rule over into the text mode as a start.
-            if form.mode.visible_child_name().as_deref() == Some("text") {
-                if let Some(rule) = form.current.borrow().as_ref() {
-                    form.text.set_text(&rule.to_string());
-                }
+            if form.mode.visible_child_name().as_deref() == Some("text")
+                && let Some(rule) = form.current.borrow().as_ref()
+            {
+                form.text.set_text(&rule.to_string());
             }
             refresh();
         }
