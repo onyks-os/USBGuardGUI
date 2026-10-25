@@ -66,6 +66,7 @@ fn gui_application_contracts() {
     app.register(None::<&gio::Cancellable>).unwrap();
     let backend = Backend::start();
     super::config::tests::exercise();
+    super::history::tests::exercise(&app);
     super::rule_dialog::tests::exercise(&app);
     super::rule_preview::tests::exercise(&backend);
     super::policy_view::tests::exercise();

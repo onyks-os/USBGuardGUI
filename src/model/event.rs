@@ -78,6 +78,9 @@ pub enum UiEvent {
     ConnectionLost(String),
     /// The event worker is connected again; both caches were discarded.
     Reconnected,
+    /// A large burst was replaced by a fresh snapshot; intermediate events
+    /// may have been missed by the local history.
+    ObservationGap,
 }
 
 #[cfg(test)]

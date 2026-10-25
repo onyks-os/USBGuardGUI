@@ -207,6 +207,10 @@ pub struct DeviceDelta {
     pub id: DeviceId,
     /// The device left during the window: drop its row.
     pub removed: bool,
+    /// A `DevicePresenceChanged(Insert)` was observed in this window.
+    pub observed_insert: bool,
+    /// A `DevicePresenceChanged(Remove)` was observed in this window.
+    pub observed_remove: bool,
     /// The latest known target, if any event carried one.
     pub target: Option<Target>,
     /// The latest rule text, if any event carried one.

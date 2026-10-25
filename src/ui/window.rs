@@ -14,6 +14,7 @@ use gettextrs::{gettext, ngettext};
 use super::APP_NAME;
 use super::config::Config;
 use super::device_view::{DeviceAction, DeviceView, ModifyBlock};
+use super::history::{self, History};
 use super::i18n::{self, fill};
 use super::notify::Notifier;
 use super::policy_view::{PolicyAction, PolicyView};
@@ -90,6 +91,7 @@ struct State {
     connected: bool,
     access: Option<AccessState>,
     denials: Denials,
+    history: History,
     ops: HashMap<OperationId, (PendingOperation, OpKind)>,
 }
 
@@ -181,6 +183,7 @@ impl MainWindow {
 
         let menu = gio::Menu::new();
         menu.append(Some(&gettext("_Preferences")), Some("win.preferences"));
+        menu.append(Some(&gettext("_Event history")), Some("win.history"));
         menu.append(
             Some(&fill(&gettext("_About {app}"), &[("app", APP_NAME)])),
             Some("win.about"),
@@ -225,6 +228,11 @@ impl MainWindow {
             .content(&toolbar)
             .build();
 
+        let history = if config.persist_history() {
+            History::from_setting(&config.history_data())
+        } else {
+            History::default()
+        };
         let inner = Rc::new(Inner {
             window,
             toasts,
@@ -241,6 +249,7 @@ impl MainWindow {
                 connected: false,
                 access: None,
                 denials: Denials::default(),
+                history,
                 ops: HashMap::new(),
             }),
             ui_tx,
@@ -302,7 +311,15 @@ impl MainWindow {
         let about = gio::ActionEntry::builder("about")
             .activate(|w: &adw::ApplicationWindow, _, _| preferences::present_about(w))
             .build();
-        inner.window.add_action_entries([preferences, about]);
+        let history_action = gio::ActionEntry::builder("history")
+            .activate({
+                let this = self.clone();
+                move |_, _, _| this.show_history()
+            })
+            .build();
+        inner
+            .window
+            .add_action_entries([preferences, about, history_action]);
         app.set_accels_for_action("win.preferences", &["<Control>comma"]);
     }
 
@@ -310,6 +327,20 @@ impl MainWindow {
         self.0.hold.borrow_mut().take();
         self.0.notifier.withdraw();
         self.0.window.present();
+    }
+
+    fn show_history(&self) {
+        let history = self.0.state.borrow().history.clone();
+        history::save_from_window(&self.0.app, &self.0.window, &history);
+    }
+
+    fn record_history(&self, record: impl FnOnce(&mut History)) {
+        let encoded = {
+            let mut state = self.0.state.borrow_mut();
+            record(&mut state.history);
+            state.history.encode()
+        };
+        self.0.config.save_history(&encoded);
     }
 
     /// Opens the window on the device list — the notification's default action.
@@ -521,17 +552,6 @@ impl MainWindow {
         } else {
             self.0.notifier.announce(&new);
         }
-    }
-
-    fn known_ids(&self) -> Vec<DeviceId> {
-        self.0
-            .state
-            .borrow()
-            .devices
-            .sorted()
-            .iter()
-            .map(|d| d.id)
-            .collect()
     }
 
     fn reload_policy_if_needed(&self) {
@@ -885,6 +905,7 @@ impl MainWindow {
                 self.refresh_devices();
                 match result {
                     Ok(_) => {
+                        self.record_history(|history| history.record_action(policy, true));
                         // Whole sentences, not assembled from pieces:
                         // word order differs between languages.
                         let template = match (policy, persistence) {
@@ -912,7 +933,12 @@ impl MainWindow {
                             self.mark_rules_stale();
                         }
                     }
-                    Err(err) => self.report(&err, Write::Devices),
+                    Err(err) => {
+                        if !matches!(&err, AppError::Cancelled | AppError::Inconclusive(_)) {
+                            self.record_history(|history| history.record_action(policy, false));
+                        }
+                        self.report(&err, Write::Devices);
+                    }
                 }
             }
             (OpKind::RemoveRule, result) => {
@@ -1014,7 +1040,12 @@ impl MainWindow {
                 // A snapshot while connected is a burst resynchronization
                 // (§5.4): its new devices are insertions too. The first
                 // snapshot after (re)connecting announces nothing.
-                let before = self.0.state.borrow().connected.then(|| self.known_ids());
+                let before = self
+                    .0
+                    .state
+                    .borrow()
+                    .connected
+                    .then(|| self.0.state.borrow().devices.sorted());
                 {
                     let mut state = self.0.state.borrow_mut();
                     state.connected = true;
@@ -1022,7 +1053,10 @@ impl MainWindow {
                 }
                 self.refresh_devices();
                 if let Some(before) = before {
-                    self.announce_new(&before);
+                    let after = self.0.state.borrow().devices.sorted();
+                    self.record_history(|history| record_device_diff(history, &before, &after));
+                    let before_ids: Vec<_> = before.iter().map(|device| device.id).collect();
+                    self.announce_new(&before_ids);
                 }
                 self.0.devices.set_stale(false);
                 if self.unreachable_reported() {
@@ -1038,10 +1072,23 @@ impl MainWindow {
                 self.reload_policy_if_needed();
             }
             UiEvent::DeviceBatch(batch) => {
-                let before = self.known_ids();
-                self.0.state.borrow_mut().devices.apply(batch);
+                let before = self.0.state.borrow().devices.sorted();
+                self.0.state.borrow_mut().devices.apply(batch.clone());
+                let after = self.0.state.borrow().devices.sorted();
                 self.refresh_devices();
-                self.announce_new(&before);
+                self.record_history(|history| {
+                    for delta in &batch {
+                        if delta.observed_insert {
+                            history.record_inserted();
+                        }
+                        if delta.observed_remove {
+                            history.record_removed();
+                        }
+                    }
+                    record_device_target_changes(history, &before, &after);
+                });
+                let before_ids: Vec<_> = before.iter().map(|device| device.id).collect();
+                self.announce_new(&before_ids);
             }
             UiEvent::RuleSnapshot(rules) => self.0.policy.set_rules(rules),
             UiEvent::RuleSnapshotFailed(err) => {
@@ -1059,6 +1106,7 @@ impl MainWindow {
             UiEvent::OperationFinished { op, result } => self.finish(op, result),
             UiEvent::AccessStateChanged(access) => self.apply_access(access),
             UiEvent::ConnectionLost(_) => {
+                self.record_history(History::record_gap);
                 self.0.state.borrow_mut().connected = false;
                 self.0.devices.set_stale(true);
                 self.set_indicator(Indicator::Disconnected);
@@ -1073,6 +1121,7 @@ impl MainWindow {
                 }
             }
             UiEvent::Reconnected => {
+                self.record_history(History::record_reconnected);
                 // Nothing observed before the disconnection is trusted —
                 // including which writes were refused: the daemon's
                 // configuration may have changed while it was away.
@@ -1088,6 +1137,7 @@ impl MainWindow {
                 // longer hold either.
                 super::probe_after_present(self.0.ui_tx.clone());
             }
+            UiEvent::ObservationGap => self.record_history(History::record_burst_gap),
         }
     }
 
@@ -1155,6 +1205,31 @@ impl MainWindow {
             }
         }
         self.0.state.borrow_mut().access = Some(access);
+    }
+}
+
+fn record_device_diff(history: &mut History, before: &[Device], after: &[Device]) {
+    for old in before {
+        match after.iter().find(|new| new.id == old.id) {
+            None => history.record_removed(),
+            Some(new) if new.target != old.target => history.record_target(new.target),
+            Some(_) => {}
+        }
+    }
+    for new in after {
+        if !before.iter().any(|old| old.id == new.id) {
+            history.record_inserted();
+        }
+    }
+}
+
+fn record_device_target_changes(history: &mut History, before: &[Device], after: &[Device]) {
+    for old in before {
+        if let Some(new) = after.iter().find(|new| new.id == old.id)
+            && new.target != old.target
+        {
+            history.record_target(new.target);
+        }
     }
 }
 

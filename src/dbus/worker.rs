@@ -146,6 +146,7 @@ async fn run(
                 if coalescer.needs_resync() {
                     debug!("burst over the resync threshold; taking a snapshot");
                     coalescer.clear();
+                    send(ui_tx, UiEvent::ObservationGap).await?;
                     snapshot(client, ui_tx).await?;
                 }
             }

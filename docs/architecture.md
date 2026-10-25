@@ -1579,6 +1579,18 @@ xdg-dbus-proxy 0.1.6 or newer.
   `model` and `rules` return structured errors and the interface words them, so
   no translation dependency reaches below `ui`.
 
+### 9.8 Local Event History
+
+The main menu opens a bounded history of USB insertions/removals, authorization
+actions and observed target changes. Reconnection and signal-burst resynchronization
+add explicit observation-gap markers; the initial device snapshot is not presented
+as a new insertion. At most 200 entries are retained. By default they exist only
+in memory. The user can opt in to GSettings persistence; switching persistence
+off clears the stored copy. Each record contains only an event category and a Unix
+timestamp, never a device name, daemon ID, USB ID, serial, port, hash, rule text,
+or error details. JSON export uses the same redacted schema and includes an
+`identifiers_included: false` marker.
+
 ---
 
 ## 10. Configuration, Logging, and Command Line
@@ -1596,6 +1608,8 @@ Stored through GSettings under `io.github.onyks_os.UsbguardGui`. The full set:
 | `window-maximized` | boolean | `false` | |
 | `show-blocked-only` | boolean | `false` | Device filter |
 | `tray-notice-shown` | boolean | `false` | Whether §9.6's one-time notice was given |
+| `persist-history` | boolean | `false` | Opt-in persistence of the redacted event history |
+| `history-data` | string | empty | Bounded event categories and timestamps; no device identifiers |
 
 `default-persistence` defaults to the non-persisting option deliberately: the
 less destructive default for a security tool is the one whose effect disappears
@@ -1676,7 +1690,8 @@ usbguard-gui/
 │   │   ├── policy_view.rs
 │   │   ├── rule_dialog.rs
 │   │   ├── diagnostic_dialog.rs
-│   │   └── preferences.rs
+│   │   ├── preferences.rs
+│   │   └── history.rs             # §9.8 — bounded, identifier-free event history
 │   ├── notify.rs               # §9.5
 │   └── tray.rs                 # §9.6
 ├── data/

@@ -84,9 +84,28 @@ pub(super) fn present_preferences(parent: &impl IsA<gtk::Widget>, config: &Confi
     session.add(&background);
     session.add(&login);
 
+    let history = adw::SwitchRow::builder()
+        .title(gettext("Keep event history between runs"))
+        .subtitle(gettext(
+            "Off by default. Stores event types and times only, never device identifiers.",
+        ))
+        .build();
+    history.set_active(config.persist_history());
+    if config.settings().is_some() {
+        let config = config.clone();
+        history.connect_active_notify(move |row| config.set_persist_history(row.is_active()));
+    } else {
+        history.set_sensitive(false);
+    }
+    let history_group = adw::PreferencesGroup::builder()
+        .title(gettext("Event history"))
+        .build();
+    history_group.add(&history);
+
     let page = adw::PreferencesPage::new();
     page.add(&group);
     page.add(&session);
+    page.add(&history_group);
     let dialog = adw::PreferencesDialog::new();
     dialog.add(&page);
     dialog.present(Some(parent));

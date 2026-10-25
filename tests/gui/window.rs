@@ -3,6 +3,7 @@ use super::*;
 use crate::dbus::client::to_handles;
 use crate::model::{Capabilities, DeviceDelta, RuleId};
 use crate::rules::{parse_device, parse_rule};
+use crate::ui::history::EventKind;
 use std::time::{Duration, Instant};
 
 fn drain(window: &MainWindow, rx: &async_channel::Receiver<UiEvent>) {
@@ -313,7 +314,15 @@ pub(in crate::ui) fn exercise(app: &adw::Application, backend: &Backend) {
     }
     window.apply(UiEvent::ConnectionLost("test disconnect".into()));
     assert!(!window.0.state.borrow().connected);
+    assert_eq!(
+        window.0.state.borrow().history.events.last().unwrap().kind,
+        EventKind::ConnectionGap
+    );
     window.apply(UiEvent::Reconnected);
+    assert_eq!(
+        window.0.state.borrow().history.events.last().unwrap().kind,
+        EventKind::Reconnected
+    );
     drain(&window, &rx);
     assert!(window.0.device_block.borrow().is_none());
     window.apply(UiEvent::DeviceSnapshot(vec![dev.clone()]));
@@ -322,8 +331,20 @@ pub(in crate::ui) fn exercise(app: &adw::Application, backend: &Backend) {
         target: Some(Target::Block),
         rule_text: Some("block".into()),
         removed: false,
+        observed_insert: true,
+        observed_remove: false,
         attrs: crate::model::DeviceAttributes::default(),
     }]));
+    assert!(
+        window
+            .0
+            .state
+            .borrow()
+            .history
+            .events
+            .iter()
+            .any(|event| event.kind == EventKind::Inserted)
+    );
     window.allow_from_notification(DeviceId::new(500));
     pump();
     window.0.window.set_visible(false);
@@ -337,6 +358,15 @@ pub(in crate::ui) fn exercise(app: &adw::Application, backend: &Backend) {
         pump();
         close_dialogs(&window.0.window);
     }
+    gio::prelude::ActionGroupExt::activate_action(&window.0.window, "history", None);
+    pump();
+    let history = app
+        .windows()
+        .into_iter()
+        .find(|candidate| candidate.title().as_deref() == Some("Event history"))
+        .unwrap();
+    history.close();
+    pump();
     // Disabling background mode while registration is pending must win.
     let gate = std::sync::Arc::new(tokio::sync::Notify::new());
     *backend.desktop.registration_gate.lock().unwrap() = Some(gate.clone());

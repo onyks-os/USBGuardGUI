@@ -31,6 +31,8 @@ fn insert_then_remove_never_appears() {
     let batch = c.take();
     assert_eq!(batch.len(), 1);
     assert!(batch[0].removed);
+    assert!(batch[0].observed_insert);
+    assert!(batch[0].observed_remove);
     assert_eq!(batch[0].target, None);
 }
 
@@ -42,6 +44,8 @@ fn remove_then_insert_is_a_new_device() {
     c.push(presence(1, DeviceEvent::Insert, Target::Block), now);
     let batch = c.take();
     assert!(!batch[0].removed);
+    assert!(batch[0].observed_insert);
+    assert!(batch[0].observed_remove);
     assert_eq!(batch[0].target, Some(Target::Block));
 }
 

@@ -19,7 +19,9 @@ pub(super) struct Config(Option<gio::Settings>);
 impl Config {
     pub(super) fn load() -> Self {
         let installed = gio::SettingsSchemaSource::default().and_then(|s| s.lookup(APP_ID, true));
-        let schema = installed.or_else(development_schema);
+        // Prefer the schema staged by this checkout in debug builds. An older
+        // system-installed copy may otherwise win and lack newly added keys.
+        let schema = development_schema().or(installed);
         if schema.is_none() {
             warn!("GSettings schema {APP_ID} not found; settings will not be saved");
         }
@@ -49,6 +51,34 @@ impl Config {
 
     pub(super) fn notify_inserted(&self) -> bool {
         self.bool("notify-inserted", true)
+    }
+
+    pub(super) fn persist_history(&self) -> bool {
+        self.bool("persist-history", false)
+    }
+
+    pub(super) fn history_data(&self) -> String {
+        self.0
+            .as_ref()
+            .map_or_else(String::new, |s| s.string("history-data").to_string())
+    }
+
+    pub(super) fn save_history(&self, value: &str) {
+        if self.persist_history()
+            && let Some(settings) = &self.0
+        {
+            let _ = settings.set_string("history-data", value);
+        }
+    }
+
+    pub(super) fn set_persist_history(&self, enabled: bool) {
+        if let Some(settings) = &self.0 {
+            let _ = settings.set_boolean("persist-history", enabled);
+            if !enabled {
+                // Opting out also removes the previously persisted copy.
+                let _ = settings.set_string("history-data", "");
+            }
+        }
     }
 
     /// Whether the one-time "still running in the background" notice was
