@@ -64,5 +64,14 @@ full LLVM JSON `target/coverage-application.json`; HTML
 `target/coverage-98-verify-final.log`, `target/coverage-98-msrv.log`,
 `target/coverage-98-properties.log`. The native test host lacked Xvfb/xdotool:
 RPMs were downloaded/extracted under `target/coverage-tools/root` without a host
-installation. Add its `usr/bin` to PATH and `usr/lib64` to LD_LIBRARY_PATH locally.
-CI installs normal Ubuntu test packages. The Python suite now has 61 tests.
+installation. `make coverage` now discovers both local tool locations automatically, including
+the unpacked desktop libraries; no manual PATH/LD_LIBRARY_PATH exports are needed.
+Missing dependencies fail before tests with install instructions. Four new tool
+discovery/preflight regressions bring the Python suite to 65 tests. The diagnostic
+GUI regression now accepts the no-agent CI case and separately checks an IPC
+denial with copyable commands. CI installs normal Ubuntu test packages.
+
+Coverage command follow-up: `make coverage` succeeded without any manually added
+PATH or LD_LIBRARY_PATH (`target/coverage-user-entrypoint.log`), still 98.2346%.
+`target/coverage-tools-gui.log` verifies the agent-independent diagnostic fixture;
+`target/coverage-tools-tests.log` has 13 checker/tool tests and Clippy is clean.

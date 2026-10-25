@@ -2,6 +2,32 @@
 # A private display, D-Bus, configuration and cache for each GTK test process.
 set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
+# Prefer installed desktop tools; also support an unpacked, checkout-local bundle.
+desktop_tools=${USBGUARD_GUI_TEST_TOOLS_ROOT:-"$root/target/coverage-tools/root"}
+if ! command -v Xvfb >/dev/null 2>&1 || ! command -v xdotool >/dev/null 2>&1; then
+    if test -d "$desktop_tools/usr/bin"; then
+        export PATH="$desktop_tools/usr/bin:$PATH"
+        export LD_LIBRARY_PATH="$desktop_tools/usr/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    fi
+fi
+missing=()
+for tool in Xvfb xdotool dbus-run-session dbus-daemon; do
+    if ! command -v "$tool" >/dev/null 2>&1; then missing+=("$tool"); fi
+done
+if ((${#missing[@]})); then
+    printf 'Missing GTK test tools: %s\n' "${missing[*]}" >&2
+    echo 'Install the desktop test dependencies listed in docs/testing.md.' >&2
+    exit 1
+fi
+if ! LC_ALL=en_US.UTF-8 locale charmap >/dev/null 2>&1; then
+    echo 'The en_US.UTF-8 locale is required; see docs/testing.md.' >&2
+    exit 1
+fi
+if [[ ${1:-} == --check ]]; then exit 0; fi
+if (($# == 0)); then
+    echo 'Usage: scripts/test-gui.sh <command> [arguments...] | --check' >&2
+    exit 2
+fi
 mkdir -p "$root/target"
 test_root=$(mktemp -d "$root/target/gui-test.XXXXXX")
 export XDG_CONFIG_HOME="$test_root/config" XDG_DATA_HOME="$test_root/data"

@@ -5,11 +5,24 @@ pub(in crate::ui) fn exercise(app: &adw::Application, backend: &Backend) {
     let window = adw::ApplicationWindow::builder().application(app).build();
     window.present();
     pump();
-    for denied in [true, false] {
-        if denied {
-            backend.state.lock().unwrap().denied.insert("getParameter");
-        } else {
-            backend.state.lock().unwrap().denied.clear();
+    // A headless CI runner has no Polkit agent, while a desktop often does.
+    // IPC denial supplies a command-bearing remedy independently of that heuristic.
+    for failure in [Some("polkit"), Some("ipc"), None] {
+        {
+            let mut state = backend.state.lock().unwrap();
+            state.denied.clear();
+            state.failures.clear();
+            match failure {
+                Some("polkit") => {
+                    state.denied.insert("getParameter");
+                }
+                Some("ipc") => {
+                    state
+                        .failures
+                        .insert("getParameter", "IPC access denied".into());
+                }
+                _ => {}
+            }
         }
         present(&window);
         pump();
@@ -22,9 +35,27 @@ pub(in crate::ui) fn exercise(app: &adw::Application, backend: &Backend) {
             assert!(std::time::Instant::now() < deadline);
             pump();
         }
+        let report = widgets::<gtk::Label>(&dialog)
+            .into_iter()
+            .find(|label| label.text().contains("Result:"))
+            .unwrap()
+            .text();
+        match failure {
+            Some("polkit") => assert!(
+                report.contains("Result: denied by Polkit")
+                    || report.contains("Result: no Polkit authentication agent")
+            ),
+            Some("ipc") => {
+                assert!(report.contains("Result: denied by the USBGuard IPC access control"));
+            }
+            _ => assert!(report.contains("Result: connected")),
+        }
+        let has_commands = report
+            .lines()
+            .any(|line| line.trim_start().starts_with("$ "));
         let copy = button(&dialog, "Copy commands");
-        assert_eq!(copy.is_visible(), denied);
-        if denied {
+        assert_eq!(copy.is_visible(), has_commands);
+        if has_commands {
             copy.emit_clicked();
             let text = glib::MainContext::default()
                 .block_on(copy.clipboard().read_text_future())

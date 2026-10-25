@@ -39,6 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Coverage targets find checkout-local cargo-llvm-cov without shell PATH changes,
+  check graphical prerequisites before running tests, and give pinned install
+  instructions when tools are absent. The diagnostic GUI regression handles
+  both desktop Polkit agents and agent-less CI runners.
 - Switching the new-rule form from Guided to Text no longer aborts on a
   synchronously re-entered preview borrow.
 - Cancellation preserves its outcome and cache invalidation when the UI event

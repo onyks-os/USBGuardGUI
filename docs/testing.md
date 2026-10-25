@@ -81,10 +81,20 @@ xdotool and the `en_US.UTF-8` locale, then run:
 
 ```bash
 rustup component add llvm-tools-preview
-cargo install cargo-llvm-cov --version 0.9.1 --locked
+cargo install cargo-llvm-cov --version 0.9.1 --locked --root target/tools
 make coverage-app
 make coverage  # same gate, plus target/llvm-cov/html/index.html
 ```
+
+The Make targets automatically add `target/tools/bin` to their own PATH; no
+interactive shell PATH change is needed for that installation. A missing plugin
+fails before profile cleanup with the exact install commands. GUI dependencies
+are also checked before Rust tests: `scripts/test-gui.sh --check`. Installed
+Xvfb/xdotool are preferred; an unpacked bundle under
+`target/coverage-tools/root` (or `USBGUARD_GUI_TEST_TOOLS_ROOT`) is also supported,
+including its private library directory. These checks do not install anything. Coverage runs GTK contracts in English
+independently of the caller's LANGUAGE; the separate French focus regression is
+unchanged.
 
 The application gate requires **at least 98% of production lines across all
 application source files**, including GTK, the executable and the build without
