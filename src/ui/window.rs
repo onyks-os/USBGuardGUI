@@ -288,16 +288,7 @@ impl MainWindow {
                 let (width, height) = w.default_size();
                 this.0.config.save_window(width, height, w.is_maximized());
                 if this.0.config.run_in_background() {
-                    // Let GTK finish the close button's activation before
-                    // unmapping its headerbar and notifying its children.
-                    let this = this.clone();
-                    glib::idle_add_local_once(move || {
-                        if this.0.config.run_in_background() {
-                            this.hide_to_background();
-                        } else {
-                            this.0.window.close();
-                        }
-                    });
+                    this.hide_to_background();
                     glib::Propagation::Stop
                 } else {
                     glib::Propagation::Proceed
@@ -597,7 +588,7 @@ impl MainWindow {
         dialog.set_default_response(Some("cancel"));
         dialog.set_close_response("cancel");
         dialog.connect_response(None, move |_, response| on_answer(response == "yes"));
-        dialog.present(Some(&self.0.window));
+        super::present_dialog(&dialog, &self.0.window);
     }
 
     // -----------------------------------------------------------------------
@@ -887,7 +878,7 @@ impl MainWindow {
                 this.start_remove(chosen.clone(), true);
             }
         });
-        dialog.present(Some(&self.0.window));
+        super::present_dialog(&dialog, &self.0.window);
     }
 
     fn finish(&self, op: OperationId, result: Result<OperationOutcome, AppError>) {

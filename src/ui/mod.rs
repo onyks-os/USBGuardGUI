@@ -54,6 +54,17 @@ fn application_id(isolated_instance: bool) -> String {
 /// place; translations refer to it as `{app}`.
 pub(super) const APP_NAME: &str = "USBGuardGUI";
 
+/// Keep native close-button callbacks alive through their signal emission.
+/// With animations disabled, closing can synchronously remove the last dialog
+/// owner. Release our temporary reference on the next main-loop iteration.
+fn present_dialog(dialog: &impl IsA<adw::Dialog>, parent: &impl IsA<gtk::Widget>) {
+    dialog.connect_closed(|dialog| {
+        let dialog = dialog.clone();
+        glib::idle_add_local_once(move || drop(dialog));
+    });
+    dialog.present(Some(parent));
+}
+
 /// Capacity of the event channel. Events are already coalesced (§5.4), so
 /// this is never reached in practice.
 const CHANNEL_CAPACITY: usize = 64;

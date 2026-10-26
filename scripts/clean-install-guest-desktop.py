@@ -35,13 +35,26 @@ APP_PATH = "/io/github/onyks_os/UsbguardGui"
 WATCHER = "org.kde.StatusNotifierWatcher"
 
 
+def require_clean_app_log(protocol: str) -> None:
+    failure = re.search(r"\b[\w-]+[-:](?:CRITICAL|ERROR)\b", protocol)
+    if failure:
+        raise RuntimeError("GUI emitted a toolkit critical or error: " + failure[0])
+
+
 def main() -> None:
     helper.require_guest()
     parser = argparse.ArgumentParser()
     parser.add_argument("--desktop", required=True, choices=("gnome", "kde"))
+    parser.add_argument("--binary", type=Path, default=Path("/usr/bin/usbguard-gui"))
+    parser.add_argument("--cycles", type=int, default=10)
     args = parser.parse_args()
     receipt = Path("desktop-" + args.desktop + "-report.json")
     receipt.unlink(missing_ok=True)
+    if args.cycles < 1 or args.cycles > 100:
+        parser.error("--cycles must be between 1 and 100")
+    binary = args.binary.resolve(strict=True)
+    if not binary.is_file() or not os.access(binary, os.X_OK):
+        parser.error("--binary must be an executable file inside the test guest")
     runtime = tempfile.TemporaryDirectory(
         prefix="usbguard-" + args.desktop + "-", ignore_cleanup_errors=True
     )
@@ -243,10 +256,10 @@ def main() -> None:
                 check=True,
             )
             app = spawn(
-                ["usbguard-gui"],
+                [str(binary)],
                 log=app_log,
                 critical=True,
-                extra_env=dict(env, WAYLAND_DEBUG="client"),
+                extra_env=dict(env, WAYLAND_DEBUG="client", G_DEBUG="fatal-criticals"),
             )
             frame = wait(
                 lambda: helper.mapped_frame(
@@ -453,7 +466,7 @@ def main() -> None:
                 "background: close hides the window, keeps GUI alive and sends the correct one-time notice"
             )
             print("PASS checkpoint:", cases[-1], flush=True)
-            second = spawn(["usbguard-gui"], log=app_log)
+            second = spawn([str(binary)], log=app_log)
             assert second.wait(timeout=60) == 0
             wait(lambda: find(role="frame"))
             assert app.poll() is None
@@ -469,6 +482,24 @@ def main() -> None:
             )
             cases.append("single instance: relaunch reopens the original process")
             print("PASS checkpoint:", cases[-1], flush=True)
+            for cycle in range(args.cycles):
+                search = wait(lambda: find(name="Filter devices by name, ID, or serial"))
+                assert search.queryEditableText().setTextContents("usbguard-clean-test")
+                wait(lambda: find(name="Allowed"))
+                click(wait(lambda: find(name="Close", role=("button", "push button"))))
+                wait(lambda: not find(role="frame"))
+                restored = spawn([str(binary)], log=app_log)
+                assert restored.wait(timeout=60) == 0
+                wait(lambda: find(role="frame"))
+                assert owner == call(
+                    "org.freedesktop.DBus",
+                    "/org/freedesktop/DBus",
+                    "org.freedesktop.DBus",
+                    "GetNameOwner",
+                    GLib.Variant("(s)", (APP,)),
+                )[0]
+                print("PASS filter/hide/relaunch cycle", cycle + 1, flush=True)
+            cases.append(f"stress: {args.cycles} filter/hide/relaunch cycles retain the original owner")
             click(wait(lambda: find(name="Close", role=("button", "push button"))))
             wait(lambda: not find(role="frame"))
             time.sleep(2)
@@ -507,6 +538,7 @@ def main() -> None:
                 assert not owned(WATCHER)
                 cases.append("GNOME: background without a watcher; Quit exits cleanly")
             required.remove(app)
+            require_clean_app_log(Path(base + "-app.log").read_text(errors="replace"))
             print("PASS checkpoint:", cases[-1], flush=True)
             report = {
                 "passed": True,
@@ -516,8 +548,14 @@ def main() -> None:
                 "os_release": Path("/etc/os-release").read_text(),
                 "kernel": subprocess.check_output(["uname", "-r"], text=True).strip(),
                 "binary_sha256": hashlib.sha256(
-                    Path("/usr/bin/usbguard-gui").read_bytes()
+                    binary.read_bytes()
                 ).hexdigest(),
+                "binary_path": str(binary),
+                "fatal_criticals": True,
+                "stress_cycles": args.cycles,
+                "gtk_version": subprocess.check_output(
+                    ["rpm", "-q", "gtk4"], text=True
+                ).strip(),
                 "cases": cases,
                 "window": frame,
                 "settings_backend": "dconf in private XDG directories and session bus",

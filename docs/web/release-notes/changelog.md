@@ -51,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Closing native dialogs with animations disabled retains the dialog until the
+  GTK button callback finishes, avoiding a GObject critical during destruction.
 - Coverage targets find checkout-local cargo-llvm-cov without shell PATH changes,
   check graphical prerequisites before running tests, and give pinned install
   instructions when tools are absent. The diagnostic GUI regression handles

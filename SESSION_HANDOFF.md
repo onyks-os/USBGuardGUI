@@ -1,3 +1,62 @@
+# Active development checkpoint — resumed 2026-10-26
+
+The user asked to continue. Branch `feat/desktop-quality`, PR #61 remains draft.
+No new release or tag has been created. Privacy and DCO authorization below still
+apply. All real desktop tests stay inside the marked synthetic Fedora VM.
+
+Changes since the saved pause:
+
+- Removed unsupported AT-SPI GrabFocus from diagnostic stress scripts. Formal
+  driver uses editable text, ten hide/relaunch cycles, same-owner assertions,
+  fatal GTK criticals and a final critical/error log gate. It records binary
+  path/hash, GTK version, driver/helper/protocol hashes; `--binary` permits a
+  diagnostic candidate without replacing the installed guest package.
+- Controlled GNOME tests reproduce the GObject critical on BOTH original
+  installed binary `71b56eff...fbbbd` and deferred-close experiment
+  `b2c9367f...55a30`. The ineffective production experiment and its test were
+  reverted. `tests/gui/window.rs` matches `41d0c2b` again; later dialog-helper call sites alter src/ui/window.rs separately.
+- Exact guest package: `gtk4-4.22.5-2.fc44.x86_64`. GDB also catches the critical
+  during repeated main-window close/relaunch, after preferences finished.
+  New diagnostic target scripts log button type/parent/icon before callbacks.
+  Do not infer an upstream cause yet; minimal GTK/X11 dialog and 100-cycle
+  main-close examples pass, including a search and view-switcher version.
+- Newer evidence: the GDB button breakpoint caught the FIRST activation on a
+  `GtkButton` under `AdwSheetControls` (preferences close). GDB consumes the trap
+  and may let later cases continue after detaching; their progress does NOT
+  place the critical in the main-window close handler. A minimal GI example
+  reproduces on isolated X11 when external dialog references are released;
+  retaining it through `closed` until idle passes. The production candidate now
+  centralizes this retention in ui::present_dialog for all transient dialogs.
+  Fatal-critical GTK contracts pass and check native close plus eventual release.
+  Final corrected-native GNOME run and fresh final coverage are in progress.
+- VM currently RUNNING via `target/start-desktop-test-vm.py`; native test data
+  remains in the same private VM. Diagnostic scripts and logs are ignored under
+  `target/`. Exact ongoing tool session IDs are ephemeral, inspect named logs.
+- `make coverage` passed inside Bubblewrap with isolated PID/proc/buses/display:
+  5499/5606 = 98.0913%, but this measured the subsequently REVERTED experiment.
+  Keep `target/coverage-experimental-close.json` separate. Re-measure final code.
+  Force Mesa via `__EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json`
+  and `LIBGL_ALWAYS_SOFTWARE=1` in that container; otherwise Xvfb attempts the
+  host NVIDIA library in its device-less namespace and aborts. Create private
+  `/tmp/.X11-unix` mode 1777. No host device access or process inventory is needed.
+- Driver tests: 20 passed; reproducibility checker tests: 30 passed; dependency
+  policy negative tests: 6 passed (PATH must include target/tools/bin); i18n
+  packaging tests: 7 passed. Cargo audit fetched current advisories and found
+  no vulnerabilities; cargo-deny licenses/sources passed. Lint and pinned strict
+  MkDocs build passed before latest docs-only updates; markdownlint unavailable.
+- Updated scripts catalog and guest desktop reproduction procedure. Full final
+  desktop acceptance, final receipts, fresh coverage and CI still required.
+- GitHub PR #61 checked on resume: open/draft/mergeable, 17 published checks green
+  for `41d0c2b`, not for local subsequent changes.
+
+Useful new logs: `target/resume-{coverage,lint,audit,driver-tests,reproducible-tests,
+dependency-policy-tests,i18n-tests,docs}.log`, `target/desktop-resumed-*.log`,
+`target/gtk-close-{minimal,header}.log`. Guest originals saved as
+`resumed-baseline-app.log` and `resumed-patched-app.log`; failed strict formal
+runs do not leave passing receipts. Collect named files and stop VM when done.
+
+---
+
 # Development handoff — paused at user request, 2026-10-26
 
 Resume the desktop-quality milestone, then prepare 0.2.0. The user explicitly

@@ -137,6 +137,51 @@ matches the same candidate executable as the 5/5 GUI/PAM guest receipt. This is
 a native Wayland rendering check; GNOME/KDE shell, tray, portal and interactive
 session behavior remain separate milestone acceptance checks.
 
+### Private GNOME/Plasma guest sessions
+
+`scripts/clean-install-guest-desktop.py` runs only as the unprivileged test user
+inside the marked disposable guest. Prepare the native package and synthetic
+USB policy using the clean-install procedure first. Install GNOME Shell, KWin,
+Plasma workspace, AT-SPI/Python bindings, dconf, software Mesa and the matching
+desktop portal backends inside that guest. No host display, bus, device or
+filesystem passthrough is needed.
+
+Copy both scripts, preserving the helper filename, and run each desktop in a
+fresh session bus:
+
+```sh
+python3 scripts/verify-clean-install.py copy --output target/clean-fedora \
+  scripts/clean-install-guest-wayland.py /home/usbguard-test/clean-install-guest-wayland.py
+python3 scripts/verify-clean-install.py copy --output target/clean-fedora \
+  scripts/clean-install-guest-desktop.py /home/usbguard-test/desktop-test.py
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  flock --wait 300 desktop-test.lock dbus-run-session -- python3 desktop-test.py --desktop gnome
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  flock --wait 300 desktop-test.lock dbus-run-session -- python3 desktop-test.py --desktop kde
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  cat desktop-gnome-report.json desktop-kde-report.json
+python3 scripts/verify-clean-install.py stop --output target/clean-fedora
+```
+
+Each run uses private XDG directories/dconf, a virtual Wayland output and software
+rendering. Accessible nodes are matched to the exact GUI PID. Checks cover a
+rendered main frame, named controls and filtering, the native preferences switch
+and persisted value, one background notice, same-process relaunch, and ten
+filter/hide/relaunch cycles. GNOME tests the no-watcher path; Plasma registers
+with its real watcher and exercises tray activation and menu Quit. The earlier
+GUI/PAM fixture supplies the separate Tab/Shift+Tab keyboard assertions.
+
+The primary GUI runs with `G_DEBUG=fatal-criticals`; any critical/error in its
+combined application log also rejects the run. A failed run removes the previous
+passing report. Successful reports record the executable, driver, helper and
+protocol digests, GTK/compositor versions and SELinux state. `--cycles` accepts
+1–100; use the default ten for acceptance. `--binary` allows a diagnostic build
+inside the guest without replacing the installed package; its path/hash are
+recorded, so that run must not be presented as installed-package evidence.
+
+This driver is still under investigation; the six-case exploratory runs do not
+constitute final desktop acceptance. See the [GTK investigation](validation/desktop-quality-2026-10-26/investigation.md).
+
 ## Reconnection regressions
 
 The supervisor is also tested with a bridge whose name stays owned while reads

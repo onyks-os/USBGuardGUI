@@ -189,7 +189,7 @@ pub(super) fn present(
     });
 
     recompute(&form);
-    form.dialog.present(Some(parent));
+    super::present_dialog(&form.dialog, parent);
 }
 
 fn build(rules: Vec<RuleHandle>, default_persistence: Persistence) -> Form {
