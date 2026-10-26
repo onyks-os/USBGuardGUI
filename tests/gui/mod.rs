@@ -64,6 +64,7 @@ fn gui_application_contracts() {
         .flags(gio::ApplicationFlags::NON_UNIQUE)
         .build();
     app.register(None::<&gio::Cancellable>).unwrap();
+    super::preferences::tests::exercise_native_close(&app);
     let backend = Backend::start();
     super::config::tests::exercise();
     super::history::tests::exercise(&app);

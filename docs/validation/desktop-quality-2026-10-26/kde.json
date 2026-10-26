@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "desktop": "kde",
+  "validated_at": "2026-10-26T13:42:36.508533+00:00",
+  "scope": "Private headless kde/Wayland diagnostic release executable; software rendering and synthetic USB only",
+  "os_release": "NAME=\"Fedora Linux\"\nVERSION=\"44 (Cloud Edition)\"\nRELEASE_TYPE=stable\nID=fedora\nVERSION_ID=44\nVERSION_CODENAME=\"\"\nPRETTY_NAME=\"Fedora Linux 44 (Cloud Edition)\"\nANSI_COLOR=\"0;38;2;60;110;180\"\nLOGO=fedora-logo-icon\nCPE_NAME=\"cpe:/o:fedoraproject:fedora:44\"\nHOME_URL=\"https://fedoraproject.org/\"\nDOCUMENTATION_URL=\"https://docs.fedoraproject.org/en-US/fedora/f44/\"\nSUPPORT_URL=\"https://ask.fedoraproject.org/\"\nBUG_REPORT_URL=\"https://bugzilla.redhat.com/\"\nREDHAT_BUGZILLA_PRODUCT=\"Fedora\"\nREDHAT_BUGZILLA_PRODUCT_VERSION=44\nREDHAT_SUPPORT_PRODUCT=\"Fedora\"\nREDHAT_SUPPORT_PRODUCT_VERSION=44\nSUPPORT_END=2027-05-19\nVARIANT=\"Cloud Edition\"\nVARIANT_ID=cloud\n",
+  "kernel": "6.19.10-300.fc44.x86_64",
+  "binary_sha256": "d7d4337c009f06e3799f865a4c74e0f8b8b8bb4e6a51591741a405d2b9ad093a",
+  "binary_path": "/home/usbguard-test/usbguard-gui-dialog-fixed",
+  "fatal_criticals": true,
+  "stress_cycles": 30,
+  "gtk_version": "gtk4-4.22.5-2.fc44.x86_64",
+  "cases": [
+    "native Wayland: main surface configured, buffer committed and frame received",
+    "AT-SPI: named device controls exposed; synthetic device filter responds",
+    "preferences: native dialog opens and closes without losing the main window",
+    "background: close hides the window, keeps GUI alive and sends the correct one-time notice",
+    "single instance: relaunch reopens the original process",
+    "stress: 30 filter/hide/relaunch cycles retain the original owner",
+    "Plasma tray: real watcher registration, Activate reopens, Quit menu exits cleanly"
+  ],
+  "window": {
+    "xdg_surface": 42,
+    "surface": 17,
+    "toplevel": 43,
+    "frame_callback": 52
+  },
+  "settings_backend": "dconf in private XDG directories and session bus",
+  "display_size": [
+    1280,
+    900
+  ],
+  "compositor_version": "kwin 6.7.5",
+  "selinux": "Enforcing",
+  "driver_sha256": "1f5939182d91bcaffd066b6e73b32e53163f6b95d96e1ee22f98880e4eaa1d5f",
+  "wayland_helper_sha256": "61c2d009a182d93fd315b9148863f2f6228b0a6caebb8a9122301c92e2a59562",
+  "protocol_sha256": "b57116bbef1b786328d4b125e8b2b0988e7049adf2a7b48192261783e3ccccd5",
+  "executable_kind": "Diagnostic release executable in guest home; not an installed-package receipt",
+  "package_version_at_build": "0.1.2",
+  "source_revision": "ddd89772555144d749e52a7d6da33c7b5b7747e9",
+  "source_sha256": "a2b56e12a89fdf9c64be766113bd9540a592cc4aaeac7da9b547999514c7335f",
+  "driver_base_revision": "ddd89772555144d749e52a7d6da33c7b5b7747e9",
+  "driver_modified_worktree": true,
+  "build_rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+}

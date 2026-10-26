@@ -11,4 +11,5 @@ installation — if you do not have one, start with the [Quickstart](../tutorial
 | [Add and remove rules safely](rules.md) | You are editing the policy, possibly while something else edits it too. |
 | [Change policy with your own password](polkit-rule.md) | Typing the administrator password for every change is too much. |
 | [Keep announcing devices with the window closed](background.md) | You want notifications without keeping the window open. |
+| [Review observed events](history.md) | You want to review recent activity or export event types and times without device identifiers. |
 | [Report a bug without leaking your hardware](bug-report.md) | You are about to open an issue. |

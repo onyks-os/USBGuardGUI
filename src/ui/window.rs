@@ -195,6 +195,7 @@ impl MainWindow {
             .tooltip_text(gettext("Main menu"))
             .primary(true)
             .build();
+        menu_button.update_property(&[gtk::accessible::Property::Label(&gettext("Main menu"))]);
 
         let header = adw::HeaderBar::new();
         header.set_title_widget(Some(
@@ -587,7 +588,7 @@ impl MainWindow {
         dialog.set_default_response(Some("cancel"));
         dialog.set_close_response("cancel");
         dialog.connect_response(None, move |_, response| on_answer(response == "yes"));
-        dialog.present(Some(&self.0.window));
+        super::present_dialog(&dialog, &self.0.window);
     }
 
     // -----------------------------------------------------------------------
@@ -877,7 +878,7 @@ impl MainWindow {
                 this.start_remove(chosen.clone(), true);
             }
         });
-        dialog.present(Some(&self.0.window));
+        super::present_dialog(&dialog, &self.0.window);
     }
 
     fn finish(&self, op: OperationId, result: Result<OperationOutcome, AppError>) {

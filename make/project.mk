@@ -84,4 +84,4 @@ test-i18n: ## Test translations, format validation and package catalogues
 
 .PHONY: test-clean-install-driver
 test-clean-install-driver: ## Test disposable VM isolation and input guards (no VM required)
-	python3 -m unittest discover -s tests -p 'test_clean_install.py' -v
+	python3 -m unittest discover -s tests -p 'test_clean_install*.py' -v

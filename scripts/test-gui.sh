@@ -59,12 +59,19 @@ cleanup() {
     rm -rf "$test_root"
 }
 trap cleanup EXIT
-for _ in {1..100}; do
+# Hosted CI runners can take several seconds to initialize Xvfb after package
+# installation. Allow 20 seconds before treating a still-running server as stuck.
+for _ in {1..400}; do
     if test -s "$test_root/display"; then break; fi
     if ! kill -0 "$xvfb_pid" 2>/dev/null; then cat "$test_root/display.log" >&2; exit 1; fi
     sleep 0.05
 done
-if ! test -s "$test_root/display"; then echo "Xvfb did not start" >&2; exit 1; fi
+if ! test -s "$test_root/display"; then
+    echo "Xvfb did not report a display within 20 seconds" >&2
+    cat "$test_root/display.log" >&2
+    ps -p "$xvfb_pid" -o pid=,stat=,args= >&2 || true
+    exit 1
+fi
 DISPLAY=":$(cat "$test_root/display")"
 export DISPLAY
 # The child expands bus variables after dbus-run-session has set them.

@@ -70,7 +70,7 @@ class CleanInstallTests(unittest.TestCase):
         package = output / "first/candidate.rpm"
         package.write_bytes(b"test package")
         (output / "report.json").write_text(json.dumps({"binary_sha256": "a" * 64}))
-        ui = {"passed": True, "cases": ["no-agent", "cancel", "password", "restart"], "binary_sha256": "a" * 64}
+        ui = {"passed": True, "cases": ["accessibility and keyboard: focus verified", "no-agent", "cancel", "password", "restart"], "binary_sha256": "a" * 64}
         return argparse.Namespace(output=directory, package=package), ui
 
     def test_successful_validation_checks_installed_bytes_and_records_receipt(self):
@@ -87,7 +87,13 @@ class CleanInstallTests(unittest.TestCase):
             self.assertIn("rm -f ui-report.json", script)
 
     def test_incomplete_failed_or_wrong_binary_validation_cannot_publish_receipt(self):
-        for changes in ({"passed": False}, {"cases": ["no-agent"]}, {"binary_sha256": "b" * 64}):
+        for changes in (
+            {"passed": False},
+            {"cases": ["accessibility and keyboard: focus verified", "no-agent", "cancel", "password"]},
+            {"cases": ["a11y", "no-agent", "cancel", "password", "restart"]},
+            {"cases": ["no-agent"]},
+            {"binary_sha256": "b" * 64},
+        ):
             with self.subTest(changes=changes), tempfile.TemporaryDirectory() as temporary:
                 args, ui = self.validation_fixture(Path(temporary))
                 old = '{"previous": true}'
@@ -114,6 +120,7 @@ class CleanInstallTests(unittest.TestCase):
         self.assertNotIn("SESSION_HANDOFF.md", files)
         self.assertNotIn("scripts/verify-clean-install.py", files)
         self.assertFalse(any(name.startswith("scripts/clean-install-") for name in files))
+        self.assertFalse(any(name.startswith("tests/test_clean_install") for name in files))
 
     def test_ssh_pins_identity_and_known_hosts_inside_output(self):
         with tempfile.TemporaryDirectory() as temporary:

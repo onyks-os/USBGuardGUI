@@ -1851,7 +1851,7 @@ reproduced the native GTK 4.22.5 crash and now passes; see [testing.md](testing.
 | Burst latency | ≤ 250 ms + render | Guaranteed by `MAX_LATENCY` (§5.4); verified in T3 |
 | Event loss under burst | zero | T3: final displayed state compared against `usbguard list-devices` |
 | Polkit resilience | zero timeouts on waits ≤ 10 min | T13 |
-| Idle memory | RSS < 110 MB, PSS < 70 MB | `smem`, after 10 minutes in background with 20 devices |
+| Idle memory | RSS < 110 MB with Cairo, PSS < 70 MB | `scripts/measure-memory.sh`, after 10 minutes in background with 20 invented devices |
 | Direct first-party system filesystem access | zero | `strace -f -k` on `/etc`, `/var`, `/sys`, with library accesses attributed separately |
 | Parser robustness | zero panics over 10⁶ fuzz inputs | `cargo-fuzz` |
 | Application coverage | ≥ 98% of production lines, GUI and headless configuration included | `make coverage-app` / `cargo-llvm-cov` |
@@ -1879,6 +1879,12 @@ The memory figure is PSS-based on purpose. GTK4 and libadwaita share a
 substantial fraction of their pages with every other GTK application in the
 session, so RSS overstates what this program actually costs a running desktop,
 and PSS is the honest number to hold ourselves to.
+
+**Measured again (2026-10-25, debug build):** with 20 synthetic devices after
+600 seconds in background on Fedora 44 / GNOME Shell 50.6 / Wayland (GTK 4.22.5,
+libadwaita 1.9.4, Cairo renderer), RSS was 63.4 MiB and PSS 34.4 MiB. Both
+targets passed. The procedure and its scope are recorded in
+[`docs/testing.md`](testing.md#background-memory-check).
 
 ### 13.3 Phase 0: Upstream Verification Procedure
 

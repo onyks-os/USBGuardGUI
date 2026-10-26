@@ -67,17 +67,23 @@ case.
 * **Live device list** — authorization state with icon *and* text, name, `vendor:product`, serial,
   and port, sorted by physical topology. Insertion bursts are merged, so a hub full of devices does
   not freeze the window.
+* **Device details** — USB interfaces, physical port path, connection type and state reported by
+  the daemon, with the source of the rule text stated explicitly.
 * **Device actions** — allow, block, reject; this session only or permanently; a Cancel button while
   a password prompt is open, which never times out on its own.
 * **Policy view** — the ruleset in the order the daemon evaluates it, a rule editor with a guided
-  mode and a text mode, live preview and validation before anything is sent, and explicit placement
+  mode and a text mode, live rule-text validation before anything is sent, and explicit placement
   ("at the end" or "after rule N").
+* **Matching-device preview** — ask USBGuard which connected devices match a new rule's attributes
+  before saving it. The preview is read-only; conditions and earlier rules can affect the final decision.
 * **Runtime parameters** — `ImplicitPolicyTarget` and `InsertedDevicePolicy`, changed with
   confirmation.
 * **Notifications** — when a device that is not authorized is plugged in, with an *Allow for this
   session* button where the notification server supports it.
 * **Background mode** — keeps announcing new devices after the window is closed, with a status icon
   where the desktop has one, and an optional start at login.
+* **Local event history** — the latest 200 observed events, with observation gaps marked and JSON
+  export containing event types and times only. Keeping history between runs is opt-in.
 * **`usbguard-gui --diagnose`** — the whole access check as one command whose output you can paste
   into a bug report.
 

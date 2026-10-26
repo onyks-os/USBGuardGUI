@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Explicit screen-reader names for the device filter/list, device details action,
+  and icon-only main menu; a repeatable 20-device background memory check.
+- A development-only `USBGUARD_GUI_ISOLATED_INSTANCE=1` option for running a
+  demo/test GUI without forwarding activation to the installed application.
+- AT-SPI name assertions in the disposable clean-install UI test for the device
+  filter/list/details and main menu.
 - A local event history for observed device insertions/removals, authorization
   outcomes, daemon reconnections and resynchronization gaps. It is capped at 200
   entries, stores only categories and timestamps, persists only by opt-in, and
@@ -50,6 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Closing native dialogs with animations disabled retains the dialog until the
+  GTK button callback finishes, avoiding a GObject critical during destruction.
 - Coverage targets find checkout-local cargo-llvm-cov without shell PATH changes,
   check graphical prerequisites before running tests, and give pinned install
   instructions when tools are absent. The diagnostic GUI regression handles

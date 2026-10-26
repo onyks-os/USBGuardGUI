@@ -1,0 +1,25 @@
+{
+  "distro": "fedora",
+  "image": "fedora-44.qcow2",
+  "image_sha256": "28680fe5b371a5a82ebf43a31926e086a168e59949d03969c5093e7071f90b7f",
+  "serial": "usbguard-clean-test",
+  "acceleration": "tcg",
+  "validated_at": "2026-10-25T21:41:10.478250+00:00",
+  "package": "usbguard-gui-0.1.2-1.x86_64.rpm",
+  "package_sha256": "91bfe83f045d825c2be8ecea69dbabe1f4cc5a501df96b596dc191d8be82c74b",
+  "ui": {
+    "cases": [
+      "accessibility and keyboard: labels exposed; Tab/Shift+Tab moves focus",
+      "no-agent: refused; GUI alive; device unchanged",
+      "agent-cancel: refused; GUI alive; device unchanged",
+      "agent-password: runtime block; persistent rules unchanged",
+      "daemon-restart: GUI reconnected; persistent allow restored"
+    ],
+    "os_release": "NAME=\"Fedora Linux\"\nVERSION=\"44 (Cloud Edition)\"\nRELEASE_TYPE=stable\nID=fedora\nVERSION_ID=44\nVERSION_CODENAME=\"\"\nPRETTY_NAME=\"Fedora Linux 44 (Cloud Edition)\"\nANSI_COLOR=\"0;38;2;60;110;180\"\nLOGO=fedora-logo-icon\nCPE_NAME=\"cpe:/o:fedoraproject:fedora:44\"\nHOME_URL=\"https://fedoraproject.org/\"\nDOCUMENTATION_URL=\"https://docs.fedoraproject.org/en-US/fedora/f44/\"\nSUPPORT_URL=\"https://ask.fedoraproject.org/\"\nBUG_REPORT_URL=\"https://bugzilla.redhat.com/\"\nREDHAT_BUGZILLA_PRODUCT=\"Fedora\"\nREDHAT_BUGZILLA_PRODUCT_VERSION=44\nREDHAT_SUPPORT_PRODUCT=\"Fedora\"\nREDHAT_SUPPORT_PRODUCT_VERSION=44\nSUPPORT_END=2027-05-19\nVARIANT=\"Cloud Edition\"\nVARIANT_ID=cloud\n",
+    "kernel": "6.19.10-300.fc44.x86_64",
+    "usbguard_package": "usbguard-1.1.4-1.fc44.x86_64",
+    "binary_sha256": "71b56efffc9d97c6ad9228d8ae03356453c24a40f604d7e6977d6e27ca9fbbbd",
+    "policy": "Explicit remote-user fixture; real PAM AUTH_SELF, no cached authorization",
+    "passed": true
+  }
+}

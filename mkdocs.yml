@@ -91,6 +91,7 @@ nav:
       - Add and remove rules: how-to/rules.md
       - Change policy with your own password: how-to/polkit-rule.md
       - Background mode and notifications: how-to/background.md
+      - Review observed events: how-to/history.md
       - Report a bug: how-to/bug-report.md
   - Explanation:
       - Architecture: explanation/architecture.md

@@ -66,6 +66,131 @@ window and synthetic devices, with no real USBGuard or authentication request.
 The compositor-specific crash was observed locally on Wayland; headless Xvfb
 also exercises the explicit focus-preservation assertions.
 
+## Background memory check
+
+On a Wayland or X11 desktop, run:
+
+```bash
+scripts/measure-memory.sh
+```
+
+It builds the debug GUI and demo bridge, runs both on a private session bus,
+uses 20 invented USB devices and Cairo for a stable renderer baseline, then
+reads RSS and PSS from the GUI process's `/proc/<pid>/smaps_rollup` after ten
+minutes. It fails above 110 MiB RSS or 70 MiB PSS. No system USBGuard daemon,
+USB policy, authentication, or user settings are touched. The run takes about
+ten minutes; for a quick smoke check use `MEMORY_SECONDS=5`. Set
+`USBGUARD_GUI_DEMO_DEVICE_COUNT` (7–200) or `MEMORY_RENDERER` to vary the load
+or renderer; the RSS budget is enforced only for Cairo. These measurements are
+specific to the local kernel, GTK build, and desktop libraries, so compare
+them on the same machine and session type.
+
+`USBGUARD_GUI_ISOLATED_INSTANCE=1` gives development runs a separate
+GApplication ID so activating a demo cannot forward to the installed GUI. Pair
+it with `USBGUARD_GUI_BUS=session` to use the demo bridge; the instance option
+alone does not change which USBGuard bus the client connects to. Release builds
+ignore the instance option.
+
+**Measured 2026-10-25:** RSS 64,912 KiB (63.4 MiB), PSS 35,276 KiB (34.4 MiB),
+after 600 seconds with 20 demo devices. Environment: Fedora 44, GNOME Shell
+50.6 on Wayland, GTK 4.22.5, libadwaita 1.9.4, Linux 7.2.11, debug build,
+Cairo renderer. Both limits passed. This is a repeatable local baseline, not
+a GNOME/KDE comparison or a release-binary measurement.
+
+## Native Wayland guest smoke check
+
+The marked Fedora 44 guest also checks the installed candidate with Weston
+15.0.1's headless backend, Pixman renderer and synthetic input seat. GTK uses
+`GDK_BACKEND=wayland` with Cairo, a private session bus/runtime/configuration,
+and no X11 fallback. This smoke check disables GTK accessibility; the separate
+AT-SPI/Xvfb guest run verifies accessible names and keyboard focus.
+
+The check allows up to 120 seconds for GTK startup under QEMU TCG and requires
+the main `USBGuardGUI` toplevel's configuration acknowledgement, a buffer commit
+on that same surface and its matching frame callback. The app must stay alive
+for five more seconds. Registry discovery or an empty surface alone cannot
+pass. The first exploratory launcher used a five-second deadline and stopped
+before GTK finished starting; it was a test timeout, not evidence of a GUI crash.
+
+For a guest already prepared and validated with the clean-install driver:
+
+```sh
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  sudo dnf -y install weston
+python3 scripts/verify-clean-install.py copy --output target/clean-fedora \
+  scripts/clean-install-guest-wayland.py /home/usbguard-test/wayland-test.py
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  dbus-run-session -- python3 /home/usbguard-test/wayland-test.py
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  cat wayland-report.json
+python3 scripts/verify-clean-install.py stop --output target/clean-fedora
+```
+
+The script refuses to run outside the marked VM or as root. Its report records
+the installed executable, test-driver and protocol-log SHA-256 digests; raw
+logs remain inside the disposable guest. Failed runs remove any stale passing
+report. `make test-clean-install-driver` checks the VM guards and incomplete
+protocol cases without starting a compositor or examining a live desktop.
+
+The [Fedora Wayland receipt](validation/desktop-quality-2026-10-25/wayland.json)
+matches the same candidate executable as the 5/5 GUI/PAM guest receipt. This is
+a native Wayland rendering check; GNOME/KDE shell, tray, portal and interactive
+session behavior remain separate milestone acceptance checks.
+
+### Private GNOME/Plasma guest sessions
+
+`scripts/clean-install-guest-desktop.py` runs only as the unprivileged test user
+inside the marked disposable guest. Prepare the native package and synthetic
+USB policy using the clean-install procedure first. Install GNOME Shell, KWin,
+Plasma workspace, AT-SPI/Python bindings, dconf, software Mesa and the matching
+desktop portal backends inside that guest. No host display, bus, device or
+filesystem passthrough is needed.
+
+Copy both scripts, preserving the helper filename, and run each desktop in a
+fresh session bus:
+
+```sh
+python3 scripts/verify-clean-install.py copy --output target/clean-fedora \
+  scripts/clean-install-guest-wayland.py /home/usbguard-test/clean-install-guest-wayland.py
+python3 scripts/verify-clean-install.py copy --output target/clean-fedora \
+  scripts/clean-install-guest-desktop.py /home/usbguard-test/desktop-test.py
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  flock --wait 300 desktop-test.lock dbus-run-session -- python3 desktop-test.py --desktop gnome
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  flock --wait 300 desktop-test.lock dbus-run-session -- python3 desktop-test.py --desktop kde
+python3 scripts/verify-clean-install.py ssh --output target/clean-fedora \
+  cat desktop-gnome-report.json desktop-kde-report.json
+python3 scripts/verify-clean-install.py stop --output target/clean-fedora
+```
+
+Each run uses private XDG directories/dconf, a virtual Wayland output and software
+rendering. Accessible nodes are matched to the exact GUI PID. Checks cover a
+rendered main frame, named controls and filtering, the native preferences switch
+and persisted value, one background notice, same-process relaunch, and ten
+filter/hide/relaunch cycles. GNOME tests the no-watcher path; Plasma registers
+with its real watcher and exercises tray activation and menu Quit. The earlier
+GUI/PAM fixture supplies the separate Tab/Shift+Tab keyboard assertions.
+Window presence is observed with one `GetChildren` request to the exact
+application's AT-SPI root. Widget traversal resumes only while a window is
+present; a separate cached child-count/index pair can race with hiding.
+
+The primary GUI runs with `G_DEBUG=fatal-criticals`; any critical/error in its
+combined application log also rejects the run. A failed run removes the previous
+passing report. Successful reports record the executable, driver, helper and
+protocol digests, GTK/compositor versions and SELinux state. `--cycles` accepts
+1–100; use the default ten for acceptance. `--binary` allows a diagnostic build
+inside the guest without replacing the installed package; its path/hash are
+recorded, so that run must not be presented as installed-package evidence.
+
+The corrected diagnostic executable passed seven cases on
+[GNOME Shell 50.6](validation/desktop-quality-2026-10-26/gnome.json) and
+[KWin/Plasma 6.7.5](validation/desktop-quality-2026-10-26/kde.json), including
+ten GNOME and thirty Plasma hide/relaunch cycles. These are diagnostic-release
+executables in the guest home, rather than new installed-package receipts.
+The [investigation](validation/desktop-quality-2026-10-26/investigation.md)
+distinguishes the fixed dialog lifetime from GTK's stale-index AT-SPI edge case
+and records the observer correction. Fatal criticals remain enabled.
+
 ## Reconnection regressions
 
 The supervisor is also tested with a bridge whose name stays owned while reads
@@ -422,12 +547,13 @@ Polkit and PAM inside disposable QEMU guests:
 | :---- | :----- | :--------------- | :---- | :------------ |
 | Ubuntu 24.04.5 | 6.8.0-147-generic | 1.1.2+ds-6build2 | polkit-gnome | 4/4 passed, October 24 |
 | Debian 13.7 | 6.12.113+deb13-amd64 | 1.1.3+ds-3 | mate-polkit | 4/4 passed, October 25 |
-| Fedora 44 | 6.19.10-300.fc44.x86_64 | 1.1.4-1.fc44 | mate-polkit | 4/4 passed, October 25 |
+| Fedora 44 (baseline) | 6.19.10-300.fc44.x86_64 | 1.1.4-1.fc44 | mate-polkit | 4/4 passed, October 25 |
+| Fedora 44 (desktop-quality candidate) | 6.19.10-300.fc44.x86_64 | 1.1.4-1.fc44 | mate-polkit | 5/5 passed, October 25; AT-SPI and Tab focus |
 | Arch rolling | 7.2.11-arch1-1 | 1.1.4-11 | polkit-gnome | 4/4 passed, October 25 |
 
-Each suite starts the installed GTK app as the unprivileged test user under
-Xvfb/Openbox, with memory settings and a software renderer. It filters the
-synthetic USB disk, requests Block / This session only, and checks:
+The daemon/Polkit suite starts the installed GTK app as the unprivileged test
+user under Xvfb/Openbox, with memory settings and a software renderer. It
+filters the synthetic USB disk, requests Block / This session only, and checks:
 
 1. Without an agent, the request is denied, the device stays allowed and the GUI survives.
 2. Dismissing the real agent's password dialog denies the request without changing the device.
@@ -435,6 +561,16 @@ synthetic USB disk, requests Block / This session only, and checks:
    current session and leaves the persistent ruleset byte-for-byte unchanged.
 4. Restarting both USBGuard services restores persistent allow, and the GUI
    reconnects and displays the refreshed state.
+The desktop-quality candidate adds a fifth check: accessible names are exposed
+for the filter, device list, details action and main menu; Tab leaves the filter
+and Shift+Tab returns focus to it.
+
+The guest driver performs the accessibility and keyboard checks only inside the
+disposable Xvfb guest; the host desktop is not queried. The original October
+24–25 runs predate these assertions and remain evidence for the four
+daemon/Polkit cases above. A Fedora 44 run against the desktop-quality candidate
+passed all five checks; its package and executable hashes are recorded in
+[the desktop-quality validation receipts](validation/desktop-quality-2026-10-25/).
 
 The October 25 driver additionally observes actual system-bus calls and denials
 inside the VM. It asserts the synthetic device ID, block target and `permanent=false`,

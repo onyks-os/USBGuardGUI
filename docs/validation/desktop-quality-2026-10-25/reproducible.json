@@ -1,0 +1,26 @@
+{
+  "scope": "Linux x86_64 GUI binary, unsigned RPM, DEB, Arch package and Flatpak bundle",
+  "revision": "7b48ba2068b7fd08526473b79820963549add330",
+  "modified_worktree": false,
+  "source_date_epoch": 1792961095,
+  "source_sha256": "2071c126028ee40ba5f49bd3dd45817f17abff36551a8872783b6d5909999734",
+  "recipe_sha256": "ef5b483d1274d70fe51dc2baab3a0c42f9e5ecd771fa804ca1e5cb4ff80f70e4",
+  "recipe_archive_sha256": "7ef8af699a41ea53ea1c8f04bcb3751c0bcb375858b902e9143ba8deba03e462",
+  "builder_image": "d2ccb406bb095c9b4b8d87c8f5ed35f58c743e0f2b221ce8f4fb4b2b39d3886f",
+  "flatpak_filename": "usbguard-gui-0.1.2.flatpak",
+  "flatpak_sha256": "a759f3b111a901f358296055cfe53086ead29ebf8f91672cbbed7e845443ac1a",
+  "flatpak_binary_sha256": "598d657cf76fb86ae7b8617f1881c6e285eba01eb36ddfd9d2335e9abd082014",
+  "arch_filename": "usbguard-gui-0.1.2-1-x86_64.pkg.tar.zst",
+  "arch_sha256": "4174287af6751ce31983dc7b7035958b61d86b28a3c0b69d73f18847c65fcb7c",
+  "deb_filename": "usbguard-gui_0.1.2-1_amd64.deb",
+  "deb_sha256": "e57307bfce8923d0b3f43bfcb359b75c53134a0ea3d674fcf2210163152ab804",
+  "rpm_filename": "usbguard-gui-0.1.2-1.x86_64.rpm",
+  "rpm_sha256": "91bfe83f045d825c2be8ecea69dbabe1f4cc5a501df96b596dc191d8be82c74b",
+  "binary_sha256": "71b56efffc9d97c6ad9228d8ae03356453c24a40f604d7e6977d6e27ca9fbbbd",
+  "byte_identical": true,
+  "build_roots": [
+    "/tmp/repro-one",
+    "/tmp/independent/repro-two"
+  ],
+  "compilation_network": "none"
+}

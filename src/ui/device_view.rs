@@ -111,6 +111,9 @@ impl DeviceView {
             .placeholder_text(gettext("Filter by name, ID, or serial"))
             .hexpand(true)
             .build();
+        search.update_property(&[gtk::accessible::Property::Label(&gettext(
+            "Filter devices by name, ID, or serial",
+        ))]);
         search.connect_search_changed({
             let (query, filter) = (query, filter.clone());
             move |entry| {
@@ -128,6 +131,9 @@ impl DeviceView {
             .show_row_separators(true)
             .reorderable(false)
             .build();
+        columns.update_property(&[gtk::accessible::Property::Label(&gettext(
+            "Connected USB devices",
+        ))]);
         columns.add_css_class("data-table");
         columns.append_column(&state_column());
         for (title, expand, text) in text_columns() {
@@ -278,6 +284,9 @@ fn details_column() -> gtk::ColumnViewColumn {
             return;
         };
         let details = gtk::MenuButton::builder().label(gettext("Details")).build();
+        details.update_property(&[gtk::accessible::Property::Label(&gettext(
+            "Show device details",
+        ))]);
         let text = gtk::Label::builder()
             .width_request(320)
             .max_width_chars(48)

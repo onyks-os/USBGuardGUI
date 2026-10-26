@@ -1,77 +1,61 @@
-# Development handoff — 2026-10-25
+# Development checkpoint — 2026-10-26
 
-Completed implementation follow-up: the user explicitly requested **98% coverage across the entire
-application, including GTK**, plus an edge-case review. The local gate passes at **4841/4928 = 98.2346%**.
-The implementation is on
-`test/core-coverage-98` (the branch name predates the clarified whole-app scope).
+Continue completing PR #61 (`feat/desktop-quality`), then prepare and publish
+0.2.0 through a verified release candidate. The user authorized signed-off commits,
+PR management and release/tag publication; DCO consent already exists.
 
-- Production fixes: cancellable-operation events survive queue backpressure;
-  Guided → Text releases its preview borrow before GTK's synchronous callbacks;
-  parameter signals preserve structural denials and disable unknown values;
-  policy error descriptions escape markup; one tray registration in flight
-  follows the latest background preference, including rapid off/on changes.
-- Unit tests moved to `tests/unit/`, graphical contracts to `tests/gui/`, preserving
-  all existing tests. `make coverage-app` measures production source across GUI
-  and headless feature configurations, with private display/buses/user dirs.
-- Graphical tests cover real 20/180-second notices. Do not edit the launcher
-  while it is executing. The 180-second test is intentionally a wall-clock wait.
-- New coverage checker rejects omitted GUI files, malformed/duplicate reports,
-  test-code inflation and percentages that only round to 98%.
-- The original zbus migration / real clean-install work below is complete;
-  these new GUI tests simulate the backend and do not replace its PAM receipts.
+**Privacy:** never inspect the real host's desktop, applications, services or
+physical devices. Use only the marked private VM with synthetic USB, or the
+narrow namespace wrapper `target/run-private-tests.py`. No subagents requested.
 
+## Completed and verified
 
-The requested zbus/ksni migration and clean-install verification are implemented
-and locally verified. No translation expansion or AUR publication was undertaken.
+- Production fix at pushed `ddd8977`: retain transient dialogs through native
+  close callbacks, then release at GLib idle. Preferences/About contract verifies
+  native close and eventual release. Earlier main-window deferral was ineffective
+  and reverted. Investigation: `docs/validation/desktop-quality-2026-10-26/`.
+- Final whole-application coverage: **5500/5607 = 98.0917%**, GUI included.
+  Receipt identifies source and Rust-test digests. Log:
+  `target/dialog-lifetime-coverage.log`; HTML `target/llvm-cov/html/index.html`.
+- Final native desktop tests passed: GNOME seven cases/10 cycles, Plasma seven
+  cases/30 cycles, fatal criticals, no debugger, same owner, single notice and
+  clean exit. Plasma uses its real watcher/tray. Both receipts identify diagnostic
+  executable SHA256 `d7d4337c009f06e3799f865a4c74e0f8b8b8bb4e6a51591741a405d2b9ad093a`,
+  NOT an installed release package. Version at build remains 0.1.2.
+- The final driver uses atomic AT-SPI root GetChildren during window hiding.
+  GDB traced the separate stale-index critical to GTK 4.22.5's root handler.
+  This corrects our observer; it does not fix GTK for other accessibility clients.
+- All 17 PR checks passed on ddd8977, including coverage, reproducibility of every
+  package format, stable/beta/MSRV, lint, audit, DCO and CodeQL. Final subsequent
+  driver/docs/receipt changes need their own CI before merge.
+- Local checks already passed: driver 20 tests, reproducibility 30, dependency
+  policy 6, i18n 7; audit/deny, lint, pinned strict MkDocs. Markdownlint unavailable.
 
-- zbus 6.1 and Rust 1.89 replace the old dependency/compiler baseline. The fixed
-  SNI/menu implementation runs directly on zbus, replacing ksni and the deprecated
-  zvariant stack. Architecture, dependency inventory and ADR 0002 describe it.
-- All four real GUI/PAM cases pass on Ubuntu 24.04.5, Debian 13.7, Fedora 44 and
-  Arch rolling: no agent, cancelled authentication, correct-password runtime block
-  with unchanged permanent rules, daemon restart/GUI reconnection.
-- Tests also verify wire properties/actions, both tooltip signals, watcher restart,
-  mutation error classification and installed artifact identity. Core per-file
-  coverage stays above 90%; the dependency audit has no findings or notices.
-- [Testing](docs/testing.md#zbus-6-and-real-clean-system-validation-2026-10-2425)
-  and [verification](docs/verification.md#post-012-zbus-6-validation-2026-10-2425)
-  contain exact scope, reproduction and committed receipts.
+## VM and local evidence
 
-Checkpoint artifacts under ignored `target/zbus6-repro-final` are measured
-modified-worktree builds retaining version 0.1.2, distinct from the published
-0.1.2 release. The native binary hash in all guest receipts is
-`e6f620ab6756d34849a15357b9967fe1b07541a0b509686f3d930484ff53cf82`.
-The CI reproduction gate measures the final PR source independently.
+The private Fedora VM is **STOPPED** (graceful shutdown and private QMP socket
+checked). Its directory is `target/clean-install-fedora-pr61`; keys/credentials
+must never be printed or committed. Evidence archive:
+`target/clean-install-fedora-pr61/desktop-accepted-evidence.tar.gz`.
+Final raw reports/logs: `target/desktop-{gnome,kde}-atomic-{report.json,app.log}`.
+Resume only if needed via `target/start-desktop-test-vm.py` (refuses second writer).
 
-Local test VM disks and evidence remain under `target/clean-install-*`, with
-credentials private and never committed. Stop VMs after collecting evidence.
-Use generic Debian images with USB support, start the packaged modern Polkit
-helper socket when needed, and reload fixture policy after writing it.
-Do not enable SUID or disable SELinux to make a test pass.
+Host GUI/coverage tests MUST use `target/run-private-tests.py`: empty mount root,
+private proc/dev/tmp/run/sys/buses/network, only explicit code/toolchain binds,
+software Mesa. Do not use the older whole-root bind or the real desktop.
 
-No new release/tag is part of this implementation handoff. Publication needs the
-usual versioning and release gates. Signed-off-by with the configured Git identity
-was explicitly approved for this work; avoid asking for that consent again.
+## Remaining release work
 
-Developer tools: `/home/onyks/.cargo/bin` and `target/tools/bin` (cargo-deny 0.20.2,
-cargo-llvm-cov 0.9.1). Use `/bin/bash`, `login:false`. The host lacks /dev/kvm,
-so VM execution uses TCG. Historical detailed pause instructions are preserved
-in commit `ccfb96d`; the work described there has now been completed.
+1. Commit final observer, verified receipts, updated roadmap/docs; push PR #61,
+   update its description, mark ready, wait for green exact-head CI and squash
+   merge with the already-authorized Git identity's Signed-off-by.
+2. Prepare 0.2.0 version metadata/changelog/AppStream/Arch version in a new branch.
+   Include all four completed product milestones in 0.2.0 scope; no more languages
+   or AUR publication. Draft notes: `target/release-020-notes.md`.
+3. Pass CI and merge version PR; require main checks before tagging. Follow
+   `docs/releasing.md`: publish v0.2.0-rc.1, verify checksums/Sigstore identity,
+   installed candidate package and pinned Flatpak validation; stable tag at the
+   same verified commit. Existing native receipts from prior candidates must not
+   be described as installed 0.2.0 validation.
 
-Whole-app evidence: `docs/validation/application-coverage-2026-10-25.json`;
-full LLVM JSON `target/coverage-application.json`; HTML
-`target/llvm-cov/html/index.html`; logs `target/coverage-98-complete.log`,
-`target/coverage-98-verify-final.log`, `target/coverage-98-msrv.log`,
-`target/coverage-98-properties.log`. The native test host lacked Xvfb/xdotool:
-RPMs were downloaded/extracted under `target/coverage-tools/root` without a host
-installation. `make coverage` now discovers both local tool locations automatically, including
-the unpacked desktop libraries; no manual PATH/LD_LIBRARY_PATH exports are needed.
-Missing dependencies fail before tests with install instructions. Four new tool
-discovery/preflight regressions bring the Python suite to 65 tests. The diagnostic
-GUI regression now accepts the no-agent CI case and separately checks an IPC
-denial with copyable commands. CI installs normal Ubuntu test packages.
-
-Coverage command follow-up: `make coverage` succeeded without any manually added
-PATH or LD_LIBRARY_PATH (`target/coverage-user-entrypoint.log`), still 98.2346%.
-`target/coverage-tools-gui.log` verifies the agent-independent diagnostic fixture;
-`target/coverage-tools-tests.log` has 13 checker/tool tests and Clippy is clean.
+No v0.2.0 tag exists at this checkpoint. Stable remains 0.1.2.

@@ -27,3 +27,12 @@ agent and a person fetching a password look the same.
 !!! warning "Cancel stops waiting, not USBGuard"
     If you cancel after entering the password, USBGuard may already have made the change. The list
     always shows what USBGuard reports, so check the row after cancelling.
+
+## Inspect a device
+
+Click **Details** on its row to see USB interfaces, the physical port path, connection type,
+and the state and device rule text reported by USBGuard. Missing attributes are shown explicitly.
+
+The device rule text describes that device. The `listDevices` response does not identify the
+effective policy rule, so the details view states that the matched rule is unavailable rather
+than guessing from similar rules.

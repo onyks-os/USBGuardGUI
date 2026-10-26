@@ -108,7 +108,7 @@ pub(super) fn present_preferences(parent: &impl IsA<gtk::Widget>, config: &Confi
     page.add(&history_group);
     let dialog = adw::PreferencesDialog::new();
     dialog.add(&page);
-    dialog.present(Some(parent));
+    super::present_dialog(&dialog, parent);
 }
 
 pub(super) fn present_about(parent: &impl IsA<gtk::Widget>) {
@@ -127,7 +127,7 @@ pub(super) fn present_about(parent: &impl IsA<gtk::Widget>) {
         // Translators: replace with your name(s), one per line, to be credited.
         .translator_credits(gettext("translator-credits"))
         .build();
-    about.present(Some(parent));
+    super::present_dialog(&about, parent);
 }
 
 #[cfg(test)]

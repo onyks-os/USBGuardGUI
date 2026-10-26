@@ -7,6 +7,109 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Explicit screen-reader names for the device filter/list, device details action,
+  and icon-only main menu; a repeatable 20-device background memory check.
+- A development-only `USBGUARD_GUI_ISOLATED_INSTANCE=1` option for running a
+  demo/test GUI without forwarding activation to the installed application.
+- AT-SPI name assertions in the disposable clean-install UI test for the device
+  filter/list/details and main menu.
+- A local event history for observed device insertions/removals, authorization
+  outcomes, daemon reconnections and resynchronization gaps. It is capped at 200
+  entries, stores only categories and timestamps, persists only by opt-in, and
+  exports JSON without device identifiers.
+- A per-device details popover with USB interfaces, physical port path,
+  connection type and daemon-reported state. It distinguishes the device rule
+  text from the effective policy rule, which `listDevices` does not report.
+- A read-only preview in both new-rule editor modes showing connected devices
+  matching the rule's attributes. Conditions and earlier-rule precedence are
+  called out as factors the preview cannot simulate; edits, cancellation and
+  closing invalidate pending results. Device names are displayed as plain text.
+- French translations for the interface, notifications, desktop entry and
+  AppStream metadata; gettext/plural/format and package-catalogue tests, plus
+  the graphical focus regression in both English and French.
+- A pinned cargo-deny license/source gate in CI and `make verify`, with rejection
+  tests for forbidden licenses across dependency kinds, optional/target-specific
+  dependencies, SPDX AND/OR expressions and unapproved pinned Git sources.
+
+### Changed
+
+- Enforce >=98% production line coverage across the complete application, including
+  GTK and headless builds. Isolated desktop tests cover dialogs, notifications,
+  device/rule operations, single-instance lifecycle and real 20/180-second notices;
+  unit-test source no longer inflates the measured application coverage.
+- Migrate to zbus 6.1 and Rust 1.89, including the CI minimum and pinned
+  reproducible builder. Replace ksni with fixed SNI/D-Bus menu interfaces on
+  zbus; preserve native/Flatpak registration, actions and watcher reconnection.
+  The deprecated zvariant/zvariant_derive/zbus_names dependency stack is removed.
+- Add disposable QEMU clean-install validation with synthetic USB storage,
+  native packages and real Polkit/PAM. Ubuntu, Debian, Fedora and Arch pass
+  denial, cancellation, runtime authorization and daemon-restart/reconnection
+  checks. The verifier validates observed calls, installed hashes and complete
+  receipts; isolation and failure guards are regression-tested.
+
+### Fixed
+
+- Closing native dialogs with animations disabled retains the dialog until the
+  GTK button callback finishes, avoiding a GObject critical during destruction.
+- Coverage targets find checkout-local cargo-llvm-cov without shell PATH changes,
+  check graphical prerequisites before running tests, and give pinned install
+  instructions when tools are absent. The diagnostic GUI regression handles
+  both desktop Polkit agents and agent-less CI runners; tool-discovery fixtures
+  isolate Cargo's plugin directory from globally installed tools.
+- Switching the new-rule form from Guided to Text no longer aborts on a
+  synchronously re-entered preview borrow.
+- Cancellation preserves its outcome and cache invalidation when the UI event
+  queue is full, without blocking GTK.
+- Parameter updates preserve structural access denials and keep unknown daemon
+  values unselected and insensitive.
+- Policy read failures display daemon details as literal text instead of markup.
+- A late tray registration cannot resurrect the icon after background mode is
+  disabled; concurrent requests are coalesced.
+- Source crates exclude privileged VM-only tools while retaining required build inputs; a packaging regression enforces this boundary.
+- Installed Flatpak headless checks avoid starting the unrelated document portal.
+- Reproducible builds compile every language registered in `po/LINGUAS`, and
+  installed Flatpak validation checks every registered catalogue.
+
+## [0.1.2] - 2026-10-24
+
+### Added
+
+- `make reproducible`: two clean offline Linux x86_64 GUI builds with a pinned Ubuntu
+  image/snapshot and Rust 1.88.0. Byte comparison, temporary-path checks, GUI dependency
+  inspection, source/recipe archives, and an environment report run locally and in CI.
+- Reproduction inputs accompany new releases; the published bare binary comes only from the
+  successful comparison job. Complete RPM, DEB, Arch and Flatpak archives are compared as well.
+- Flatpak bundles use a dedicated /app-locale executable and fixed OSTree export clock;
+  private runtime validation enforces a pinned GNOME commit and checks installed CLI/schema/assets.
+- Unit tests for deterministic source archives, excluded credentials, recipe freezing,
+  checker failure paths, and refusing stale outputs or unacknowledged local changes.
+- Mock D-Bus resilience tests for interrupted writes before/after execution (T2), ten-minute
+  authentication waits with virtual time (T13), and cancellation while authentication is pending.
+- Regression tests for log privacy and startup notices when debug/trace is enabled.
+- `make coverage-core` and a CI gate requiring >90% line coverage per rule-language,
+  cancellable-operation, and error-classification file.
+- A private-demo-bus filesystem tracing script and scoped measurement notes in `docs/testing.md`.
+
+### Fixed
+
+- Dependency-audit CI runs the pinned auditor directly with read-only permissions,
+  avoiding failed check-run publication and keeping fork pull requests supported.
+- Require Tokio 1.53.3 to resolve RUSTSEC-2026-0386 (AsyncFd I/O safety).
+- Release builds no longer embed build-machine paths for development-only schemas/catalogues;
+  installed system assets and debug builds retain their respective behavior.
+- Device-table refreshes and reconnection resets clear the old row's keyboard focus before
+  removing it. This avoids a GTK crash when focus returns from an authentication window after
+  cancelling Polkit. A graphical regression test reproduces the original crash and runs in CI.
+- Reconnection no longer spins when the bridge owns its bus name but cannot serve requests:
+  retries observe exponential backoff, and reconnection is announced only after subscriptions
+  and the first device read succeed. Tests now include a real private bus and name replacement.
+- Writes whose replies are lost now report an inconclusive outcome and request fresh device/policy
+  state without retrying automatically. The message is also translated into Italian.
+- Connection and malformed-signal errors no longer include raw detail at default log levels;
+  debug/trace logging prints a privacy notice, including with dependency-specific filters.
+
 ### Changed
 
 - Documentation checked against 0.1.1. The security assessment now gives each mitigation the status

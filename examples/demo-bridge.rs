@@ -36,7 +36,7 @@ fn device(target: &str, id: &str, name: &str, serial: &str, port: &str, ifaces: 
 
 #[tokio::main]
 async fn main() -> zbus::Result<()> {
-    let devices = vec![
+    let mut devices = vec![
         (
             1,
             device(
@@ -97,6 +97,33 @@ async fn main() -> zbus::Result<()> {
             ),
         ),
     ];
+    // The optional count is useful for memory/large-list checks without
+    // changing the normal six-device demo. Device details are invented.
+    let configured_count = std::env::var("USBGUARD_GUI_DEMO_DEVICE_COUNT").ok();
+    if let Some(raw_count) = configured_count.as_deref() {
+        let count = raw_count
+            .parse::<u16>()
+            .ok()
+            .filter(|count| (7..=200).contains(count));
+        let Some(count) = count else {
+            eprintln!("USBGUARD_GUI_DEMO_DEVICE_COUNT must be between 7 and 200");
+            std::process::exit(2);
+        };
+        for index in 7..=count {
+            let name = format!("Example USB Device {index}");
+            devices.push((
+                u32::from(index),
+                device(
+                    "allow",
+                    &format!("5555:{index:04x}"),
+                    &name,
+                    &format!("DEMO{index:04}"),
+                    &format!("3-{index}"),
+                    "08:06:50",
+                ),
+            ));
+        }
+    }
     let rules = vec![
         (
             1,
@@ -117,6 +144,7 @@ async fn main() -> zbus::Result<()> {
                 .to_owned(),
         ),
     ];
+    let demo_device_count = devices.len();
     let state = Arc::new(Mutex::new(State {
         devices,
         rules,
@@ -137,23 +165,29 @@ async fn main() -> zbus::Result<()> {
         .await?;
     println!("Demo USBGuard bridge running on the session bus. Start the window with:");
     println!("    USBGUARD_GUI_BUS=session cargo run");
-    println!("A new blocked device will be plugged in 15 seconds from now. Ctrl+C to stop.");
+    if configured_count.is_some() {
+        println!("Static demo with {demo_device_count} devices. Ctrl+C to stop.");
+    } else {
+        println!("A new blocked device will be plugged in 15 seconds from now. Ctrl+C to stop.");
+    }
 
-    tokio::time::sleep(Duration::from_secs(15)).await;
-    let phone = device(
-        "block",
-        "4444:0001",
-        "Example Phone",
-        "EXPHONE01",
-        "2-2",
-        "{ 06:01:01 ff:42:01 }",
-    );
-    state.lock().unwrap().devices.push((7, phone.clone()));
-    let emitter = SignalEmitter::new(&connection, "/org/usbguard1/Devices")?;
-    let attrs = HashMap::from([("name".to_owned(), "Example Phone".to_owned())]);
-    Devices::device_presence_changed(&emitter, 7, 1, 1, &phone, attrs.clone()).await?;
-    Devices::device_policy_changed(&emitter, 7, 1, 1, &phone, 0, attrs).await?;
-    println!("Plugged in: Example Phone (blocked).");
+    if configured_count.is_none() {
+        tokio::time::sleep(Duration::from_secs(15)).await;
+        let phone = device(
+            "block",
+            "4444:0001",
+            "Example Phone",
+            "EXPHONE01",
+            "2-2",
+            "{ 06:01:01 ff:42:01 }",
+        );
+        state.lock().unwrap().devices.push((7, phone.clone()));
+        let emitter = SignalEmitter::new(&connection, "/org/usbguard1/Devices")?;
+        let attrs = HashMap::from([("name".to_owned(), "Example Phone".to_owned())]);
+        Devices::device_presence_changed(&emitter, 7, 1, 1, &phone, attrs.clone()).await?;
+        Devices::device_policy_changed(&emitter, 7, 1, 1, &phone, 0, attrs).await?;
+        println!("Plugged in: Example Phone (blocked).");
+    }
 
     std::future::pending::<()>().await;
     Ok(())

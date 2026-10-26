@@ -80,7 +80,7 @@ pub(super) fn present(parent: &impl IsA<gtk::Widget>) {
         .content_height(480)
         .child(&toolbar)
         .build();
-    dialog.present(Some(parent));
+    super::present_dialog(&dialog, parent);
 
     // The probe runs on Tokio; the result comes back over a one-shot channel
     // and is applied here, on the main thread.
