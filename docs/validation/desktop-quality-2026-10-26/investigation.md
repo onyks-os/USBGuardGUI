@@ -1,6 +1,8 @@
-# Desktop investigation checkpoint — 2026-10-26
+# Desktop investigation and final validation — 2026-10-26
 
-This is unfinished investigation evidence, not a passing release receipt.
+The final diagnostic executable passed both native desktop suites. The history
+below distinguishes the application fix from a test-observer correction; the
+linked receipts are not installed-package release validation.
 
 Private native Wayland sessions in the marked synthetic Fedora guest passed six
 functional cases each on GNOME Shell 50.6 and KWin/Plasma 6.7.5. A GNOME run also
@@ -28,10 +30,9 @@ _g_log_abort
 
 The attempted repeated-cycle driver also invoked AT-SPI `GrabFocus`, which is
 unsupported by the inspected [GTK 4.22.5 component implementation](https://github.com/GNOME/gtk/blob/4.22.5/gtk/a11y/gtkatspicomponent.c).
-That driver error must be removed before comparing baseline and experimental
-background-close timing. Neither the proposed deferral nor the ten planned
-cycles has been validated. No upstream or first-party cause is established.
-The exact guest GTK version still needs recording.
+At that checkpoint, the driver error prevented a valid comparison of baseline
+and experimental background-close timing. The follow-up below records the
+controlled comparison and exact guest version.
 
 Raw diagnostics and preliminary six-case reports remain under ignored `target/`;
 SESSION_HANDOFF.md records their paths and the exact candidate identity.
@@ -66,5 +67,55 @@ emitted and releases that reference at the next GLib idle iteration. This
 applies to preferences, About, diagnostics, rule editor and alerts. Native
 Close-button contracts cover preferences/About without keeping test references
 alive during the callback, and verify that the dialogs are subsequently freed.
-The GTK contract passes with fatal criticals; final GNOME/Plasma acceptance on
-the corrected executable is still pending. No upstream issue or fix is claimed.
+The GTK contract passes with fatal criticals. The corrected diagnostic executable
+also passed all seven GNOME cases, including ten hide/relaunch cycles with fatal
+criticals and no debugger; see [the exact receipt](gnome.json). It is not an
+installed-package receipt. No upstream issue or fix is claimed.
+
+The Plasma run passed preferences and six stress cycles, then found a different
+critical: `g_variant_is_object_path: assertion string != NULL failed`. This required
+a separate investigation, resolved for the observer below. The
+initial Plasma watcher startup also needed a longer property-call deadline under
+TCG, before any application had launched. That startup timeout is distinct from
+the later primary-GUI critical.
+
+
+## AT-SPI observer follow-up
+
+The original failed PID's core dump and a later live GDB reproduction both
+enter GTK's `handle_accessible_method`, then `g_variant_new_object_path` with a
+null path. The immediate caller is GTK's accessibility D-Bus handler, rather
+than an application window callback:
+
+```text
+g_variant_is_object_path
+g_variant_new_object_path
+g_variant_new
+handle_accessible_method.part.0       (libgtk-4.so.1)
+call_in_idle_cb                      (libgio-2.0.so.0)
+g_idle_dispatch
+```
+
+This matches the stale-index path in [GTK 4.22.5's root handler](https://github.com/GNOME/gtk/blob/4.22.5/gtk/a11y/gtkatspiroot.c):
+the fixture read a child count and requested children separately while the
+window was hiding. That root handler can still try to return the last hidden
+window's unrealized accessibility path. The fixture now observes the target
+application's children atomically with `GetChildren`, using the exact app's
+AT-SPI bus name/path, and traverses its widget tree only when a window is
+present. It keeps both fatal criticals and the final critical-message gate.
+This changes the observer, not GTK, and does not claim to fix GTK for other
+clients using stale child indices.
+
+Final runs with this same observer and executable passed without a debugger:
+
+| Desktop | Functional cases | Filter/hide/relaunch cycles | Receipt |
+| :--- | :--- | :--- | :--- |
+| GNOME Shell 50.6 | 7/7 | 10 | [GNOME](gnome.json) |
+| KWin/Plasma 6.7.5 | 7/7 | 30 | [Plasma](kde.json) |
+
+Both kept fatal criticals enabled and verified clean exit, the same application
+owner across cycles, and a single background notification. The Plasma run used
+its real watcher, tray activation and Quit menu; GNOME exercised no-watcher
+behavior. Binary, driver, helper and protocol hashes were checked when collecting
+the receipts. Whole-application coverage is [5500/5607 lines](coverage.json),
+98.0917%. The private VM was then shut down.

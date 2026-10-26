@@ -170,6 +170,9 @@ and persisted value, one background notice, same-process relaunch, and ten
 filter/hide/relaunch cycles. GNOME tests the no-watcher path; Plasma registers
 with its real watcher and exercises tray activation and menu Quit. The earlier
 GUI/PAM fixture supplies the separate Tab/Shift+Tab keyboard assertions.
+Window presence is observed with one `GetChildren` request to the exact
+application's AT-SPI root. Widget traversal resumes only while a window is
+present; a separate cached child-count/index pair can race with hiding.
 
 The primary GUI runs with `G_DEBUG=fatal-criticals`; any critical/error in its
 combined application log also rejects the run. A failed run removes the previous
@@ -179,8 +182,14 @@ protocol digests, GTK/compositor versions and SELinux state. `--cycles` accepts
 inside the guest without replacing the installed package; its path/hash are
 recorded, so that run must not be presented as installed-package evidence.
 
-This driver is still under investigation; the six-case exploratory runs do not
-constitute final desktop acceptance. See the [GTK investigation](validation/desktop-quality-2026-10-26/investigation.md).
+The corrected diagnostic executable passed seven cases on
+[GNOME Shell 50.6](validation/desktop-quality-2026-10-26/gnome.json) and
+[KWin/Plasma 6.7.5](validation/desktop-quality-2026-10-26/kde.json), including
+ten GNOME and thirty Plasma hide/relaunch cycles. These are diagnostic-release
+executables in the guest home, rather than new installed-package receipts.
+The [investigation](validation/desktop-quality-2026-10-26/investigation.md)
+distinguishes the fixed dialog lifetime from GTK's stale-index AT-SPI edge case
+and records the observer correction. Fatal criticals remain enabled.
 
 ## Reconnection regressions
 

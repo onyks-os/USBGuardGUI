@@ -193,6 +193,7 @@ def main() -> None:
                 interface: str,
                 method: str,
                 parameters: Any = None,
+                timeout_ms: int = 15000,
             ) -> tuple[Any, ...]:
                 return bus.call_sync(
                     destination,
@@ -202,7 +203,7 @@ def main() -> None:
                     parameters,
                     None,
                     Gio.DBusCallFlags.NONE,
-                    15000,
+                    timeout_ms,
                     None,
                 ).unpack()
 
@@ -215,13 +216,17 @@ def main() -> None:
                     GLib.Variant("(s)", (name,)),
                 )[0]
 
-            def prop(destination: str, path: str, interface: str, name: str) -> Any:
+            def prop(
+                destination: str, path: str, interface: str, name: str,
+                timeout_ms: int = 15000,
+            ) -> Any:
                 return call(
                     destination,
                     path,
                     "org.freedesktop.DBus.Properties",
                     "Get",
                     GLib.Variant("(ss)", (interface, name)),
+                    timeout_ms=timeout_ms,
                 )[0]
 
             if args.desktop == "kde":
@@ -235,6 +240,9 @@ def main() -> None:
                             "/StatusNotifierWatcher",
                             WATCHER,
                             "IsStatusNotifierHostRegistered",
+                            # Under TCG the watcher can own its bus name before
+                            # Plasma finishes initializing its property handler.
+                            timeout_ms=60000,
                         )
                     ),
                     180,
@@ -333,6 +341,37 @@ def main() -> None:
                 raise RuntimeError(
                     "Accessible widget has no action: " + repr(item.name)
                 )
+
+            application = wait(lambda: next(roots(), None))
+            accessibility_address = call(
+                "org.a11y.Bus", "/org/a11y/bus", "org.a11y.Bus", "GetAddress"
+            )[0]
+            accessibility_bus = Gio.DBusConnection.new_for_address_sync(
+                accessibility_address,
+                Gio.DBusConnectionFlags.AUTHENTICATION_CLIENT
+                | Gio.DBusConnectionFlags.MESSAGE_BUS_CONNECTION,
+                None,
+                None,
+            )
+
+            def application_windows() -> list[tuple[str, str]]:
+                # Query the exact app's children in one request. A cached child
+                # count followed by GetChildAtIndex races with window hiding;
+                # GTK 4.22.5 can dereference a null path for that stale index.
+                return accessibility_bus.call_sync(
+                    application.app.bus_name,
+                    application.path,
+                    "org.a11y.atspi.Accessible",
+                    "GetChildren",
+                    None,
+                    None,
+                    Gio.DBusCallFlags.NONE,
+                    15000,
+                    None,
+                ).unpack()[0]
+
+            def visible_frame() -> Any:
+                return application_windows() and find(role="frame")
 
             search = wait(lambda: find(name="Filter devices by name, ID, or serial"))
             search.queryEditableText().setTextContents("usbguard-clean-test")
@@ -438,7 +477,7 @@ def main() -> None:
                     == "USBGuardGUI"
                 )
             click(wait(lambda: find(name="Close", role=("button", "push button"))))
-            wait(lambda: not find(role="frame"))
+            wait(lambda: not application_windows())
             expected = (
                 "Use the status icon to reopen it"
                 if args.desktop == "kde"
@@ -468,7 +507,7 @@ def main() -> None:
             print("PASS checkpoint:", cases[-1], flush=True)
             second = spawn([str(binary)], log=app_log)
             assert second.wait(timeout=60) == 0
-            wait(lambda: find(role="frame"))
+            wait(visible_frame)
             assert app.poll() is None
             assert (
                 owner
@@ -487,10 +526,10 @@ def main() -> None:
                 assert search.queryEditableText().setTextContents("usbguard-clean-test")
                 wait(lambda: find(name="Allowed"))
                 click(wait(lambda: find(name="Close", role=("button", "push button"))))
-                wait(lambda: not find(role="frame"))
+                wait(lambda: not application_windows())
                 restored = spawn([str(binary)], log=app_log)
                 assert restored.wait(timeout=60) == 0
-                wait(lambda: find(role="frame"))
+                wait(visible_frame)
                 assert owner == call(
                     "org.freedesktop.DBus",
                     "/org/freedesktop/DBus",
@@ -501,7 +540,7 @@ def main() -> None:
                 print("PASS filter/hide/relaunch cycle", cycle + 1, flush=True)
             cases.append(f"stress: {args.cycles} filter/hide/relaunch cycles retain the original owner")
             click(wait(lambda: find(name="Close", role=("button", "push button"))))
-            wait(lambda: not find(role="frame"))
+            wait(lambda: not application_windows())
             time.sleep(2)
             assert notification_count() == 1, (
                 "Background notice repeated on the second close"
@@ -514,7 +553,7 @@ def main() -> None:
                     "Activate",
                     GLib.Variant("(ii)", (0, 0)),
                 )
-                wait(lambda: find(role="frame"))
+                wait(visible_frame)
                 call(
                     tray_service,
                     "/MenuBar",

@@ -529,7 +529,7 @@ The same installed executable also passed the separate
 on headless Weston 15.0.1/Pixman. The check ties the main window's XDG
 configuration to a committed buffer and its frame callback, then observes
 five seconds of continued liveness. Its startup timeout accounts for TCG;
-GNOME/KDE session integration remains open. See the
+GNOME/Plasma diagnostic-executable acceptance is recorded below. See the
 [guest reproduction procedure](testing.md#native-wayland-guest-smoke-check).
 
 All four pass no-agent denial, real-agent cancellation, successful PAM-authenticated
@@ -562,3 +562,36 @@ remains the ordinary lint/unit/dependency gate. The GTK tests use a simulated
 USBGuard bridge, notifications and watcher on private buses. They do not claim
 real PAM authentication or physical hardware coverage; the clean-install evidence
 above documents those separate checks.
+
+## Desktop-quality native follow-up (2026-10-26, unreleased)
+
+The corrected release-profile diagnostic executable, SHA-256
+`d7d4337c009f06e3799f865a4c74e0f8b8b8bb4e6a51591741a405d2b9ad093a`,
+passed seven cases each in private native Wayland sessions on Fedora 44:
+
+| Desktop | Repeated hide/relaunch cycles | Additional integration |
+| :--- | :--- | :--- |
+| [GNOME Shell 50.6](validation/desktop-quality-2026-10-26/gnome.json) | 10 | Background without a watcher, one explanatory notification, same-owner relaunch and Quit |
+| [KWin/Plasma 6.7.5](validation/desktop-quality-2026-10-26/kde.json) | 30 | Real watcher registration, tray Activate and menu Quit |
+
+Both also verify a rendered main Wayland frame, named accessible controls,
+filtering, the native preferences switch and its persisted value. Tests use
+synthetic USB, software rendering, private XDG state/session buses and fatal
+criticals; neither final acceptance run uses a debugger. The receipts distinguish
+the diagnostic executable in guest home from the earlier installed-package
+checks, and record the exact driver/helper/protocol digests. They do not claim
+physical hardware or every desktop/renderer combination.
+
+The application retains transient dialogs through native close callbacks and
+releases them on the next idle iteration; GTK contracts also check eventual
+destruction. [The investigation](validation/desktop-quality-2026-10-26/investigation.md)
+records the original failure, discarded experiment and separate GTK AT-SPI
+stale-index issue. The observer uses an atomic application-window snapshot;
+it does not suppress toolkit criticals or patch GTK for other clients.
+
+[Fresh application coverage](validation/desktop-quality-2026-10-26/coverage.json)
+is **5500/5607 production lines (98.0917%)**, including GTK and headless builds.
+The source and Rust-test digests identify the measured snapshot. All 17 PR
+checks passed on `ddd8977`, including Rust stable/beta/1.89, dependency gates and
+[independent offline package builds](https://github.com/onyks-os/USBGuardGUI/actions/runs/40328040104).
+The final documentation/observer commit and release version must pass CI again.
