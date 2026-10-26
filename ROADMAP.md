@@ -218,11 +218,11 @@ explicit at every step.
 | **0.1.0** | Released | Device list/search/filter; runtime or permanent allow/block/reject; policy editor and safe removal; diagnostics; preferences; notifications, background/tray, autostart; English/Italian; native and Flatpak packages. |
 | **0.1.1** | Released | Flatpak status-icon correction. |
 | **0.1.2** | Current stable | Authentication-cancellation crash fix, reconnect backoff, inconclusive-write handling, log privacy, per-file core coverage, reproducible binaries and all package formats. |
-| **0.2.0** | Implementation complete; release pending | zbus 6.1, direct SNI/menu implementation and Rust 1.89; four clean-system daemon/Polkit checks; application fixes and >=98% production line coverage, GTK included. Includes the already-merged French catalogues and license/source/CI maintenance. |
-| **Following releases, versions unassigned** | Approved product milestones | Rule/device preview, device details and observed decisions, event history, desktop quality; ordered below. |
+| **0.2.0** | Implementation and desktop acceptance complete; release candidate pending | Rule/device preview, device details, private local event history and desktop quality; zbus 6.1, direct SNI/menu and Rust 1.89; four clean-system daemon/Polkit checks; >=98% production line coverage, GTK included. Includes the already-merged French catalogues and license/source/CI maintenance. |
 
 The old “v0.2.0 scope” above is historical: those policy actions shipped in
-0.1.0. The new 0.2.0 target contains the post-0.1.2 dependency and validation work. No release date is promised; a tag
+0.1.0. The new 0.2.0 target contains the post-0.1.2 dependency and validation work
+and all four product milestones below. No release date is promised; a tag
 requires the usual CI, coverage, reproducibility and installed-runtime gates.
 
 Real-daemon/Polkit checks now pass on disposable Ubuntu, Debian, Fedora and Arch
@@ -232,8 +232,8 @@ records the exact virtual-device/agent scope and package versions.
 
 ### Approved product milestones (2026-10-25)
 
-The following work is approved in priority order. Version numbers and release dates
-will be assigned after each milestone passes its acceptance checks. Further languages
+The following work was approved in priority order and is included in the 0.2.0
+release preparation after passing its acceptance checks. Further languages
 and AUR publication remain deferred; they are not prerequisites for these milestones.
 
 | Priority | Milestone | Scope and acceptance criteria | Status |
@@ -241,7 +241,7 @@ and AUR publication remain deferred; they are not prerequisites for these milest
 | **1** | **Preview matching devices before adding a rule** | A read-only action in both rule-editor modes asks USBGuard which currently connected devices match the attributes. Show results, no matches, errors and cancellation; discard results after edits or closing. State explicitly that conditions and rule precedence are not simulated. No authorization or policy mutation is performed. Test target-independent queries, hostile text, stale replies and failure paths; maintain >=98% application line coverage. | Merged; unreleased |
 | **2** | **Device details and observed decisions** | Add an accessible per-device details view for USB interfaces/functions, physical port topology, connection type and daemon-reported state/rule text. Label the source and distinguish that device description from the effective policy rule. Show a matched rule only when USBGuard reports an unambiguous, current identity; otherwise say that the API does not provide it. Test missing/malformed fields, hostile strings and invalidation on row replacement/reconnection. | Merged; unreleased |
 | **3** | **Local event history** | Show insertions, removals, authorization outcomes and reconnections observed while the app runs. Mark observation gaps; bound retention and make persistence opt-in. Offer export with identifiers obscured and test redaction. | Merged; unreleased |
-| **4** | **Desktop quality** | Measure and reduce memory usage; verify keyboard navigation, screen-reader labels, Wayland and GNOME/KDE behavior. Track repeatable measurements and desktop-specific regressions. | Validated; PR #61 pending merge. Memory baseline, installed Fedora AT-SPI/keyboard and native Weston checks passed. Corrected diagnostic executable passed 7/7 cases on GNOME and Plasma with 10/30 stress cycles and fatal criticals; application coverage 98.0917%. Versioned release-package verification remains a release gate. |
+| **4** | **Desktop quality** | Measure and reduce memory usage; verify keyboard navigation, screen-reader labels, Wayland and GNOME/KDE behavior. Track repeatable measurements and desktop-specific regressions. | Validated for 0.2.0. Memory baseline, installed Fedora AT-SPI/keyboard and native Weston checks passed. Corrected diagnostic executable passed 7/7 cases on GNOME and Plasma with 10/30 stress cycles and fatal criticals; application coverage 98.0917%. Versioned release-package verification remains a release gate. |
 
 All four retain the unprivileged D-Bus architecture. Each completed milestone must
 pass the existing tests, coverage and packaging gates before release. The first

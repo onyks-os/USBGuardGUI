@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-26
+
 ### Added
 
 - Explicit screen-reader names for the device filter/list, device details action,
@@ -35,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Update the locked Tokio runtime to 1.54.1, proptest to 1.12.0, and pinned CI
+  actions after compatibility, coverage and reproducibility checks.
 - Enforce >=98% production line coverage across the complete application, including
   GTK and headless builds. Isolated desktop tests cover dialogs, notifications,
   device/rule operations, single-instance lifecycle and real 20/180-second notices;
@@ -178,6 +182,8 @@ The first release.
 - `docs/architecture.md`: `listRules` takes a label filter, not a query — `""` lists every rule,
   `"match"` would have listed none. Found by introspection before any code depended on it.
 
-[Unreleased]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/onyks-os/USBGuardGUI/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.2...v0.2.0
+[0.1.2]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/onyks-os/USBGuardGUI/releases/tag/v0.1.0

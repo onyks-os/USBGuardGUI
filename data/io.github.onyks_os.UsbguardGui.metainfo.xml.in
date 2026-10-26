@@ -93,6 +93,17 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
+    <release version="0.2.0" date="2026-10-26" type="stable">
+      <description>
+        <p>Understand device policy before making changes.</p>
+        <ul>
+          <li>Preview connected devices matching a new rule's attributes</li>
+          <li>Inspect USB interfaces, connection details and daemon-reported state</li>
+          <li>Review local event history with optional persistence and no device identifiers</li>
+          <li>Improve accessible controls and native-dialog reliability</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.2" date="2026-10-24" type="stable">
       <description>
         <p>Authentication cancellation and USBGuard reconnection are more reliable.</p>

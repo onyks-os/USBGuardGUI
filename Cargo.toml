@@ -1,6 +1,6 @@
 [package]
 name = "usbguard-gui"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.89"
 description = "Unprivileged GTK4 desktop client for managing USB device authorization policy through the USBGuard daemon."
