@@ -97,9 +97,13 @@ bundle, are on the [releases page](https://github.com/onyks-os/USBGuardGUI/relea
 [changelog](release-notes/changelog.md) and the
 [roadmap](https://github.com/onyks-os/USBGuardGUI/blob/main/ROADMAP.md).
 
-The approved feature roadmap is complete. The project is now in maintenance:
-bug fixes, security/dependency updates, and desktop/distribution compatibility.
-No additional feature milestone is currently committed.
+The 0.2 feature roadmap is complete. Planned next: marking devices that act as
+keyboards or mice (0.3.0) and handling devices plugged in while the screen is
+locked (0.4.0). Bug fixes, security/dependency updates and compatibility continue.
+
+USBGuardGUI is written entirely by AI under a human maintainer's direction, and relies
+on a verification pipeline rather than on trust; see the
+[AI policy](https://github.com/onyks-os/USBGuardGUI/blob/main/AI_POLICY.md).
 
 Security policy and vulnerability reporting:
 [SECURITY.md](https://github.com/onyks-os/USBGuardGUI/blob/main/SECURITY.md).

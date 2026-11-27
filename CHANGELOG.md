@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `AI_POLICY.md`: the project is written by AI and relies on its verification
+  pipeline, not on trust; contributors are asked to disclose AI use.
+- Roadmap: 0.3.0 (marking devices that act as input devices) and 0.4.0
+  (devices plugged in while the session is locked) are planned.
+
 ## [0.2.1] - 2026-11-27
 
 ### Added

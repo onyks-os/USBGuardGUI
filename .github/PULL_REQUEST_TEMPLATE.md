@@ -14,6 +14,10 @@
 
 <!-- Describe the tests you ran and how a reviewer can reproduce them. -->
 
+## AI use
+
+<!-- Was AI used for this change? If yes, which tool and for what. See AI_POLICY.md. -->
+
 ## Checklist
 
 - [ ] `make verify` passes locally.

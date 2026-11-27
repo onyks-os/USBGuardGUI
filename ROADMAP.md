@@ -51,7 +51,8 @@ records the candidate and stable workflows. The historical acting-on-policy scop
 the D-Bus migration and validation work. See the
 [stable release](https://github.com/onyks-os/USBGuardGUI/releases/tag/v0.2.0) and
 [release verification](docs/verification.md#stable-020-release-verification-2026-10-26).
-The agreed feature scope is complete; the project now enters maintenance.
+The feature scope agreed for 0.2 is complete; 0.3.0 and 0.4.0 are
+[planned](#planned-milestones-2026-11-27).
 **0.2.1** (2026-11-27) is the first maintenance release: Brazilian Portuguese,
 completed Italian and French catalogues, the USBGuard #636 warning and dependency updates;
 see its [release verification](docs/verification.md#stable-021-release-verification-2026-11-27).
@@ -248,7 +249,8 @@ GTK, desktop and distribution versions. Preserve the >=95% whole-application lin
 coverage gate and validate release packages when shipping changes. Coverage and
 passing tests are evidence, not a guarantee that no defects remain.
 
-New features require a concrete use case and a separately agreed scope. Additional
+New features require a concrete use case and a separately agreed scope; the agreed
+ones are listed under *Planned milestones*. Additional
 languages, AUR and the upstream API proposal below remain optional ideas, not
 unfinished requirements for this release.
 
@@ -269,6 +271,27 @@ All four retain the unprivileged D-Bus architecture. Each completed milestone mu
 pass the existing tests, coverage and packaging gates before release. The first
 preview is an attribute-match snapshot, not a promise that saving a rule immediately
 changes those devices or that it wins over earlier policy rules.
+
+### Planned milestones (2026-11-27)
+
+Agreed with the maintainer after comparing with
+[gunchev/usbguard_gui](https://github.com/gunchev/usbguard_gui), another USBGuard front end.
+Two of its ideas address real risks that this program does not handle yet; they are planned
+as separate releases so each gets its own acceptance run.
+
+| Release | Milestone | Scope and acceptance criteria | Status |
+| :--- | :--- | :--- | :--- |
+| **0.3.0** | **Recognize devices that act as input devices** | A device declaring a HID interface (class `03`) can type or click on its own; one that also declares storage or another function is the usual shape of a "BadUSB" attack. Mark such devices in the list, the details view and the notification, and say which interfaces they declare. Do not offer the notification's quick *Allow* for them: allowing one needs the window and a confirmation that names the risk. The marking is a description of what the device declares, not a verdict on whether it is malicious. Also add a how-to for recovering when the policy blocks the keyboard. Test single-function, composite and malformed interface lists, hostile names, notification servers with and without actions, and keyboard-only operation; translate every new string in it/fr/pt_BR; keep >=95% application line coverage. | Planned |
+| **0.4.0** | **Devices plugged in while the session is locked** | Read the session's lock state from logind (`LockedHint`) rather than a desktop-specific screensaver API; confirming that GNOME and Plasma keep it current is part of acceptance. A device inserted while locked gets no quick action; after unlock, one notification lists what arrived, marked as *plugged in while locked*, and the event history records it. If the lock state cannot be read, behave as today and say so in the diagnostics. Test lock/unlock races, devices removed before unlock, missing logind and repeated lock cycles; validate on GNOME and Plasma in the disposable guests; keep >=95% coverage. | Planned |
+
+Not adopted from that project, deliberately:
+
+- **A Polkit rule that grants policy changes without a password.** Installing a Polkit rule
+  stays the administrator's decision (see *Explicitly Out of Scope*).
+- **"Once" actions that delete an existing permanent rule.** Here permanent rules are managed
+  in the rule editor, where the user sees which rule is removed.
+- **A blocking pop-up dialog on every insertion.** Desktop notifications already offer the
+  action and do not steal focus; 0.3.0 and 0.4.0 restrict that action where it is risky.
 
 | Item | Description |
 | :--- | :---------- |
