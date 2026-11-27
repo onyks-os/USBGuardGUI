@@ -33,6 +33,13 @@ you edit the attributes or the connected devices change.
 **Position** decides where the rule goes: at the end, or after a specific rule. **Keep after
 USBGuard restarts** decides whether it is written to the policy or kept in memory only.
 
+!!! warning "A runtime rule can become permanent"
+    Because of an open USBGuard bug ([usbguard#636](https://github.com/USBGuard/usbguard/issues/636)),
+    when a permanent change is saved afterwards — such as a rule with **Keep after USBGuard
+    restarts** on — the daemon writes the runtime-only rules to its policy file too, and they
+    survive the restart. Remove a runtime rule yourself when you no longer need it. Allowing or
+    blocking a device for **this session only** adds no rule and is not affected.
+
 ## Remove a rule
 
 Click the bin icon on the rule and confirm. USBGuard numbers rules by position, and the numbers

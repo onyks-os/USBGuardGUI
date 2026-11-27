@@ -55,7 +55,7 @@ jobs:
           persist-credentials: false
       # gettext: msgfmt compiles the translations the packages install.
       - name: Install GTK development packages and gettext
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext
+        run: scripts/ci-apt-update.sh && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: stable
@@ -80,7 +80,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install manifest parser for unit tests
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends python3-yaml
+        run: scripts/ci-apt-update.sh && sudo apt-get install -y --no-install-recommends python3-yaml
       - name: Verify two clean offline builds
         run: make test-reproducible reproducible
       - name: Stage the verified binary and its reproduction inputs
@@ -202,7 +202,7 @@ jobs:
           persist-credentials: false
       # cargo publish builds the packaged crate once more to verify it.
       - name: Install GTK development packages and gettext
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext
+        run: scripts/ci-apt-update.sh && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: stable

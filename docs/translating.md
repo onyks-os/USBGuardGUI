@@ -8,8 +8,9 @@ SPDX-License-Identifier: MIT
 The interface uses [GNU gettext](https://www.gnu.org/software/gettext/). Every translation is one
 file, `po/<language>.po`, and you need no Rust knowledge to write one.
 
-English is the source language; Italian and French catalogues are provided.
-The initial French catalogue was prepared with AI assistance; fluent-speaker
+English is the source language; Italian, French and Brazilian Portuguese catalogues are provided.
+The initial French catalogue, and the strings added to the Italian and French
+catalogues in 0.2.1, were prepared with AI assistance; fluent-speaker
 improvements are welcome through the usual review process.
 
 ## What is translated, and what is not

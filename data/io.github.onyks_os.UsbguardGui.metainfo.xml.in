@@ -93,6 +93,16 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
+    <release version="0.2.1" date="2026-11-27" type="stable">
+      <description>
+        <p>Brazilian Portuguese translation and corrections.</p>
+        <ul>
+          <li>Brazilian Portuguese translation; complete Italian and French translations</li>
+          <li>Warn that a later permanent change can save a runtime rule (USBGuard issue #636)</li>
+          <li>Updated dependencies</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.2.0" date="2026-10-26" type="stable">
       <description>
         <p>Understand device policy before making changes.</p>

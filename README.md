@@ -62,6 +62,14 @@ case.
 | **Rules removed by identity, not by number** | USBGuard rule numbers shift whenever the ruleset changes. A rule is identified by its text and re-resolved just before removal, so a rule deleted from another terminal is reported as gone instead of a *different* rule being removed. |
 | **Hostile device names are just text** | Device names and serial numbers come from the device itself. The rule parser treats them as untrusted bytes, is fuzzed, and escapes them on the way back, so a crafted name cannot become rule syntax. |
 
+## Project status
+
+[**0.2.1 is released**](https://github.com/onyks-os/USBGuardGUI/releases/tag/v0.2.1).
+The approved feature roadmap is complete. Development now focuses on bug fixes,
+security and dependency updates, and desktop/distribution compatibility. Further
+features will be considered based on concrete needs; no new feature milestone is committed.
+See the [roadmap](ROADMAP.md) and [release verification](docs/verification.md).
+
 ## Features
 
 * **Live device list** — authorization state with icon *and* text, name, `vendor:product`, serial,
@@ -105,11 +113,11 @@ case.
 Download the package for your distribution from the
 [latest release](https://github.com/onyks-os/USBGuardGUI/releases/latest) and install it:
 
-* **Debian / Ubuntu**: `sudo apt install ./usbguard-gui_0.1.1-1_amd64.deb`
-* **Fedora / RHEL**: `sudo dnf install ./usbguard-gui-0.1.1-1.x86_64.rpm`
-* **Arch Linux**: `sudo pacman -U ./usbguard-gui-0.1.1-1-x86_64.pkg.tar.zst`, or from a clone,
+* **Debian / Ubuntu**: `sudo apt install ./usbguard-gui_0.2.1-1_amd64.deb`
+* **Fedora / RHEL**: `sudo dnf install ./usbguard-gui-0.2.1-1.x86_64.rpm`
+* **Arch Linux**: `sudo pacman -U ./usbguard-gui-0.2.1-1-x86_64.pkg.tar.zst`, or from a clone,
   `cd packaging/arch && makepkg -si`
-* **Any distribution, as a Flatpak**: `flatpak install --user ./usbguard-gui-0.1.1.flatpak`. USBGuard
+* **Any distribution, as a Flatpak**: `flatpak install --user ./usbguard-gui-0.2.1.flatpak`. USBGuard
   itself must still come from your distribution: the Flatpak only talks to it over D-Bus.
 * **With Cargo**: `cargo install usbguard-gui` (needs the GTK development packages listed under
   [From source](#2-from-source)).
@@ -294,8 +302,7 @@ Contributions are welcome. The areas where help matters most:
    systems other than the ones already checked.
 2. **GTK 4 / libadwaita** — accessibility, keyboard navigation, and adaptive layouts.
 3. **Packaging** — packages in the distributions' own repositories.
-4. **Translations** — English and Italian are released; French is available on `main` for the next
-   0.2.0 target. [docs/translating.md](docs/translating.md)
+4. **Translations** — English, Italian, French and Brazilian Portuguese are released. [docs/translating.md](docs/translating.md)
    explains how to add a language, no Rust needed.
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md). Every commit needs a DCO `Signed-off-by` line.

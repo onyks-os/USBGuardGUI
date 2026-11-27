@@ -17,25 +17,25 @@ package pulls in USBGuard and its D-Bus bridge.
 === "Fedora / RHEL"
 
     ```bash
-    sudo dnf install ./usbguard-gui-0.1.1-1.x86_64.rpm
+    sudo dnf install ./usbguard-gui-0.2.1-1.x86_64.rpm
     ```
 
 === "Debian / Ubuntu"
 
     ```bash
-    sudo apt install ./usbguard-gui_0.1.1-1_amd64.deb
+    sudo apt install ./usbguard-gui_0.2.1-1_amd64.deb
     ```
 
 === "Arch"
 
     ```bash
-    sudo pacman -U ./usbguard-gui-0.1.1-1-x86_64.pkg.tar.zst
+    sudo pacman -U ./usbguard-gui-0.2.1-1-x86_64.pkg.tar.zst
     ```
 
 === "Flatpak"
 
     ```bash
-    flatpak install --user ./usbguard-gui-0.1.1.flatpak
+    flatpak install --user ./usbguard-gui-0.2.1.flatpak
     ```
 
     The Flatpak does not contain USBGuard: install `usbguard` (and, on Fedora, `usbguard-dbus`)

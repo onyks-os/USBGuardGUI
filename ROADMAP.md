@@ -17,7 +17,7 @@ Rust; treat elapsed time as an output of the work, not an input to it.
 
 ---
 
-## Current Status (v0.1.2)
+## Current Status (v0.2.1)
 
 Delivered:
 
@@ -33,7 +33,7 @@ Delivered:
   reconnection, the window, GSettings, desktop file, AppStream metainfo, and icon. T1, T3, T4, T5,
   T6, and T15 pass against the mock. Memory: PSS within target; RSS within target only with the
   software renderer (`docs/architecture.md` §13.2).
-- **v0.2.0**, code complete: device actions with the runtime/permanent choice, the policy view
+- **Policy actions (shipped in v0.1.0)**: device actions with the runtime/permanent choice, the policy view
   with safe removal and the disambiguation dialog, the new-rule dialog (guided and text modes),
   cancellable operations with the 20 s / 180 s notices, runtime parameters, preferences.
 - **Beyond the plan**: notifications with a quick action (§9.5), background mode and the tray
@@ -45,7 +45,15 @@ Delivered:
 Released: **0.1.0** (2026-09-27), with everything above, and **0.1.1** (2026-09-29), which fixes the
 status icon in the Flatpak. **0.1.2** adds the reliability and reproducible-package
 follow-ups below; [release validation](docs/verification.md#remote-012-validation-2026-10-24)
-records the candidate and stable workflows. The v0.2.0 scope below shipped in 0.1.0.
+records the candidate and stable workflows. The historical acting-on-policy scope below shipped in 0.1.0.
+
+**0.2.0 is released** (2026-10-26), including all four approved product milestones,
+the D-Bus migration and validation work. See the
+[stable release](https://github.com/onyks-os/USBGuardGUI/releases/tag/v0.2.0) and
+[release verification](docs/verification.md#stable-020-release-verification-2026-10-26).
+The agreed feature scope is complete; the project now enters maintenance.
+**0.2.1** (2026-11-27) is the first maintenance release: Brazilian Portuguese,
+completed Italian and French catalogues, the USBGuard #636 warning and dependency updates.
 
 ---
 
@@ -209,7 +217,7 @@ explicit at every step.
   remote CI on the clean 0.1.2 commit and the complete release-candidate pipeline also passed
   on 2026-10-24. See [published evidence](docs/verification.md#remote-012-validation-2026-10-24).
 
-## Next
+## Maintenance and release overview
 
 ### Release overview
 
@@ -217,31 +225,44 @@ explicit at every step.
 | :------ | :----- | :---- |
 | **0.1.0** | Released | Device list/search/filter; runtime or permanent allow/block/reject; policy editor and safe removal; diagnostics; preferences; notifications, background/tray, autostart; English/Italian; native and Flatpak packages. |
 | **0.1.1** | Released | Flatpak status-icon correction. |
-| **0.1.2** | Current stable | Authentication-cancellation crash fix, reconnect backoff, inconclusive-write handling, log privacy, per-file core coverage, reproducible binaries and all package formats. |
-| **0.2.0** | Implementation and desktop acceptance complete; release candidate pending | Rule/device preview, device details, private local event history and desktop quality; zbus 6.1, direct SNI/menu and Rust 1.89; four clean-system daemon/Polkit checks; >=98% production line coverage, GTK included. Includes the already-merged French catalogues and license/source/CI maintenance. |
+| **0.1.2** | Released | Authentication-cancellation crash fix, reconnect backoff, inconclusive-write handling, log privacy, per-file core coverage, reproducible binaries and all package formats. |
+| **0.2.0** | Released 2026-10-26 | Rule/device preview, device details, private local event history and desktop quality; zbus 6.1, direct SNI/menu and Rust 1.89; four clean-system daemon/Polkit checks; >=98% production line coverage, GTK included. Includes the already-merged French catalogues and license/source/CI maintenance. |
+| **0.2.1** | Current stable; released 2026-11-27 | Brazilian Portuguese; Italian/French catalogues completed; USBGuard #636 runtime-rule warning; gettext-independent AppStream tags; CI on Ubuntu 24.04 with a >=95% coverage gate; dependency updates including rustix 1.1.6 (RUSTSEC-2026-0486). |
 
 The old “v0.2.0 scope” above is historical: those policy actions shipped in
 0.1.0. The new 0.2.0 target contains the post-0.1.2 dependency and validation work
-and all four product milestones below. No release date is promised; a tag
-requires the usual CI, coverage, reproducibility and installed-runtime gates.
+and all four product milestones below. The candidate and stable release gates
+passed. No further feature release is currently committed.
 
 Real-daemon/Polkit checks now pass on disposable Ubuntu, Debian, Fedora and Arch
 installations, including cancelled and successful real PAM authentication and
 GUI reconnection. [Testing evidence](docs/testing.md#zbus-6-and-real-clean-system-validation-2026-10-2425)
 records the exact virtual-device/agent scope and package versions.
 
+### Maintenance policy
+
+The approved feature scope is complete. Maintenance covers actionable bug reports,
+security fixes, periodic dependency/advisory review and compatibility with new
+GTK, desktop and distribution versions. Preserve the >=95% whole-application line
+coverage gate and validate release packages when shipping changes. Coverage and
+passing tests are evidence, not a guarantee that no defects remain.
+
+New features require a concrete use case and a separately agreed scope. Additional
+languages, AUR and the upstream API proposal below remain optional ideas, not
+unfinished requirements for this release.
+
 ### Approved product milestones (2026-10-25)
 
 The following work was approved in priority order and is included in the 0.2.0
-release preparation after passing its acceptance checks. Further languages
+release after passing its acceptance checks. Further languages
 and AUR publication remain deferred; they are not prerequisites for these milestones.
 
 | Priority | Milestone | Scope and acceptance criteria | Status |
 | :--- | :--- | :--- | :--- |
-| **1** | **Preview matching devices before adding a rule** | A read-only action in both rule-editor modes asks USBGuard which currently connected devices match the attributes. Show results, no matches, errors and cancellation; discard results after edits or closing. State explicitly that conditions and rule precedence are not simulated. No authorization or policy mutation is performed. Test target-independent queries, hostile text, stale replies and failure paths; maintain >=98% application line coverage. | Merged; unreleased |
-| **2** | **Device details and observed decisions** | Add an accessible per-device details view for USB interfaces/functions, physical port topology, connection type and daemon-reported state/rule text. Label the source and distinguish that device description from the effective policy rule. Show a matched rule only when USBGuard reports an unambiguous, current identity; otherwise say that the API does not provide it. Test missing/malformed fields, hostile strings and invalidation on row replacement/reconnection. | Merged; unreleased |
-| **3** | **Local event history** | Show insertions, removals, authorization outcomes and reconnections observed while the app runs. Mark observation gaps; bound retention and make persistence opt-in. Offer export with identifiers obscured and test redaction. | Merged; unreleased |
-| **4** | **Desktop quality** | Measure and reduce memory usage; verify keyboard navigation, screen-reader labels, Wayland and GNOME/KDE behavior. Track repeatable measurements and desktop-specific regressions. | Validated for 0.2.0. Memory baseline, installed Fedora AT-SPI/keyboard and native Weston checks passed. Corrected diagnostic executable passed 7/7 cases on GNOME and Plasma with 10/30 stress cycles and fatal criticals; application coverage 98.0917%. Versioned release-package verification remains a release gate. |
+| **1** | **Preview matching devices before adding a rule** | A read-only action in both rule-editor modes asks USBGuard which currently connected devices match the attributes. Show results, no matches, errors and cancellation; discard results after edits or closing. State explicitly that conditions and rule precedence are not simulated. No authorization or policy mutation is performed. Test target-independent queries, hostile text, stale replies and failure paths; maintain >=98% application line coverage. | Released in 0.2.0 |
+| **2** | **Device details and observed decisions** | Add an accessible per-device details view for USB interfaces/functions, physical port topology, connection type and daemon-reported state/rule text. Label the source and distinguish that device description from the effective policy rule. Show a matched rule only when USBGuard reports an unambiguous, current identity; otherwise say that the API does not provide it. Test missing/malformed fields, hostile strings and invalidation on row replacement/reconnection. | Released in 0.2.0 |
+| **3** | **Local event history** | Show insertions, removals, authorization outcomes and reconnections observed while the app runs. Mark observation gaps; bound retention and make persistence opt-in. Offer export with identifiers obscured and test redaction. | Released in 0.2.0 |
+| **4** | **Desktop quality** | Measure and reduce memory usage; verify keyboard navigation, screen-reader labels, Wayland and GNOME/KDE behavior. Track repeatable measurements and desktop-specific regressions. | Validated for 0.2.0. Memory baseline, installed Fedora AT-SPI/keyboard and native Weston checks passed. Corrected diagnostic executable passed 7/7 cases on GNOME and Plasma with 10/30 stress cycles and fatal criticals; application coverage 98.0917%. The exact 0.2.0 RPM passed all five installed Fedora acceptance cases; see release verification. |
 
 All four retain the unprivileged D-Bus architecture. Each completed milestone must
 pass the existing tests, coverage and packaging gates before release. The first
@@ -252,7 +273,7 @@ changes those devices or that it wins over earlier policy rules.
 | :--- | :---------- |
 | **D-Bus dependency migration** | Implemented: zbus 6.1 with Rust 1.89 in the application, CI and pinned builder. The fixed SNI/menu interfaces run directly on zbus, replacing ksni and the deprecated stack; wire, watcher-restart and GTK regression tests pass. See DEPENDENCIES.md. |
 | **Clean-install verification** | Complete for the four reference guests: native package installation, real daemon/Polkit/PAM, denial/cancellation/success and restart/reconnection; receipts are linked from docs/testing.md. |
-| **Translations** | French is implemented for the next feature target. Open issues invite Spanish, Russian, Chinese, German, Brazilian Portuguese, and Japanese; [docs/translating.md](docs/translating.md) explains how. |
+| **Translations** | French shipped in 0.2.0 and Brazilian Portuguese in 0.2.1. Open issues invite Spanish, Russian, Chinese, German, and Japanese; [docs/translating.md](docs/translating.md) explains how. |
 | **Arch User Repository** | A `usbguard-gui` package, when AUR registrations reopen. |
 
 One upstream contribution is worth more than any of them: proposing

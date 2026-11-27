@@ -1,11 +1,14 @@
 # Development checkpoint — 2026-10-26
 
-PR #61 and maintenance PRs #52–57 are merged. Continue preparing and publishing
-0.2.0 through a verified release candidate on branch `release/0.2.0`. The user authorized signed-off commits,
-PR management and release/tag publication; DCO consent already exists.
+**0.2.0 is published and installed on the user's Fedora host.** The approved
+feature roadmap is complete; continue in maintenance mode, not release preparation.
+The user authorized signed-off commits, PR management and release/tag publication;
+DCO consent already exists. No additional languages or AUR work is requested.
 
 **Privacy:** never inspect the real host's desktop, applications, services or
-physical devices. Use only the marked private VM with synthetic USB, or the
+physical devices. The explicitly requested USBGuardGUI package upgrade and narrow
+package/API verification were authorized; this does not authorize unrelated host
+inspection. For graphical tests use only the marked private VM with synthetic USB, or the
 narrow namespace wrapper `target/run-private-tests.py`. No subagents requested.
 
 ## Completed and verified
@@ -45,22 +48,29 @@ Host GUI/coverage tests MUST use `target/run-private-tests.py`: empty mount root
 private proc/dev/tmp/run/sys/buses/network, only explicit code/toolchain binds,
 software Mesa. Do not use the older whole-root bind or the real desktop.
 
-## Remaining release work
+## Release completed; maintenance next
 
-1. Version metadata, changelog and AppStream now identify 0.2.0; all four product
-   milestones are assigned to this release. Local pre-integration Rust/lint and
-   policy/i18n/coverage-tool tests, AppStream and strict MkDocs passed. The complete
-   combination with the merged dependencies is being revalidated before release.
-2. Push the release preparation PR; pass current-head CI and merge, then require
-   main checks before tagging. No additional languages or AUR publication.
-3. Follow `docs/releasing.md`: publish v0.2.0-rc.1, verify checksums/Sigstore
-   identity, installed candidate package and pinned Flatpak validation; stable
-   tag at the same verified commit. Existing native receipts from prior candidates
-   must not be described as installed 0.2.0 validation.
+- PR #62 and all preceding release/maintenance PRs are merged. Stable `v0.2.0`
+  and candidate `v0.2.0-rc.1` target `8add6f16c4acd4d1c9698708a31d2b2c2af37986`.
+- Integrated CI `40373074672`, candidate release `40378484865` and stable release
+  `40383201161` succeeded. GitHub release and crates.io 0.2.0 are live.
+- All 13 artifact checksums and 14 stable Sigstore signatures were verified.
+  Receipt: `target/release-0.2.0-published/local-verification.json`.
+- Exact candidate/stable RPM passed 5/5 installed Fedora acceptance cases.
+  Use `target/release-020-fedora-package-validation-final.json`; the earlier
+  non-final receipt tested an old installed binary and is not valid acceptance
+  evidence. Use `dnf install`, not `dnf reinstall`, to upgrade across versions.
+- The user's host was upgraded from 0.1.2 to 0.2.0 using that verified RPM.
+  Outside the sandbox, `rpm -V usbguard-gui` passed and `usbguard-gui --version`
+  reported 0.2.0 and a reachable USBGuard API. Installed binary SHA256:
+  `852f8232baa90fcb675bfd08cffccca7ef740eb0f5cf8dc1f5263553afefe5ff`.
+- Merged branches were removed; only main remained. GitHub automatic deletion
+  of merged branches is enabled. The private VM remains stopped.
+- Current task: align documentation with the published release and prepare a
+  Reddit announcement in `docs/announcements/reddit-0.2.0.md`. The announcement
+  is a draft for the user to post; it has not been submitted to Reddit.
 
-Release-note draft: `target/release-020-notes.md`. Signature verifier is installed
-only in `target/release-signature-venv/` (sigstore 4.5.1). The original CI coverage
-report from final desktop commit is `target/ci-5f8874d-coverage/`; paths refer to
-GitHub's checkout and were mapped in memory for local validation, not rewritten.
-
-No v0.2.0 tag exists at this checkpoint. Stable remains 0.1.2.
+Maintenance covers bugs, security/dependency review and desktop/distribution
+compatibility. There is no pending approved feature milestone. Do not restart
+release preparation or repeat the full test suite for documentation-only edits.
+Release evidence and its scope are summarized in `docs/verification.md`.

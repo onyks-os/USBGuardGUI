@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-27
+
 ### Added
 
 - Brazilian Portuguese translations for the interface, notifications, desktop
-  entry and AppStream metadata.
+  entry and AppStream metadata, contributed by Rodrigo de Oliveira.
 
 ### Changed
 
@@ -24,6 +26,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   classification is unchanged.
 - CI jobs that build against GTK run on Ubuntu 24.04 again, so they keep
   testing the GTK 4.14 / libadwaita 1.5 floor.
+- Dependency updates, including rustix 1.1.6 for the RUSTSEC-2026-0486
+  soundness advisory.
+- CI and release jobs drop the runners' unused packages.microsoft.com apt
+  source before `apt-get update`, so an outage there no longer fails them.
+
+### Fixed
+
+- The new-rule dialog no longer promises that a runtime rule always ends at
+  the next USBGuard restart: because of USBGuard issue #636, a later permanent
+  change also writes runtime rules to the policy file. The dialog, the rules
+  how-to and the security assessment now say so.
+- The Italian and French catalogues lacked the strings added in 0.2.0, which
+  appeared in English; both are complete again.
+- `make i18n` writes the same AppStream language tags with every gettext
+  version, so `make i18n-check` agrees between Fedora and Ubuntu.
+- The README, quickstart, `SUPPORT.md` and `CITATION.cff` named old versions.
 
 ## [0.2.0] - 2026-10-26
 
@@ -200,7 +218,8 @@ The first release.
 - `docs/architecture.md`: `listRules` takes a label filter, not a query — `""` lists every rule,
   `"match"` would have listed none. Found by introspection before any code depended on it.
 
-[Unreleased]: https://github.com/onyks-os/USBGuardGUI/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/onyks-os/USBGuardGUI/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/onyks-os/USBGuardGUI/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/onyks-os/USBGuardGUI/compare/v0.1.0...v0.1.1

@@ -29,7 +29,7 @@ jobs:
       # GTK 4.14 and libadwaita 1.5 are the floor of docs/architecture.md §1.4;
       # Ubuntu 24.04 ships exactly those.
       - name: Install GTK development packages
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
+        run: scripts/ci-apt-update.sh && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
 
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master — this action selects the toolchain from the branch name, so a
         # pinned SHA must name the toolchain explicitly via `toolchain:`.
@@ -67,7 +67,7 @@ jobs:
       # GTK 4.14 and libadwaita 1.5 are the floor of docs/architecture.md §1.4;
       # Ubuntu 24.04 ships exactly those.
       - name: Install GTK development packages
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext
+        run: scripts/ci-apt-update.sh && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext
 
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
@@ -110,7 +110,7 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
       - name: Install isolated desktop test dependencies
         run: |
-          sudo apt-get update
+          scripts/ci-apt-update.sh
           sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev gettext dbus-daemon xvfb xdotool locales
           sudo locale-gen en_US.UTF-8
       - name: Install coverage tool
@@ -136,7 +136,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install manifest parser for unit tests
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends python3-yaml
+        run: scripts/ci-apt-update.sh && sudo apt-get install -y --no-install-recommends python3-yaml
       - name: Test the reproducibility checker
         run: make test-reproducible
       - name: Compare two clean offline builds
@@ -205,7 +205,7 @@ jobs:
       # GTK 4.14 and libadwaita 1.5 are the floor of docs/architecture.md §1.4;
       # Ubuntu 24.04 ships exactly those.
       - name: Install GTK development packages
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
+        run: scripts/ci-apt-update.sh && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
 
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:

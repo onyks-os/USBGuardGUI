@@ -155,13 +155,15 @@ the program, and the component with the smallest blast radius, because it touche
 
 ## 4. Known Limitations & Residual Risks
 
-Five of these cannot be closed without a change to upstream USBGuard. All of them are detectable at
-runtime, and each maps to a diagnostic state or to a test in the resilience matrix — which is the
-property that matters: the program fails in a way it can explain.
+Six of these cannot be closed without a change to upstream USBGuard. All but one are detectable at
+runtime, and each of those maps to a diagnostic state or to a test in the resilience matrix — which
+is the property that matters: the program fails in a way it can explain. The exception, runtime
+rules persisted by the daemon, is invisible through the API; the interface states it instead.
 
 | Risk | Severity | Why it is accepted | Compensating control |
 | :--- | :------- | :----------------- | :------------------- |
 | **The rule-removal race is irreducible client-side.** Between re-reading the ruleset and issuing the removal, another client can change it. | High | There is no compare-and-swap in the daemon's API. Closing it needs an upstream `removeRuleIfMatches(id, expected_text)`; proposing it is the highest-value contribution this project can make to USBGuard. | The window is narrowed to the round-trip of a single call, and the failure mode is biased toward refusing: a mismatch aborts with `AlreadyGone` rather than removing anything. |
+| **A runtime rule can be persisted by a later permanent change.** When any permanent change is saved, the daemon also writes rules added with `temporary=true` to its policy file ([usbguard#636](https://github.com/USBGuard/usbguard/issues/636), open). | Medium | The defect is in the daemon, and `listRules` does not say which rules are temporary, so the client cannot detect it afterwards. | The persistence switch of the new-rule dialog and the rules how-to state the limitation. Per-device *this session only* actions call `applyDevicePolicy` without `permanent` and add no rule, so they are not affected. |
 | **Denial attribution depends on daemon error strings.** Which of the three checkpoints refused is inferred from text, not from a structured code. | Medium | It is the only hook the API offers. Strings change between USBGuard versions. | A `DeniedUnattributed` state that shows *both* remedies rather than guessing, keeping this a user-experience problem instead of a correctness one. Recalibrated per supported USBGuard version. |
 | **The numeric target mapping is not a stable contract.** It derives from the declaration order of a C++ enum. | Medium | Upstream has never promised it. | A `Target::Other` variant confines the consequence to degraded display rather than a wrong authorization label. Detected by the Phase 0 introspection procedure. |
 | **Rule text as identity assumes stable canonicalization.** If a future daemon normalizes rule text differently, held handles stop matching. | Medium | Text is the only stable identity the API exposes; IDs are positional. | Handles are re-read immediately before use, so the failure mode is `AlreadyGone` on a rule that still exists — confusing, but never destructive. |
@@ -197,8 +199,11 @@ property that matters: the program fails in a way it can explain.
 - All GitHub Actions are pinned to full commit SHAs.
 - `GITHUB_TOKEN` permissions are declared read-only at workflow level and elevated per job only when
   required.
-- A repository ruleset on `main` requires passing status checks and a linear history, and forbids
-  force pushes and deletion. Review is not required: the project has one maintainer.
+- A repository ruleset on `main` requires a linear history, forbids force pushes and deletion,
+  and blocks merges with CodeQL errors or high-severity security alerts. It names no required
+  CI status checks: the maintainer merges after the pull request's checks have passed, and the
+  release workflow independently refuses to publish unless its own build, reproducibility and
+  Flatpak gates pass. Review is not required: the project has one maintainer.
 
 ---
 

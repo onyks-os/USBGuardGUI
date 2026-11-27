@@ -57,7 +57,7 @@ the SBOM but absent from that file should be reported as an issue.
 
 ## 5. Reproducing the Build
 
-The unreleased pipeline adds a reproducibility gate for the **Linux x86_64 GUI
+Since 0.1.2, the release pipeline includes a reproducibility gate for the **Linux x86_64 GUI
 binary, unsigned RPM, DEB, Arch package and Flatpak bundle**. Published 0.1.0/0.1.1 artifacts predate this gate. The crate archive, SBOM, and signatures are outside this claim;
 checksums and signing still establish their provenance, not byte reproducibility.
 
@@ -542,7 +542,7 @@ stopped after collection. Follow-up changes refine tests/tooling/documentation;
 the stored local reproduction receipt remains evidence for its recorded snapshot,
 while CI runs the reproduction gate again on the PR source.
 
-## Whole-application edge cases (2026-10-25, unreleased)
+## Whole-application edge cases (2026-10-25, shipped in 0.2.0)
 
 | Failure / boundary | Expected result | Regression |
 | :--- | :--- | :--- |
@@ -563,7 +563,7 @@ USBGuard bridge, notifications and watcher on private buses. They do not claim
 real PAM authentication or physical hardware coverage; the clean-install evidence
 above documents those separate checks.
 
-## Desktop-quality native follow-up (2026-10-26, unreleased)
+## Desktop-quality native follow-up (2026-10-26, shipped in 0.2.0)
 
 The corrected release-profile diagnostic executable, SHA-256
 `d7d4337c009f06e3799f865a4c74e0f8b8b8bb4e6a51591741a405d2b9ad093a`,
@@ -594,4 +594,39 @@ is **5500/5607 production lines (98.0917%)**, including GTK and headless builds.
 The source and Rust-test digests identify the measured snapshot. All 17 PR
 checks passed on `ddd8977`, including Rust stable/beta/1.89, dependency gates and
 [independent offline package builds](https://github.com/onyks-os/USBGuardGUI/actions/runs/40328040104).
-The final documentation/observer commit and release version must pass CI again.
+The final documentation/observer commit and integrated release subsequently passed CI;
+see the stable-release record below.
+
+
+## Stable 0.2.0 release verification (2026-10-26)
+
+[0.2.0 is published](https://github.com/onyks-os/USBGuardGUI/releases/tag/v0.2.0)
+and available on [crates.io](https://crates.io/crates/usbguard-gui/0.2.0).
+Candidate `v0.2.0-rc.1` and stable `v0.2.0` both target
+`8add6f16c4acd4d1c9698708a31d2b2c2af37986`.
+
+- [Integrated CI](https://github.com/onyks-os/USBGuardGUI/actions/runs/40373074672),
+  [candidate release](https://github.com/onyks-os/USBGuardGUI/actions/runs/40378484865)
+  and [stable release](https://github.com/onyks-os/USBGuardGUI/actions/runs/40383201161)
+  completed successfully, including stable crate publication.
+- Local verification checked 13 artifact checksums and 14 Sigstore signatures
+  against the stable workflow identity ending in `release.yml@refs/tags/v0.2.0`.
+  The binary, RPM, DEB, Arch package, Flatpak and crate are byte-identical to the
+  verified candidate artifacts.
+- The exact 0.2.0 RPM passed five installed Fedora 44 checks: accessible labels
+  and keyboard navigation; denial without an agent; cancelled authentication;
+  successful PAM authorization for a runtime block without changing persistent
+  rules; and daemon restart/reconnection restoring the persistent allow rule.
+- Application line coverage is **5500/5607 (98.0917%)**, including GTK.
+  Earlier GNOME/Plasma diagnostic-build checks and four-distribution migration
+  checks retain their original scope; they are not four exact-0.2.0 package tests.
+
+The verified RPM SHA256 is
+`9284ae1106a38bf4e96cf2ea014416cb3ec2b1d01bc37b5e38508f32ba0b8f17`;
+the installed binary SHA256 is
+`852f8232baa90fcb675bfd08cffccca7ef740eb0f5cf8dc1f5263553afefe5ff`.
+Local receipts are `target/release-0.2.0-published/local-verification.json`
+and `target/release-020-fedora-package-validation-final.json` (ignored build
+outputs, not required to build the project). The earlier non-final Fedora receipt
+is not release-package acceptance evidence: that attempt tested the old installed
+binary before the explicit upgrade.
