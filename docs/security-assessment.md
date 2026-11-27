@@ -199,8 +199,11 @@ rules persisted by the daemon, is invisible through the API; the interface state
 - All GitHub Actions are pinned to full commit SHAs.
 - `GITHUB_TOKEN` permissions are declared read-only at workflow level and elevated per job only when
   required.
-- A repository ruleset on `main` requires passing status checks and a linear history, and forbids
-  force pushes and deletion. Review is not required: the project has one maintainer.
+- A repository ruleset on `main` requires a linear history, forbids force pushes and deletion,
+  and blocks merges with CodeQL errors or high-severity security alerts. It names no required
+  CI status checks: the maintainer merges after the pull request's checks have passed, and the
+  release workflow independently refuses to publish unless its own build, reproducibility and
+  Flatpak gates pass. Review is not required: the project has one maintainer.
 
 ---
 
