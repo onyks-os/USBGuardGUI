@@ -630,3 +630,40 @@ and `target/release-020-fedora-package-validation-final.json` (ignored build
 outputs, not required to build the project). The earlier non-final Fedora receipt
 is not release-package acceptance evidence: that attempt tested the old installed
 binary before the explicit upgrade.
+
+## Stable 0.2.1 release verification (2026-11-27)
+
+[0.2.1 is published](https://github.com/onyks-os/USBGuardGUI/releases/tag/v0.2.1)
+and available on [crates.io](https://crates.io/crates/usbguard-gui/0.2.1).
+Candidate `v0.2.1-rc.2` and stable `v0.2.1` both target
+`9cbfd2153f3e8c07cc4bedca3bbfdff5d8701386`.
+
+- [Integrated CI](https://github.com/onyks-os/USBGuardGUI/actions/runs/46052237982),
+  [candidate release](https://github.com/onyks-os/USBGuardGUI/actions/runs/46052267985)
+  and [stable release](https://github.com/onyks-os/USBGuardGUI/actions/runs/46053756298)
+  completed successfully, including stable crate publication.
+- The first candidate, [`v0.2.1-rc.1`](https://github.com/onyks-os/USBGuardGUI/actions/runs/46049339702),
+  published nothing: its installed-Flatpak check could not deploy the pinned GNOME 50
+  runtime commit, which Flathub had pruned. #74 pinned the current commit
+  `ac43a2a40ddb855048f7d8e42c1cfd6ae2d0ad7d88b09939f5dc371a3735f464` and made
+  refreshing the pin a pre-tag step in [releasing](releasing.md).
+- Local verification checked 13 artifact checksums and 14 Sigstore signatures for
+  both the candidate and the stable release, each against its own
+  `release.yml@refs/tags/…` identity. The binary, RPM, DEB, Arch package, Flatpak and
+  crate are byte-identical to the candidate artifacts, and the crate's SHA256 equals
+  the checksum crates.io reports for 0.2.1.
+- RPM, DEB, Arch package and Flatpak install the `fr`, `it` and `pt_BR` catalogues;
+  the Flatpak runtime report lists the same three languages.
+- Application line coverage on the release pull request is **5294/5428 (97.5313%)**,
+  GTK included, against the >=95% gate. It is not directly comparable with 0.2.0's
+  5500/5607 (98.0917%): the CI image and toolchain changed in between.
+- Scope: unlike 0.2.0, no installed-package acceptance run in a disposable Fedora guest
+  was repeated. The code changes are one dialog string, translation catalogues and
+  semver-compatible dependency updates, covered by the CI suites above.
+
+The verified RPM SHA256 is
+`faba12f646ba427073be80710d3871afd06b7a3767600293067087a241b31077`;
+the bare binary SHA256 is
+`a390d74c49692f3c46950704946c1ec4944b6413edc6c6711bf14db0d3c13f44`.
+The local receipt is `target/release-0.2.1-published/local-verification.json`
+(an ignored build output, not required to build the project).
