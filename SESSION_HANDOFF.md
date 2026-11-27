@@ -1,10 +1,12 @@
 # Development checkpoint — 2026-11-27
 
-**0.2.1 is published** (GitHub Release *Latest* and crates.io). The approved
-feature roadmap is complete; continue in maintenance mode, not release preparation.
+**0.2.1 is published** (GitHub Release *Latest* and crates.io). The 0.2 feature
+roadmap is complete. Next approved features: 0.3.0 (HID/input-device marking) and
+0.4.0 (devices plugged in while locked); see ROADMAP *Planned milestones*.
+`AI_POLICY.md` states that the project is written by AI.
 The user authorized signed-off commits, PR management and release/tag publication;
-DCO consent already exists. No new features are proposed. This session did not touch
-the user's installed package (0.2.0 at the previous checkpoint).
+DCO consent already exists. This session did not touch the user's installed package
+(0.2.0 at the previous checkpoint).
 
 **Privacy:** never inspect the real host's desktop, applications, services or
 physical devices. The explicitly requested USBGuardGUI package upgrade and narrow
@@ -51,6 +53,6 @@ private proc/dev/tmp/run/sys/buses/network, only explicit code/toolchain binds,
 software Mesa. Do not use the older whole-root bind or the real desktop.
 
 Maintenance covers bugs, security/dependency review and desktop/distribution
-compatibility. There is no pending approved feature milestone. Do not restart
+compatibility. The next approved milestones are 0.3.0 and 0.4.0 in ROADMAP. Do not restart
 release preparation or repeat the full test suite for documentation-only edits.
 Release evidence and its scope are summarized in `docs/verification.md`.

@@ -65,9 +65,9 @@ case.
 ## Project status
 
 [**0.2.1 is released**](https://github.com/onyks-os/USBGuardGUI/releases/tag/v0.2.1).
-The approved feature roadmap is complete. Development now focuses on bug fixes,
-security and dependency updates, and desktop/distribution compatibility. Further
-features will be considered based on concrete needs; no new feature milestone is committed.
+The 0.2 feature roadmap is complete. Planned next: marking devices that act as
+keyboards or mice (0.3.0) and handling devices plugged in while the screen is locked
+(0.4.0). Bug fixes, security and dependency updates continue alongside.
 See the [roadmap](ROADMAP.md) and [release verification](docs/verification.md).
 
 ## Features
@@ -293,6 +293,14 @@ make fuzz-parser   # cargo-fuzz the parser (nightly toolchain + cargo-fuzz)
 ├── assets/           # Logo
 └── docs/             # Architecture, interfaces, threat model, Phase 0 results
 ```
+
+## How this project is made
+
+USBGuardGUI is written entirely by AI, under the direction of a human maintainer who
+decides scope and approves every merge and release. Instead of asking to be trusted,
+it relies on a verification pipeline: tests and coverage gates, fuzzing, static and
+dependency analysis, byte-for-byte reproducible packages, signed releases and
+clean-install tests. That is evidence, not a guarantee. See [AI_POLICY.md](AI_POLICY.md).
 
 ## Contributing
 

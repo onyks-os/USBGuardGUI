@@ -232,6 +232,7 @@ By making a contribution to this project, I certify that:
 2. Ensure `make verify` passes locally.
 3. Update the documentation required by [`docs/documentation-policy.md`](docs/documentation-policy.md).
 4. Fill in the pull request template checklist honestly.
+   If you used AI, say so and how; the same checks apply either way. See [`AI_POLICY.md`](AI_POLICY.md).
 5. Submit the pull request and wait for review. Expect a first response within **7 days**.
 
 Thank you for your help!
