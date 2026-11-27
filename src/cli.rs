@@ -97,7 +97,7 @@ device names and serial numbers.
 }
 
 /// Runs a headless command. [`Command::Gui`] is the caller's business.
-#[must_use]
+#[must_use = "the exit code must be returned from main"]
 pub fn run(command: Command) -> ExitCode {
     match command {
         Command::Gui { .. } | Command::Help => {

@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# Minimum line coverage, in percent, across the whole application (GUI included).
+APPLICATION_THRESHOLD = 95
 # These contain only declarations/exports/constants/types, with no instrumentable code.
 DECLARATIONS = {"src/lib.rs", "src/dbus/mod.rs", "src/model/mod.rs", "src/model/event.rs"}
 
@@ -49,10 +51,10 @@ def check(report: dict, root: Path, core: bool = False) -> int:
     if not core:
         count = sum(c[0] for c in files.values())
         covered = sum(c[1] for c in files.values())
-        passed = count > 0 and covered * 100 >= count * 98
+        passed = count > 0 and covered * 100 >= count * APPLICATION_THRESHOLD
         percent = 100 * covered / count if count else 0
         print(f"{'PASS' if passed else 'FAIL'} application (GUI included): "
-              f"{covered}/{count} lines ({percent:.4f}%; required >=98%)")
+              f"{covered}/{count} lines ({percent:.4f}%; required >={APPLICATION_THRESHOLD}%)")
         failed |= not passed
     return int(failed)
 

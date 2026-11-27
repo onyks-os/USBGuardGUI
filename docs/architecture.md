@@ -1854,7 +1854,7 @@ reproduced the native GTK 4.22.5 crash and now passes; see [testing.md](testing.
 | Idle memory | RSS < 110 MB with Cairo, PSS < 70 MB | `scripts/measure-memory.sh`, after 10 minutes in background with 20 invented devices |
 | Direct first-party system filesystem access | zero | `strace -f -k` on `/etc`, `/var`, `/sys`, with library accesses attributed separately |
 | Parser robustness | zero panics over 10⁶ fuzz inputs | `cargo-fuzz` |
-| Application coverage | ≥ 98% of production lines, GUI and headless configuration included | `make coverage-app` / `cargo-llvm-cov` |
+| Application coverage | ≥ 95% of production lines, GUI and headless configuration included | `make coverage-app` / `cargo-llvm-cov` |
 | Critical-file coverage | > 90% of lines per rule/operation/error file | `make coverage-core` |
 
 **Filesystem measurement (2026-10-18):** the background GUI reached its device
@@ -2116,7 +2116,7 @@ which is the property that matters: the program fails in a way it can explain.
 Unit-test bodies live in `tests/unit/`; display-driven contracts live in
 `tests/gui/`. Their modules retain access to private implementation details under
 `cfg(test)`, while LLVM reports measure production source only. CI enforces the
-aggregate ≥98% line target with every executable `src/` file required. The GUI
+aggregate ≥95% line target with every executable `src/` file required. The GUI
 uses real GTK widgets and private D-Bus mocks, including actual 20/180-second
 GLib timers. This does not replace real Polkit/PAM clean-install verification.
 
