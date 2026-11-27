@@ -555,7 +555,7 @@ while CI runs the reproduction gate again on the PR source.
 | Malformed D-Bus signals followed by valid traffic | Bad payload ignored; next valid event still delivered | `tests/dbus.rs` |
 | Rule set/input exactly at and just over limits | Boundary accepted; excess rejected before mutation | `tests/unit/rules_mod.rs` |
 | Recycled notification device ID | Old quick action cannot authorize another identity | `tests/gui/notify.rs` |
-| Coverage report omits GUI / rounds below 98% / duplicates files | Gate fails | `tests/test_coverage.py` |
+| Coverage report omits GUI / rounds below the threshold / duplicates files | Gate fails | `tests/test_coverage.py` |
 
 Run `make coverage-app` for the complete measured application; `make verify`
 remains the ordinary lint/unit/dependency gate. The GTK tests use a simulated

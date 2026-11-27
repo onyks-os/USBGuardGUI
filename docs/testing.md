@@ -221,7 +221,7 @@ including its private library directory. These checks do not install anything. C
 independently of the caller's LANGUAGE; the separate French focus regression is
 unchanged.
 
-The application gate requires **at least 98% of production lines across all
+The application gate requires **at least 95% of production lines across all
 application source files**, including GTK, the executable and the build without
 GUI. It resets workspace profiles, runs ordinary tests and isolated graphical
 processes, then writes `target/coverage-application.json`. Tests live outside

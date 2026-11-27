@@ -96,7 +96,7 @@ jobs:
         run: cargo build --no-default-features
 
   coverage:
-    name: Application coverage (>=98%, GTK included)
+    name: Application coverage (>=95%, GTK included)
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:

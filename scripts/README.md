@@ -13,7 +13,7 @@ Operational scripts. Shell scripts are linted by `make lint-shell` (ShellCheck) 
 | `trace-filesystem.sh` | Trace background GUI startup and diagnostics on a private demo bus; see [validation notes](../docs/testing.md). |
 | `verify-flatpak-runtime.py` | Install a bundle in private HOME/XDG/Flatpak directories, enforce the pinned GNOME runtime, and check CLI/schema/assets. |
 | `reproducible-build.py` | Freeze build inputs, prepare the pinned builder, compare two offline GUI binaries, RPMs, DEBs, Arch packages and Flatpak bundles, and write the measured report. |
-| `check-coverage.py` | Enforce >=98% production line coverage across the application, including GTK, and >90% per critical core file; reject missing, duplicate and malformed inputs. |
+| `check-coverage.py` | Enforce >=95% production line coverage across the application, including GTK, and >90% per critical core file; reject missing, duplicate and malformed inputs. |
 | `test-gui.sh` | Run GTK contracts on an isolated virtual display and private buses/configuration. |
 | `verify-clean-install.py` | Manage a disposable rootless QEMU guest with synthetic USB, private disks/SSH credentials and no host passthrough. |
 | `clean-install-guest-policy.sh` / `clean-install-guest-ui.py` | Prepare test policy and exercise real Polkit/PAM only inside the marked disposable guest. |

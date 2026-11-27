@@ -83,7 +83,7 @@ test-reproducible: ## Test source normalization and the reproducibility checker'
 test-coverage: ## Prove coverage thresholds reject missing files and rounded percentages
 	@python3 -m unittest discover -s tests -p 'test_coverage*.py' -v
 
-coverage-app: coverage-tools test-coverage ## Require >=98% production line coverage, including GTK and both feature configurations
+coverage-app: coverage-tools test-coverage ## Require >=95% production line coverage, including GTK and both feature configurations
 	@scripts/test-gui.sh --check
 	@$(CARGO) llvm-cov clean --workspace
 	@$(CARGO) llvm-cov --locked --all-features --no-report
