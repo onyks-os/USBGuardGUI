@@ -44,6 +44,7 @@ assets = [
     # Translations, compiled by `make i18n`. One line per language in po/LINGUAS.
     ["target/locale/fr/LC_MESSAGES/usbguard-gui.mo", "usr/share/locale/fr/LC_MESSAGES/", "644"],
     ["target/locale/it/LC_MESSAGES/usbguard-gui.mo", "usr/share/locale/it/LC_MESSAGES/", "644"],
+    ["target/locale/pt_BR/LC_MESSAGES/usbguard-gui.mo", "usr/share/locale/pt_BR/LC_MESSAGES/", "644"],
 ]
 
 [package.metadata.generate-rpm]
@@ -60,6 +61,7 @@ assets = [
     # Translations, compiled by `make i18n`. One line per language in po/LINGUAS.
     { source = "target/locale/fr/LC_MESSAGES/usbguard-gui.mo", dest = "/usr/share/locale/fr/LC_MESSAGES/usbguard-gui.mo", mode = "644" },
     { source = "target/locale/it/LC_MESSAGES/usbguard-gui.mo", dest = "/usr/share/locale/it/LC_MESSAGES/usbguard-gui.mo", mode = "644" },
+    { source = "target/locale/pt_BR/LC_MESSAGES/usbguard-gui.mo", dest = "/usr/share/locale/pt_BR/LC_MESSAGES/usbguard-gui.mo", mode = "644" },
 ]
 
 # Fedora ships the bridge as its own package.

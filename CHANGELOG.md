@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Brazilian Portuguese translations for the interface, notifications, desktop
+  entry and AppStream metadata.
+
 ## [0.2.0] - 2026-10-26
 
 ### Added
