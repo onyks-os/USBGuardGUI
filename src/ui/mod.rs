@@ -70,7 +70,7 @@ fn present_dialog(dialog: &impl IsA<adw::Dialog>, parent: &impl IsA<gtk::Widget>
 const CHANNEL_CAPACITY: usize = 64;
 
 /// Runs the application until the last window closes.
-#[must_use]
+#[must_use = "the exit code must be returned from main"]
 pub fn run(background: bool) -> ExitCode {
     i18n::init();
     let isolated_instance = std::env::var_os("USBGUARD_GUI_ISOLATED_INSTANCE").is_some();

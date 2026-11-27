@@ -17,6 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Brazilian Portuguese translations for the interface, notifications, desktop
   entry and AppStream metadata.
 
+### Changed
+
+- The whole-application line coverage gate is now >=95% instead of >=98%.
+  The >90% per-file gate on the rule language, commands and error
+  classification is unchanged.
+- CI jobs that build against GTK run on Ubuntu 24.04 again, so they keep
+  testing the GTK 4.14 / libadwaita 1.5 floor.
+
 ## [0.2.0] - 2026-10-26
 
 ### Added

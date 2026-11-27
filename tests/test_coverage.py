@@ -12,7 +12,7 @@ SPEC.loader.exec_module(gate)
 
 
 class CoverageGateTests(unittest.TestCase):
-    def report(self, covered=9800):
+    def report(self, covered=gate.APPLICATION_THRESHOLD * 100):
         return {"data": [{"files": [
             {"filename": str(p), "summary": {"lines": {"count": 10000, "covered": covered}}}
             for p in gate.required_files(ROOT, False)
@@ -22,10 +22,10 @@ class CoverageGateTests(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             return gate.check(report, ROOT, core)
 
-    def test_exactly_98_percent_passes(self):
+    def test_exactly_threshold_passes(self):
         self.assertEqual(self.check(self.report()), 0)
 
-    def test_rounded_98_percent_fails(self):
+    def test_rounded_threshold_fails(self):
         report = self.report()
         report["data"][0]["files"][0]["summary"]["lines"]["covered"] -= 1
         self.assertEqual(self.check(report), 1)
@@ -55,7 +55,7 @@ class CoverageGateTests(unittest.TestCase):
             self.check(report)
 
     def test_external_test_code_cannot_inflate_total(self):
-        report = self.report(9700)
+        report = self.report(gate.APPLICATION_THRESHOLD * 100 - 100)
         report["data"][0]["files"].append({"filename": str(ROOT / "tests/extra.rs"),
             "summary": {"lines": {"count": 10000000, "covered": 10000000}}})
         self.assertEqual(self.check(report), 1)
