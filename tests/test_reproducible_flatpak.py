@@ -22,6 +22,10 @@ def module(name, path):
 
 flatpak = module("repro_flatpak", "packaging/reproducible/flatpak.py")
 runtime = module("repro_runtime", "scripts/verify-flatpak-runtime.py")
+# The shipped languages, read independently of the verifier so that adding a
+# translation to po/LINGUAS does not require editing this test.
+LANGUAGES = [line.strip() for line in (ROOT / "po/LINGUAS").read_text().splitlines()
+             if line.strip() and not line.lstrip().startswith("#")]
 
 
 class FlatpakTests(unittest.TestCase):
@@ -119,8 +123,9 @@ class FlatpakTests(unittest.TestCase):
                         text = "wrong" if failure == "cli" else "Usage: usbguard-gui [OPTION]"
                     catalogue_check = "--command=sh" in command
                     if catalogue_check:
-                        self.assertIn("/app/share/locale/fr/LC_MESSAGES/usbguard-gui.mo", command[-1])
-                        self.assertIn("/app/share/locale/it/LC_MESSAGES/usbguard-gui.mo", command[-1])
+                        for language in LANGUAGES:
+                            self.assertIn(f"/app/share/locale/{language}/LC_MESSAGES/usbguard-gui.mo",
+                                          command[-1])
                     failed = failure == "command" or (failure == "catalogue" and catalogue_check)
                     return subprocess.CompletedProcess(command, 1 if failed else 0, text, "details")
 
@@ -136,7 +141,8 @@ class FlatpakTests(unittest.TestCase):
                                                 root / "local-repo" if mode == "local" else None,
                                                 root / "runtime.flatpak" if mode == "cached" else None)
                         self.assertEqual(report["runtime_commit"], "pinned")
-                        self.assertEqual(report["installed_languages"], ["fr", "it"])
+                        self.assertEqual(report["installed_languages"], LANGUAGES)
+                        self.assertLessEqual({"fr", "it"}, set(LANGUAGES))
                         if mode == "local":
                             self.assertTrue(any("--runtime" in call for call in calls))
                         if mode == "remote":
