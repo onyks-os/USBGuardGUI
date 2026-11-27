@@ -25,6 +25,16 @@ signs everything, publishes the GitHub Release, and publishes the crate to crate
 3. In `CHANGELOG.md`, the `[Unreleased]` section becomes `[<version>] - <date>`.
 4. In `data/io.github.onyks_os.UsbguardGui.metainfo.xml.in`, a `<release>` entry for the version, then
    `make i18n` to regenerate the metainfo.
+5. `commit` in [`packaging/reproducible/flatpak-runtime.json`](../packaging/reproducible/flatpak-runtime.json)
+   is still served by Flathub, which keeps only a few weeks of runtime history; otherwise the
+   `flatpak` job fails with `Server returned status 404`. List the available commits in a
+   throwaway installation and pin the newest one for the same branch:
+
+   ```bash
+   export FLATPAK_USER_DIR=$(mktemp -d)
+   flatpak remote-add --user flathub https://flathub.org/repo/flathub.flatpakrepo
+   flatpak remote-info --user --log flathub runtime/org.gnome.Platform/x86_64/50
+   ```
 
 ## Rehearse with a pre-release
 

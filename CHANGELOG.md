@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   soundness advisory.
 - CI and release jobs drop the runners' unused packages.microsoft.com apt
   source before `apt-get update`, so an outage there no longer fails them.
+- The installed-Flatpak release check uses the GNOME 50 runtime commit Flathub
+  currently serves; the previous pin had been pruned from Flathub's history.
 
 ### Fixed
 
