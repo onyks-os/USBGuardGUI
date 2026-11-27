@@ -91,11 +91,15 @@ This site follows the [Diátaxis](https://diataxis.fr/) framework:
 
 ## Project Status
 
-The current version is **0.1.1**. Packages for Debian and Ubuntu, Fedora, and Arch, and a Flatpak
+The current version is **0.2.1**. Packages for Debian and Ubuntu, Fedora, and Arch, and a Flatpak
 bundle, are on the [releases page](https://github.com/onyks-os/USBGuardGUI/releases/latest); the
 [quickstart](tutorials/quickstart.md#1-install) shows how to install them. See the
 [changelog](release-notes/changelog.md) and the
 [roadmap](https://github.com/onyks-os/USBGuardGUI/blob/main/ROADMAP.md).
+
+The approved feature roadmap is complete. The project is now in maintenance:
+bug fixes, security/dependency updates, and desktop/distribution compatibility.
+No additional feature milestone is currently committed.
 
 Security policy and vulnerability reporting:
 [SECURITY.md](https://github.com/onyks-os/USBGuardGUI/blob/main/SECURITY.md).

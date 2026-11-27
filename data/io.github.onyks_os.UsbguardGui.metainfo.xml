@@ -140,19 +140,51 @@
   </branding>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.2.1" date="2026-11-27" type="stable">
+      <description>
+        <p>Brazilian Portuguese translation and corrections.</p>
+        <p xml:lang="pt_BR">Tradução para o português do Brasil e correções.</p>
+        <p xml:lang="it">Traduzione in portoghese brasiliano e correzioni.</p>
+        <p xml:lang="fr">Traduction en portugais du Brésil et corrections.</p>
+        <ul>
+          <li>Brazilian Portuguese translation; complete Italian and French translations</li>
+          <li xml:lang="pt_BR">Tradução para o português do Brasil; traduções para italiano e francês completas</li>
+          <li xml:lang="it">Traduzione in portoghese brasiliano; traduzioni italiana e francese complete</li>
+          <li xml:lang="fr">Traduction en portugais du Brésil ; traductions italienne et française complétées</li>
+          <li>Warn that a later permanent change can save a runtime rule (USBGuard issue #636)</li>
+          <li xml:lang="pt_BR">Avisa que uma alteração permanente posterior pode salvar uma regra temporária (issue #636 do USBGuard)</li>
+          <li xml:lang="it">Avvisare che una successiva modifica permanente può salvare una regola temporanea (segnalazione USBGuard #636)</li>
+          <li xml:lang="fr">Signaler qu’une modification permanente ultérieure peut enregistrer une règle temporaire (ticket USBGuard nº 636)</li>
+          <li>Updated dependencies</li>
+          <li xml:lang="pt_BR">Dependências atualizadas</li>
+          <li xml:lang="it">Dipendenze aggiornate</li>
+          <li xml:lang="fr">Dépendances mises à jour</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.2.0" date="2026-10-26" type="stable">
       <description>
         <p>Understand device policy before making changes.</p>
         <p xml:lang="pt_BR">Entenda a política de dispositivos antes de fazer alterações.</p>
+        <p xml:lang="it">Capire la policy dei dispositivi prima di modificarla.</p>
+        <p xml:lang="fr">Comprendre la politique des périphériques avant de la modifier.</p>
         <ul>
           <li>Preview connected devices matching a new rule's attributes</li>
           <li xml:lang="pt_BR">Visualize os dispositivos conectados que correspondem aos atributos de uma nova regra</li>
+          <li xml:lang="it">Anteprima dei dispositivi collegati che corrispondono agli attributi di una nuova regola</li>
+          <li xml:lang="fr">Prévisualiser les périphériques connectés correspondant aux attributs d’une nouvelle règle</li>
           <li>Inspect USB interfaces, connection details and daemon-reported state</li>
           <li xml:lang="pt_BR">Consulte interfaces USB, detalhes da conexão e o estado informado pelo daemon</li>
+          <li xml:lang="it">Esaminare interfacce USB, dettagli della connessione e stato riportato dal demone</li>
+          <li xml:lang="fr">Examiner les interfaces USB, les détails de connexion et l’état signalé par le démon</li>
           <li>Review local event history with optional persistence and no device identifiers</li>
           <li xml:lang="pt_BR">Consulte o histórico local de eventos, com persistência opcional e sem identificadores de dispositivos</li>
+          <li xml:lang="it">Consultare la cronologia locale degli eventi, con salvataggio facoltativo e senza identificativi dei dispositivi</li>
+          <li xml:lang="fr">Consulter l’historique local des événements, avec conservation facultative et sans identifiants de périphériques</li>
           <li>Improve accessible controls and native-dialog reliability</li>
           <li xml:lang="pt_BR">Melhora os controles de acessibilidade e a confiabilidade dos diálogos nativos</li>
+          <li xml:lang="it">Controlli più accessibili e finestre di dialogo native più affidabili</li>
+          <li xml:lang="fr">Améliorer l’accessibilité des contrôles et la fiabilité des boîtes de dialogue natives</li>
         </ul>
       </description>
     </release>
@@ -160,16 +192,20 @@
       <description>
         <p>Authentication cancellation and USBGuard reconnection are more reliable.</p>
         <p xml:lang="pt_BR">O cancelamento da autenticação e a reconexão ao USBGuard estão mais confiáveis.</p>
+        <p xml:lang="it">L’annullamento dell’autenticazione e la riconnessione a USBGuard sono più affidabili.</p>
         <p xml:lang="fr">L’annulation de l’authentification et la reconnexion à USBGuard sont plus fiables.</p>
         <ul>
           <li>Avoid a device-table crash after cancelling authentication</li>
           <li xml:lang="pt_BR">Evita uma falha na tabela de dispositivos após o cancelamento da autenticação</li>
+          <li xml:lang="it">Evitare un arresto anomalo della tabella dei dispositivi dopo l’annullamento dell’autenticazione</li>
           <li xml:lang="fr">Éviter un plantage du tableau des périphériques après l’annulation de l’authentification</li>
           <li>Back off reconnection attempts and refresh state after an inconclusive write</li>
           <li xml:lang="pt_BR">Aumenta o intervalo entre as tentativas de reconexão e atualiza o estado após uma gravação inconclusiva</li>
+          <li xml:lang="it">Distanziare i tentativi di riconnessione e aggiornare lo stato dopo una scrittura dall’esito incerto</li>
           <li xml:lang="fr">Espacer les tentatives de reconnexion et actualiser l’état après une écriture au résultat incertain</li>
           <li>Verify reproducible binaries and packages before publication</li>
           <li xml:lang="pt_BR">Verifica binários e pacotes reproduzíveis antes da publicação</li>
+          <li xml:lang="it">Verificare la riproducibilità di binari e pacchetti prima della pubblicazione</li>
           <li xml:lang="fr">Vérifier la reproductibilité des binaires et des paquets avant publication</li>
         </ul>
       </description>

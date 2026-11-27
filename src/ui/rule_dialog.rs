@@ -305,7 +305,12 @@ fn build(rules: Vec<RuleHandle>, default_persistence: Persistence) -> Form {
         .build();
     let persistent = adw::SwitchRow::builder()
         .title(gettext("Keep after USBGuard restarts"))
-        .subtitle(gettext("Off: the rule lasts until USBGuard restarts"))
+        // Translators: USBGuard issue #636 — when any permanent change is
+        // saved, the daemon also writes the runtime-only rules to its policy file.
+        .subtitle(gettext(
+            "Off: the rule lasts until USBGuard restarts. A later permanent change can save \
+             it too (USBGuard issue #636).",
+        ))
         .active(default_persistence == Persistence::Permanent)
         .build();
     let placement = adw::PreferencesGroup::builder()

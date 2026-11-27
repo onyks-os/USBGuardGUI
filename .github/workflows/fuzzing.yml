@@ -27,7 +27,7 @@ jobs:
       # Scheduled runs get a much larger budget than pull request runs, so review
       # stays fast while the weekly job explores the input space deeply.
       - name: Install GTK development packages
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
+        run: scripts/ci-apt-update.sh && sudo apt-get install -y --no-install-recommends libgtk-4-dev libadwaita-1-dev
 
       - name: Run property-based tests
         env:
