@@ -73,6 +73,9 @@ i18n: ## Compile the catalogues into target/locale and the translated data files
 	@msgfmt --desktop --template data/$(APP_ID).desktop.in -d po -o data/$(APP_ID).desktop
 	@msgfmt --xml --template data/$(APP_ID).metainfo.xml.in -d po \
 		-o data/$(APP_ID).metainfo.xml
+	@# gettext < 0.22 writes xml:lang="pt_BR", newer versions "pt-BR"; pin one form
+	@# so that i18n-check gives the same answer on every distribution.
+	@sed -i -E 's/xml:lang="([a-z]+)-([A-Z]+)"/xml:lang="\1_\2"/g' data/$(APP_ID).metainfo.xml
 
 i18n-check: i18n ## Fail when the committed desktop and metainfo files are out of date
 	@$(MAKE) test-i18n
