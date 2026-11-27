@@ -75,7 +75,7 @@ impl Client {
     }
 
     /// The underlying connection.
-    #[must_use]
+    #[must_use = "this only borrows the connection and has no effect"]
     pub const fn connection(&self) -> &Connection {
         &self.connection
     }
