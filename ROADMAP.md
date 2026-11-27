@@ -53,7 +53,8 @@ the D-Bus migration and validation work. See the
 [release verification](docs/verification.md#stable-020-release-verification-2026-10-26).
 The agreed feature scope is complete; the project now enters maintenance.
 **0.2.1** (2026-11-27) is the first maintenance release: Brazilian Portuguese,
-completed Italian and French catalogues, the USBGuard #636 warning and dependency updates.
+completed Italian and French catalogues, the USBGuard #636 warning and dependency updates;
+see its [release verification](docs/verification.md#stable-021-release-verification-2026-11-27).
 
 ---
 
